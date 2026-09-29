@@ -115,7 +115,7 @@ add('<defs><style>text{font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","
 add(f'<rect width="{W}" height="{H}" fill="#0b1721"/>')
 text(48,62,META['title'],39,weight=600,halo=False)
 text(48,111,'中東・北米の主な経路と輸送コスト・リスク',22,'#b8c9d7',400,halo=False)
-text(2352,59,f'{AS_OF.year}年{AS_OF.month}月{AS_OF.day}日時点',23,'#d4dfe7',400,'end',False)
+text(2352,59,f'{AS_OF.year}年{AS_OF.month}月{AS_OF.day}日 再検証',23,'#d4dfe7',400,'end',False)
 text(2352,104,'公開情報による模式図  ｜  線の太さは輸送量を示さない',19,'#a5bacb',400,'end',False)
 img=base64.b64encode((D/'assets/osm-dark-world.png').read_bytes()).decode()
 add(f'<image x="0" y="{TOP}" width="2400" height="1120" href="data:image/png;base64,{img}"/>')
@@ -134,8 +134,10 @@ common_cape=[cape,[27,-37],[40,-33],[56,-22],[68,-10],[82,0],[92,5.5],[96,5.7],[
 route('喜望峰 → インド洋 → マラッカ海峡',common_cape,'common',width=4.5,arrows=(.44,),start_dir=(1,0),end_dir=(1,0))
 oman=[fuj,[57.2,25.3],[59.5,23.8],[61.5,21],[65,16],[72,9],[79,5.2],[86,5],[92,5.5],[96,5.7],[99,4.8],[101,3],malacca]
 route('オマーン湾側 → マラッカ海峡',oman,'1',arrows=(.47,),end_dir=(1,0))
-shuttle=[[50.25,26.7],[51.5,26.9],[53.2,26.55],[55.2,26.3],[56.3,26.45],[56.65,25.95],fuj]
-route('ラス・タヌラ付近 → ホルムズ海峡 → 湾外STS',shuttle,'1',dash='3 5',width=2.7,arrows=())
+gulf=[[50.33,26.8],[51.5,27.05],[53.6,26.6],[55.5,26.55],[56.1,26.6],[56.45,26.58],[56.7,26.43],[56.77,26.1],[56.75,25.78],[57.2,25.3]]
+route('湾内発 → ホルムズ海峡 → アジア方面（直航・積替えの共通区間）',gulf,'1',width=2.7,arrows=())
+route('フジャイラ沖の積替え接続（模式）',[[56.75,25.78],[56.6,25.3],fuj],'1',dash='3 5',width=2.7,arrows=())
+route('ソハール沖の積替え接続（模式）',[[56.75,25.78],[57.0,25.2],[57.0,24.7],[58.0,24.4],[59.5,23.8]],'1',dash='3 5',width=2.7,arrows=())
 south=[yanbu,[37.7,23.8],[38.4,21.9],[39.8,19.1],[41.15,16.4],[42.7,14.3],[43.4,12.6],[45.5,12],[50.4,13.4],[54,12.9],[61,9],[68,6],[78,4.1],[86,5]]
 route('ヤンブー → バブ・エル・マンデブ → 日本方面（航行制約）',south,'2',dash='10 8',width=4.3,arrows=(.50,),end_dir=(1,0))
 asian=[malacca,[104.6,1.1],[106,2.5],[110,8],[115,15],[120,20],[122,21.4],[126,26],[130,29],[134,31.3],[138.8,34.1],japan]
@@ -166,9 +168,8 @@ text(682,605,'ペルシャ湾',18,'#86b7d1',500,'middle')
 text(1105,822,'マラッカ海峡',20,'#a7c2d5')
 
 # Optional transshipment hubs: not mandatory waypoints for every cargo.
-for p in [[56.7,25.1],[69.7,22.4],[101.95,2.4]]:
+for p in [[56.7,25.1],[101.95,2.4]]:
     x,y=xy(p);add(f'<circle cx="{x}" cy="{y}" r="10" fill="none" stroke="{COL["S"]}" stroke-width="2"/>')
-dot([69.7,22.4],'インド西岸',(851,681),font=18)
 dot([101.95,2.4],'リンギ沖',(1042,858),anchor='end',font=19)
 
 # Route identifiers beside visible segments.
@@ -178,30 +179,30 @@ text(1211,717,'1–4',20,'#c1ced7',400)
 
 # Six route balloons plus one concise STS balloon.
 bubble(40,193,520,'地中海・喜望峰経由','3',[
-    'コスト：迂回で航海が少なくとも３週間増',
-    'リスク：送油設備の再攻撃・復旧の遅れ'],
+    'コスト：紅海南下比で航海が３週間以上増',
+    'リスク：設備への再攻撃・積替え接続の遅れ'],
     [(540,361),xy([29.7,31.1])],
-    'ヤンブー発／9/28 輸出再開報道・復旧途上')
-bubble(628,198,578,'オマーン湾側から日本へ','1',[
-    'コスト：船腹不足・保険料。STSなら積替費',
-    'リスク：周辺攻撃・混雑。湾内発は海峡通過'],
+    'ヤンブー発／9/28 再開報道・全面復旧は未確認')
+bubble(628,198,578,'中東からインド洋経由','1',[
+    'コスト：保険・船腹。積替え便は追加費用',
+    'リスク：攻撃・混雑。湾内発はホルムズ通過'],
     [(668,366),xy([57.2,25.3])],
-    'フジャイラ／ソハール積み・湾内シャトルも接続')
+    '湾外積み＋湾内発の直航・STS／9月の通航回復')
 bubble(1452,192,548,'カナダ西岸・太平洋経由','6',[
-    'コスト：運河料なし／中型船・減載で単価増',
-    'リスク：積出量・船型の制約、油種の適合'],
+    'コスト：直航で運河料・洋上積替費を回避',
+    'リスク：積出量・船型制約、油種の適合'],
     [(1806,360),xy([-137,46.35])],
-    '日本への到着実績あり・補完ルート')
+    'Aframax級で直航／8月に日本着の実績')
 bubble(752,388,536,'紅海南下','2',[
     'コスト：短距離だが保険・通航条件が不安定',
     'リスク：フーシ派の攻撃・拿捕'],
     [(1220,556),xy([74,4.86])],
-    'ヤンブー発／サウジ関連船が回避')
+    'ヤンブー発／大型原油船の回避・全船閉鎖ではない')
 bubble(1550,757,548,'米湾岸・パナマ経由','5',[
-    'コスト：運河料金＋中型船・減載で単価増',
-    'リスク：渇水による通航枠・喫水制限、待機'],
+    'コスト：運河・予約料金、積載量の制約',
+    'リスク：予約待ち・水位変動／VLCCは不可'],
     [(2018,757),xy([-103,13.6])],
-    '中型船・減載船の経路／VLCCは通れない')
+    '9/28 喫水制限緩和／10/15 通航枠増の予定')
 bubble(1778,1045,574,'米湾岸・喜望峰経由','4',[
     'コスト：長距離で燃料・用船日数が増加',
     'リスク：船腹不足、荒天・納期の長期化'],
@@ -211,21 +212,21 @@ bubble(1136,997,574,'洋上積替え（STS）','S',[
     'コスト：積替え・待機・接続船の費用',
     'リスク：荷役混雑、天候による作業中断'],
     [(1161,997),xy([101.95,2.4])],
-    '補完拠点：オマーン湾・インド西岸・マレーシア')
+    '湾外・マレーシアの代表拠点／全便共通ではない')
 
 # Unobtrusive map key in otherwise open southern Indian Ocean.
-line([(65,1172),(135,1172)],'#dce7ee',4.5,under=False);text(152,1180,'運用実績のある航路',19,'#cbd8e2',halo=False)
+line([(65,1172),(135,1172)],'#dce7ee',4.5,under=False);text(152,1180,'海上経路（模式）',19,'#cbd8e2',halo=False)
 line([(65,1210),(135,1210)],COL['2'],4.5,'11 10',under=False);text(152,1218,'航行制約・回避',19,'#cbd8e2',halo=False)
-line([(482,1172),(552,1172)],COL['1'],3.4,'3 5',under=False);text(568,1180,'シャトル輸送',19,'#cbd8e2',halo=False)
+line([(482,1172),(552,1172)],COL['1'],3.4,'3 5',under=False);text(568,1180,'湾外での積替え接続',19,'#cbd8e2',halo=False)
 add(f'<circle cx="494" cy="1210" r="9" fill="none" stroke="{COL["S"]}" stroke-width="2"/>');text(518,1218,'STS拠点',19,'#cbd8e2',halo=False)
 text(912,1218,'白線：複数ルートの共通区間',18,'#a7bdcd',anchor='end',halo=False)
 add('</g>')
 add('<path d="M 0 1265 H 2400" stroke="#354a59" stroke-width="1"/>')
-text(48,1300,'コストは費用増の要因。同条件の日本着比較運賃を確認できないため、参考値と出典は別紙に掲載。',18,'#b5c5d1',400,halo=False)
+text(48,1300,'コストは費用の要因で、同条件の運賃比較ではありません。実線も当日の運航や安全を示しません。',18,'#b5c5d1',400,halo=False)
 text(2352,1300,'作図：'+META['credit'],20,'#d5dfe5',400,'end',False)
 text(48,1338,'© OpenStreetMap contributors  ·  OpenFreeMap / © OpenMapTiles',16,'#91a8ba',halo=False)
 text(2352,1338,'資料：Bloomberg・Reuters・S&P Global・Kpler・Baltic Exchange・パナマ運河庁ほか',16,'#91a8ba',anchor='end',halo=False)
 add('</svg>')
 (OUT/'global.svg').write_text('\n'.join(svg))
-(OUT/'global.geojson').write_text(json.dumps({'type':'FeatureCollection','features':features},ensure_ascii=False,indent=2))
+(OUT/'global.geojson').write_text(json.dumps({'type':'FeatureCollection','as_of':META['as_of'],'revalidated_at':META.get('revalidated_at'),'source_notes':'docs/global-sources-and-costs.md','features':features},ensure_ascii=False,indent=2))
 print('Wrote map SVG and route geometry')

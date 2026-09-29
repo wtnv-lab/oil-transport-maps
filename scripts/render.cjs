@@ -23,7 +23,7 @@ const {launchBrowser} = require('./browser.cjs');
         const a=texts[i], b=texts[j];
         if (a.b.left<b.b.right && a.b.right>b.b.left && a.b.top<b.b.bottom && a.b.bottom>b.b.top) textOverlaps.push([a.text,b.text]);
       }
-      const leaders = [...document.querySelectorAll('.callout-leader')];
+      const leaders = [...document.querySelectorAll('.callout-leader, .label-leader')];
       const leaderTextIntersections=[];
       leaders.forEach((e,i) => {
         const len=e.getTotalLength(), matrix=e.getScreenCTM();
