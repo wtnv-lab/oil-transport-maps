@@ -1,0 +1,423 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "index": 229,
+        "project": "Abqaiq-Yanbu NGL pipeline",
+        "unit": "",
+        "type": "NGL Pipelines",
+        "parent": "Saudi Aramco [100.00%]",
+        "country": "Saudi Arabia",
+        "status_tabular": "operating",
+        "start_year": "1982",
+        "capacity": 290000.0,
+        "geom": "line",
+        "url": "https://www.gem.wiki/Abqaiq-Yanbu_gas_pipeline",
+        "id": 0
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            49.67728,
+            25.924365
+          ],
+          [
+            46.692409,
+            24.714277
+          ],
+          [
+            38.19002,
+            24.023207
+          ],
+          [
+            38.245263,
+            23.965193
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "index": 591,
+        "project": "Shaybah-Abqaiq NGL Pipeline",
+        "unit": "",
+        "type": "NGL Pipelines",
+        "parent": "Saudi Aramco [100.00%]",
+        "country": "Saudi Arabia",
+        "status_tabular": "operating",
+        "start_year": "2016",
+        "capacity": 228000.0,
+        "geom": "line",
+        "url": "https://www.gem.wiki/Shaybah-Abqaiq_NGL_Pipeline",
+        "id": 147
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            54.005162,
+            22.516833
+          ],
+          [
+            49.688328,
+            25.934821
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "index": 479,
+        "project": "Bab-Habshan–Fujairah Oil Pipeline",
+        "unit": "",
+        "type": "Oil Pipelines",
+        "parent": "ADNOC [100.00%]",
+        "country": "United Arab Emirates",
+        "status_tabular": "operating",
+        "start_year": "2012",
+        "capacity": 1500000.0,
+        "geom": "line",
+        "url": "https://www.gem.wiki/Bab-Habshan%E2%80%93Fujairah_Oil_Pipeline",
+        "id": 257
+      },
+      "geometry": {
+        "type": "MultiLineString",
+        "coordinates": [
+          [
+            [
+              53.6176,
+              23.8279
+            ],
+            [
+              53.6909,
+              23.937
+            ],
+            [
+              54.1381,
+              24.0253
+            ],
+            [
+              54.3781,
+              24.1648
+            ],
+            [
+              54.6168,
+              24.1671
+            ],
+            [
+              54.6572,
+              24.1615
+            ],
+            [
+              54.7243,
+              24.1693
+            ],
+            [
+              54.7912,
+              24.211
+            ],
+            [
+              54.8052,
+              24.273
+            ],
+            [
+              54.8317,
+              24.2699
+            ],
+            [
+              54.8386,
+              24.2781
+            ],
+            [
+              55.0235,
+              24.41
+            ],
+            [
+              55.1303,
+              24.6067
+            ],
+            [
+              55.1916,
+              24.5746
+            ],
+            [
+              55.3609,
+              24.5772
+            ],
+            [
+              55.3677,
+              24.5939
+            ],
+            [
+              55.6388,
+              24.6895
+            ],
+            [
+              55.7521,
+              24.7037
+            ],
+            [
+              55.752499029504314,
+              24.754775776552325
+            ]
+          ],
+          [
+            [
+              55.752499029504314,
+              24.754775776552325
+            ],
+            [
+              55.7525,
+              24.7549
+            ],
+            [
+              55.7523,
+              24.7546
+            ],
+            [
+              55.752499029504314,
+              24.754775776552325
+            ]
+          ],
+          [
+            [
+              55.752499029504314,
+              24.754775776552325
+            ],
+            [
+              55.8028,
+              24.7992
+            ],
+            [
+              55.7827,
+              24.8901
+            ],
+            [
+              55.8882,
+              25.0177
+            ],
+            [
+              55.9794,
+              25.0655
+            ],
+            [
+              56.0259,
+              25.1101
+            ],
+            [
+              56.0351,
+              25.1993
+            ],
+            [
+              56.1821,
+              25.1928
+            ],
+            [
+              56.2127,
+              25.2171
+            ],
+            [
+              56.3413,
+              25.2128
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "index": 226,
+        "project": "East-West Crude Oil Pipeline",
+        "unit": "",
+        "type": "Oil Pipelines",
+        "parent": "Saudi Aramco [100.00%]",
+        "country": "Saudi Arabia",
+        "status_tabular": "operating",
+        "start_year": "1982",
+        "capacity": 5000000.0,
+        "geom": "line",
+        "url": "https://www.gem.wiki/East-West_Crude_Oil_Pipeline",
+        "id": 493
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            49.67728,
+            25.924365
+          ],
+          [
+            46.692409,
+            24.714277
+          ],
+          [
+            38.19002,
+            24.023207
+          ],
+          [
+            38.245263,
+            23.965193
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "index": 979,
+        "project": "Haradh-Abqaiq Oil Plants Pipelines",
+        "unit": "Pipeline 1",
+        "type": "Oil Pipelines",
+        "parent": "Saudi Aramco [100.00%]",
+        "country": "Saudi Arabia",
+        "status_tabular": "operating",
+        "start_year": "",
+        "capacity": 300000.0,
+        "geom": "line",
+        "url": "https://www.gem.wiki/Haradh-Abqaiq_Oil_Plants_Pipelines",
+        "id": 607
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            49.203809,
+            24.059199
+          ],
+          [
+            49.688328,
+            25.934821
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "index": 324,
+        "project": "Shaybah-Abqaiq Oil Pipeline",
+        "unit": "",
+        "type": "Oil Pipelines",
+        "parent": "Saudi Aramco [100.00%]",
+        "country": "Saudi Arabia",
+        "status_tabular": "operating",
+        "start_year": "1998",
+        "capacity": 750000.0,
+        "geom": "line",
+        "url": "https://www.gem.wiki/Shaybah-Abqaia_oil_pipeline",
+        "id": 1121
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            54.005162,
+            22.516833
+          ],
+          [
+            49.688328,
+            25.934821
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "index": 182,
+        "project": "Sumed Oil Pipeline",
+        "unit": "Pipeline 1",
+        "type": "Oil Pipelines",
+        "parent": "Egyptian General Petroleum Corporation [50.00%]; Mubadala Investment Company [15.00%]; QatarEnergy [15.00%]; Saudi Aramco [15.00%]; Kuwait Investment Authority [5.00%]",
+        "country": "Egypt",
+        "status_tabular": "operating",
+        "start_year": "1977",
+        "capacity": 1250000.0,
+        "geom": "line",
+        "url": "https://www.gem.wiki/Sumed_Oil_Pipeline",
+        "id": 1169
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            32.3492431,
+            29.6164457
+          ],
+          [
+            31.9042968,
+            29.6450946
+          ],
+          [
+            31.8493652,
+            29.6928247
+          ],
+          [
+            31.607666,
+            29.6975965
+          ],
+          [
+            30.4541015,
+            30.2305945
+          ],
+          [
+            29.7784423,
+            31.0246941
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "index": 188,
+        "project": "Sumed Oil Pipeline",
+        "unit": "",
+        "type": "Oil Pipelines",
+        "parent": "Egyptian General Petroleum Corporation [50.00%]; Mubadala Investment Company [15.00%]; QatarEnergy [15.00%]; Saudi Aramco [15.00%]; Kuwait Investment Authority [5.00%]",
+        "country": "Egypt",
+        "status_tabular": "operating",
+        "start_year": "1977",
+        "capacity": 1250000.0,
+        "geom": "line",
+        "url": "https://www.gem.wiki/Sumed_Oil_Pipeline",
+        "id": 1170
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            32.3492431,
+            29.6164457
+          ],
+          [
+            31.9042968,
+            29.6450946
+          ],
+          [
+            31.8493652,
+            29.6928247
+          ],
+          [
+            31.607666,
+            29.6975965
+          ],
+          [
+            30.4541015,
+            30.2305945
+          ],
+          [
+            29.7784423,
+            31.0246941
+          ]
+        ]
+      }
+    }
+  ]
+}
