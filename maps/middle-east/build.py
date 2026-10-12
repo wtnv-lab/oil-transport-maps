@@ -9,6 +9,7 @@ OUT=args.output_dir.resolve()
 OUT.mkdir(parents=True,exist_ok=True)
 META=json.loads((D/"metadata.json").read_text())
 AS_OF=datetime.date.fromisoformat(META["as_of"])
+ADDED=datetime.date.fromisoformat(META["route_additions_as_of"])
 W,H,TOP,BOT=1800,1080,84,140
 M=lambda a: math.log(math.tan(math.pi/4+math.radians(a)/2))
 m=json.loads((D/'data/base-projection.json').read_text())
@@ -47,20 +48,20 @@ def chokepoint(p,label,dx,dy):
     line([(x+direction*12,y-12),(x+dx-direction*12,y+dy-7)],'#65d9eb',1.2,screen=True,under=False,css='label-leader')
     txt(x+dx,y+dy,label,21,'#65d9eb',anchor='end' if dx<0 else 'start')
 
-G='#95e273';R='#ff5576';C='#65d9eb';SH='#c7a6ff'
+G='#95e273';R='#ff5576';C='#65d9eb';SH='#c7a6ff';P='#b9c8d5';LOAD='#e6dcae'
 add(f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{W}" height="{H+TOP+BOT}" viewBox="0 0 {W} {H+TOP+BOT}" role="img" aria-labelledby="title desc">')
 add('<title id="title">中東の原油輸送ルート</title><desc id="desc">公開資料による原油輸送経路の概念図。ヤンブー南航はサウジ関連船への航行制約を示す赤破線で、全船の完全封鎖ではない。湾内発はホルムズを通過し、直航と湾外積替えの両方がある。海路・積替地点は模式的な代表位置で、当日の稼働・輸送量・個別貨物の日本向け実績を示さない。LNGなどは対象外。</desc>')
 add('<defs><style>text{font-family:"Hiragino Sans","Noto Sans CJK JP","Yu Gothic",sans-serif}.halo{paint-order:stroke;stroke:#13202a;stroke-width:5;stroke-linejoin:round}path{stroke-linecap:round;stroke-linejoin:round}</style><clipPath id="mapclip"><rect width="1800" height="1080"/></clipPath></defs>')
 add(f'<rect width="{W}" height="{H+TOP+BOT}" fill="#101c27"/>')
 txt(48,41,META['title'],33,weight=600,halo=False)
 txt(48,70,'公開資料による主要経路の整理 ｜ 当日の運航・稼働・輸送量を示す図ではありません',17,'#b7cbd9',400,halo=False)
-txt(1752,42,f'再検証：{AS_OF:%Y.%m.%d}',17,'#aebdc8',400,'end',False)
+txt(1752,42,f'{AS_OF:%Y.%m.%d} 基準 ／ {ADDED:%m.%d} 航路追記',17,'#aebdc8',400,'end',False)
 add(f'<g transform="translate(0 {TOP})" clip-path="url(#mapclip)">')
 b64=base64.b64encode((D/'assets/osm-dark-base.png').read_bytes()).decode()
 add(f'<image width="1800" height="1080" href="data:image/png;base64,{b64}"/>')
 
 # Country and water labels are separate from the sourced basemap.
-for lon,lat,t,size in [(29.3,25.7,'エジプト',24),(44.5,21.8,'サウジアラビア',30),(44.2,31,'イラク',24),(55.4,30,'イラン',27),(58.4,20.8,'オマーン',25),(47,16,'イエメン',25),(29.9,20.0,'スーダン',22),(37.2,15.8,'エリトリア',19),(42.7,11.8,'ジブチ',18),(53.45,22.70,'アラブ首長国連邦',17)]:
+for lon,lat,t,size in [(29.3,25.7,'エジプト',24),(44.5,21.8,'サウジアラビア',30),(44.2,31,'イラク',24),(55.4,30,'イラン',27),(57.7,19.6,'オマーン',25),(47,16,'イエメン',25),(29.9,20.0,'スーダン',22),(37.2,15.8,'エリトリア',19),(42.7,11.8,'ジブチ',18),(53.45,22.70,'アラブ首長国連邦',17)]:
     geo(lon,lat,t,size=size,color='#aab4bb',weight=400,anchor='middle')
 for lon,lat,t,size,rotate in [(33.8,32.1,'地中海',24,0),(38.1,20.3,'紅海',24,0),(53.3,25.1,'ペルシャ湾',23,0),(61.1,24.9,'オマーン湾',22,0),(59,17.8,'アラビア海',28,0),(47.65,13.8,'アデン湾',21,0)]:
     x,y=xy([lon,lat]);txt(x,y,t,size,C,400,'middle',extra=f'transform="rotate({rotate} {x} {y})"')
@@ -111,8 +112,14 @@ feat('スエズ運河経由→地中海西航（海上・概略）',suez,'schema
 # Only the westbound Mediterranean segment is within the map extent.
 cape=[[29.6824996,31.0510105],[29.60,31.20],[29.30,31.40],[28.70,31.55],[27.80,31.68],[26.60,31.85],[25.22,31.99]]
 line(cape,R,3.7);arrow(cape,R,.97,12)
-txt(45,30,'喜望峰回り → 日本方面',21,R)
+txt(45,165,'喜望峰回り → 日本方面',19,R)
 feat('シディ・ケリル→地中海→ジブラルタル→喜望峰回り（表示範囲内のみ）',cape,'schematic_shipping','ユーザー指定の迂回ルート。The National 2026-09-12','地中海西航の一部のみ描画。ジブラルタル・喜望峰は図外。実航跡ではない。')
+# The incoming positioning voyage is separate from the loaded westbound route.
+incoming=[[25.22,32.48],[26.6,32.37],[27.8,32.25],[28.7,32.10],[29.4,31.7],[29.68,31.2]]
+line(incoming,P,3,'16 6 3 6');arrow(incoming,P,.46,9);arrow(incoming,P,.94,9)
+txt(45,110,'日本から積地へ',18,P)
+txt(45,135,'（喜望峰経由）',17,P)
+feat('日本 → 喜望峰 → ジブラルタル → シディ・ケリル沖（地中海部分）',incoming,'schematic_positioning','docs/route-additions-20261012.md','積地へ向かう配船の模式線。日本・喜望峰・ジブラルタルは図外。個船の積載状態は未確認。')
 southsea=[yanbu,[37.98,23.7],[38.1,22.5],[38.75,20.8],[39.6,18.9],[40.5,17.15],[41.5,15.5],[42.4,14.0],[43.08,12.75],[43.25,12.55],[43.7,12.23],[44.3,12.03],[45.4,12.10],[47.3,12.6],[49.6,13.0],[52.4,13.65]]
 line(southsea,R,3.7,'12 10');arrow(southsea,R,.20,10);arrow(southsea,R,.48,10);arrow(southsea,R,.985,12)
 feat('ヤンブー→バブ・エル・マンデブ→日本方面（航行制約・破線）',southsea,'restricted_schematic_shipping','ユーザー指定の破線。EIA September 2026 STEO; The National 2026-09-12','サウジ関連船への航行制約を示す。全船の一律完全封鎖とは断定しない。実航跡ではない。')
@@ -120,6 +127,17 @@ fuj=[[56.358639,25.187944],[56.60,25.22],[57.18,25.10],[58.2,24.87],[59.4,24.20]
 soh=[[56.63,24.511667],[57.0,24.51],[57.55,24.46],[58.2,24.1],[59.4,23.5],[60.6,22.91],[61.7,22.66],[63.15,22.63]]
 for name,route in [('フジャイラ→日本方面',fuj),('ソハール→日本方面',soh)]:
     line(route,R,3.7);arrow(route,R,.98,12);feat(name,route,'schematic_shipping','作図用の海域内代表点','日本方面を示す模式的な線。運航実績は未検証。')
+# Mina al Fahal: area-level location, shared marker for two distinct methods.
+fahal=[58.533333,23.65]
+fahal_out=[fahal,[59.05,23.70],[59.6,23.35],[60.4,22.85],[61.5,22.3],[63.15,22.1]]
+line(fahal_out,R,3.7);arrow(fahal_out,R,.98,12)
+feat('ミナ・アル・ハファル沖 STS／原油SBM積載 → 日本方面',fahal_out,'schematic_shipping','docs/route-additions-20261012.md','原油積載区域を代表点で表示。STSとSBMは別の積載方式。個別ブイ位置・接続船・日本向け貨物は未確定。')
+fx,fy=xy(fahal)
+add(f'<circle cx="{fx}" cy="{fy}" r="9" fill="#101c27" stroke="{LOAD}" stroke-width="2"/>')
+line([(fx,fy),(1592,565)],LOAD,1.1,screen=True,under=False,css='label-leader')
+txt(1752,586,'ミナ・アル・ハファル沖',21,anchor='end')
+txt(1752,612,'STS／原油SBM（模式）',17,LOAD,400,'end')
+features.append({'type':'Feature','properties':{'name':'ミナ・アル・ハファル沖（STS／原油SBM）','category':'loading_area','source':'docs/route-additions-20261012.md','accuracy':'NGA水路誌の港域代表点。個別SBMやSTS船の正確な位置ではない。'},'geometry':{'type':'Point','coordinates':fahal}})
 # A common offshore corridor supports direct voyages and optional STS.
 # Ras Tanura exports and Sohar STS are documented; these are not AIS tracks.
 gulf=[[50.33,26.80],[50.75,27.00],[51.5,27.05],[52.5,26.9],[53.6,26.6],[54.6,26.55],[55.5,26.55],[56.1,26.60],[56.45,26.58],[56.70,26.43],[56.77,26.10],[56.75,25.78],[56.90,25.48],[57.18,25.10]]
@@ -142,22 +160,22 @@ chokepoint([43.31,12.58],'バブ・エル・マンデブ海峡',-70,-45)
 x,y=xy([32.43,30.5]);line([(x,y),(455,110)],C,1.2,screen=True,under=False);txt(465,113,'スエズ運河',22,C)
 
 points=[
- ('シディ・ケリル',[29.6824996,31.0510105],68,152,'SUMED北端・再積込み','port','start'),
+ ('シディ・ケリル',[29.6824996,31.0510105],345,67,'SUMED北端・再積込み','port','start'),
  ('アイン・スフナ',[32.3214022,29.6069879],371,219,'SUMED南端・荷揚げ','port','start'),
  ('ヤンブー',[38.2687784,23.9793099],540,561,'紅海側の輸出拠点','port','start'),
  ('ラス・タヌラ',[50.163,26.645],1110,285,'ペルシャ湾側の輸出港','port','end'),
  ('アブカイク',[49.6855348,25.922357],1202,365,'東西原油ライン起点','plant','start'),
  ('ハブシャン',[53.6176,23.8279],1230,500,None,'plant','start'),
  ('フジャイラ',[56.358639,25.187944],1502,384,None,'port','start'),
- ('ソハール',[56.630,24.511667],1496,481,'独立した港湾拠点','port','start')]
+ ('ソハール',[56.630,24.511667],1450,481,'独立した港湾拠点','port','end')]
 for name,p,lx,ly,sub,kind,anchor in points:
     point(p,name,lx,ly,None,kind,anchor)
     features.append({'type':'Feature','properties':{'name':name,'category':kind,'accuracy':'施設・港の代表点。積出しブイや個別設備の正確な位置ではない。'},'geometry':{'type':'Point','coordinates':p}})
 
 # Compact map key placed in unused land area.
-add('<rect x="46" y="718" width="431" height="196" rx="8" fill="#122330" opacity=".96" stroke="#3b4b57" stroke-width="1"/>')
+add('<rect x="46" y="718" width="431" height="230" fill="#122330" opacity=".96" stroke="#3b4b57" stroke-width="1"/>')
 txt(68,752,'凡例',20,halo=False)
-for y,col,dash,t in [(786,G,None,'原油パイプライン（概略・一部補間）'),(821,R,None,'海上経路（模式）'),(856,R,'12 10','南航に制約（サウジ関連船）'),(891,SH,None,'湾内発／紫点線は積替え接続')]:
+for y,col,dash,t in [(786,G,None,'原油パイプライン（概略・一部補間）'),(821,R,None,'海上経路（模式）'),(856,R,'12 10','南航に制約（サウジ関連船）'),(891,SH,None,'湾内発／紫点線は積替え接続'),(926,P,'16 6 3 6','積地へ向かう配船（模式）')]:
     line([(70,y-6),(122,y-6)],col,3.4,dash,screen=True,under=False);txt(138,y,t,17,halo=False)
 
 # Geographically honest scale bar, referenced to latitude 23 N.
@@ -172,12 +190,12 @@ fy=TOP+H
 add(f'<path d="M 0 {fy} H 1800" stroke="#40515d"/>')
 txt(48,fy+29,'海路は模式線。実線も安全な通航を示さず、「日本方面」は方向のみで、個別貨物の仕向地を確認したものではありません。',18,'#c4d2dc',400,halo=False)
 txt(48,fy+58,'赤破線は全船の完全封鎖を意味しません。湾内発はホルムズを通過。直航・湾外積替えがあり、起点・積替地点は代表位置です。',18,'#c4d2dc',400,halo=False)
-txt(48,fy+87,'東西線は輸出再開報道があるものの、全面復旧は未確認。対象は原油で、LNG・LPG・石油製品は含みません。',18,'#c4d2dc',400,halo=False)
+txt(48,fy+87,'STS＝船間積替え、SBM＝沖合ブイ経由の積載。配船線は個船の積載状態を示しません。既存の情勢注記は9/29基準です。',18,'#c4d2dc',400,halo=False)
 add(f'<a href="https://www.openstreetmap.org/copyright">')
 txt(48,fy+122,'© OpenStreetMap contributors  ·  OpenFreeMap / © OpenMapTiles',14,'#9dafbb',400,halo=False)
 add('</a>')
-txt(1752,fy+122,'資料：OSM・GEM・SUMED・Reuters・Bloomberg・S&P Global・IMOほか',13,'#9dafbb',400,'end',False)
+txt(1752,fy+122,'資料：OSM・GEM・SUMED・Reuters・GME・NGA・公開AISほか',13,'#9dafbb',400,'end',False)
 add('</svg>')
 (OUT/'middle-east.svg').write_text('\n'.join(svg))
-(OUT/'middle-east.geojson').write_text(json.dumps({'type':'FeatureCollection','as_of':META['as_of'],'revalidated_at':META.get('revalidated_at'),'source_notes':'docs/middle-east-sources.md','features':features},ensure_ascii=False,indent=2))
+(OUT/'middle-east.geojson').write_text(json.dumps({'type':'FeatureCollection','as_of':META['as_of'],'revalidated_at':META.get('revalidated_at'),'route_additions_as_of':META.get('route_additions_as_of'),'source_notes':'docs/middle-east-sources.md','features':features},ensure_ascii=False,indent=2))
 print('Wrote SVG and feature collection')
