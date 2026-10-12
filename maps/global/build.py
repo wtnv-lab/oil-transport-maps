@@ -27,6 +27,7 @@ D = Path(__file__).resolve().parent
 # 両図で共通の独自データ検査・描画処理。実行時の作業フォルダーに依存しない。
 sys.path.insert(0, str(D.parents[1] / 'scripts'))
 from user_layers import load_layer, render_layer
+from design_system import load_design, svg_css
 
 parser = argparse.ArgumentParser(
     description="Generate the map SVG and representative route geometry"
@@ -51,37 +52,18 @@ ADDED = datetime.date.fromisoformat(META["route_additions_as_of"])
 
 # 幅、地図本体の高さ、上部余白、図全体の高さ（いずれも SVG のピクセル単位）。
 W, MH, TOP, H = 2400, 1120, 145, 1365
+# 色・字級・線・記号は両図で共有する基盤と、この図の表示プロファイルから取得。
+# 地理座標や配置座標はこのスクリプト、見た目の規則は design/ に分ける。
+DS = load_design('global')
+TYPE = {role: (style['size'], style['weight']) for role, style in DS['typography'].items()}
+COL = DS['routes']
+C = DS['colors']
+L = DS['lines']
+SYMBOL = DS['symbols']
+SPACE = DS['spacing']
+CALLOUT = DS['callout']
 if USER_LAYER['features']:
-    H += 36  # 追加データの日付は元図の基準日と分け、下部の専用帯に表示。
-COL = {
-    '1': '#70e49d',
-    '2': '#ff727b',
-    '3': '#ffbd62',
-    '4': '#d19bff',
-    '5': '#4edce7',
-    '6': '#70aaff',
-    'S': '#e6dcae',
-    'common': '#dce7ee',
-}
-
-# PCで縮小して見る際も、目的地→発着地→通過点→補足の順に読める字級。
-# 大陸・大洋は地理的な親として大きくするが、細い字と控えめな色で背景に置く。
-# 各役割の値は (font-size, font-weight)。航路色・地理座標とは独立して管理する。
-# 広域名は縁なしの明朝、港は細い縁を付けたゴシック、通過点はさらに細い縁。
-# 補足・凡例・バルーンの本文は縁を付けず、地物ラベルとの役割の違いを示す。
-TYPE = {
-    'destination': (36, 700),
-    'port': (26, 600),
-    'passage': (23, 500),
-    'loading_area': (25, 600),
-    'detail': (19, 400),
-    'continent': (30, 400),
-    'ocean': (31, 400),
-    'local_sea': (21, 400),
-    'callout_title': (28, 600),
-    'callout_status': (19, 400),
-    'callout_body': (21, 400),
-}
+    H += SPACE['footer_user_data_height']  # 追加データの日付を下部の専用帯に表示。
 
 
 # --- 投影と SVG の基本要素 ---------------------------------------------------
@@ -115,10 +97,12 @@ def add(s):
 
 
 def text(
-    x, y, s, size=22, color='#eef4f8', weight=500, anchor='start', halo=True,
-    css='',
+    x, y, s, size=TYPE['label'][0], color=C['primary'],
+    weight=TYPE['label'][1], anchor='start', halo=True, css='', role=None,
 ):
     """文字列をエスケープして追加する。y は文字のベースライン位置。"""
+    if role:
+        size, weight = TYPE[role]
     classes = ' '.join(name for name in ('halo' if halo else '', css) if name)
     add(
         f'<text x="{x:.2f}" y="{y:.2f}" font-size="{size}" '
@@ -132,13 +116,13 @@ def path(ps):
     return 'M ' + ' L '.join(f'{x:.2f},{y:.2f}' for x, y in ps)
 
 
-def line(ps, color, width=4, dash=None, under=True, opacity=1):
+def line(ps, color, width=L['default_width'], dash=None, under=True, opacity=1):
     """直線の点列を追加する。注記の引出線や凡例にも使う。"""
     d = path(ps)
     if under:
         add(
-            f'<path d="{d}" fill="none" stroke="#071925" '
-            f'stroke-width="{width + 4}" opacity=".9"/>'
+            f'<path d="{d}" fill="none" stroke="{C["line_underlay"]}" '
+            f'stroke-width="{width + L["underlay_extra"]}" opacity="{L["underlay_opacity"]}"/>'
         )
     add(
         f'<path d="{d}" fill="none" stroke="{color}" '
@@ -150,7 +134,7 @@ def line(ps, color, width=4, dash=None, under=True, opacity=1):
 
 # --- 航路の補間・経度の連続化・進行方向 -------------------------------------
 
-def arrow(ps, col, at=0.6, size=8, reverse=False):
+def arrow(ps, col, at=0.6, size=SYMBOL['arrow_size'], reverse=False):
     """補間後の点列の長さ比 at の位置に、接線方向の矢印を置く。"""
     lens = [math.dist(a, b) for a, b in zip(ps, ps[1:])]
     target = sum(lens) * at
@@ -169,20 +153,20 @@ def arrow(ps, col, at=0.6, size=8, reverse=False):
         if 12 < x + offset < W - 12:
             add(
                 f'<path class="route-arrow" data-direction="{"reverse" if reverse else "forward"}" d="M 0 0 '
-                f'L {-size * 1.75} {-size * 0.62} '
-                f'L {-size * 1.75} {size * 0.62} Z" fill="{col}" '
+                f'L {-size * SYMBOL["arrow_length_factor"]} {-size * SYMBOL["arrow_half_width_factor"]} '
+                f'L {-size * SYMBOL["arrow_length_factor"]} {size * SYMBOL["arrow_half_width_factor"]} Z" fill="{col}" '
                 f'transform="translate({x + offset:.2f} {y:.2f}) '
                 f'rotate({ang:.2f})"/>'
             )
 
 
-def roundtrip_arrows(ps, col, at=0.6, size=8):
+def roundtrip_arrows(ps, col, at=0.6, size=SYMBOL['arrow_size']):
     """同じ線上に反対向きの矢頭を置く。積荷の流向ではなく船の往復を表す。"""
     length = sum(math.dist(a, b) for a, b in zip(ps, ps[1:]))
     if length < 12:
         return  # 全球縮尺で極端に短い接続は、往復の凡例に従い矢頭を省略。
     size = min(size, length / 8)
-    half_span = size * 2.2
+    half_span = size * SYMBOL['arrow_pair_half_span_factor']
     center = min(length - half_span - 1, max(half_span + 1, length * at))
     arrow(ps, col, (center - half_span) / length, size, reverse=True)
     arrow(ps, col, (center + half_span) / length, size)
@@ -242,7 +226,7 @@ route_samples = {}
 
 
 def route(
-    name, coords, key, dash=None, width=4.6, arrows=(0.58,), wrapped=False,
+    name, coords, key, dash=None, width=L['route_width'], arrows=(0.58,), wrapped=False,
     start_dir=None, end_dir=None,
 ):
     """模式航路を描き、補間前の代表経由点を GeoJSON 用に保存する。"""
@@ -259,7 +243,7 @@ def route(
         ps.append((xx, yy))
 
     d, samples = smooth(ps, start_dir, end_dir)
-    width = min(width, 3.5)
+    width = min(width, L['route_width'])
     for offset in (-W, 0, W):
         if (
             max(x for x, y in samples) + offset < 0
@@ -276,7 +260,7 @@ def route(
             [(x + offset, y) for x, y in samples if -10 < x + offset < W + 10]
         )
     for at in arrows or (0.5,):
-        roundtrip_arrows(samples, COL[key], at, size=8 if arrows else 4)
+        roundtrip_arrows(samples, COL[key], at, size=SYMBOL['arrow_size'] if arrows else SYMBOL['connection_arrow_size'])
     features.append({
         'type': 'Feature',
         'properties': {
@@ -294,7 +278,7 @@ def route(
 # --- 地点表示と注記の配置 ----------------------------------------------------
 
 def dot(
-    p, label=None, at=None, color='#f5f8fa', size=5.4, anchor='start',
+    p, label=None, at=None, color=C['strong'], size=SYMBOL['port_radius'], anchor='start',
     role='port',
 ):
     """地理座標 p に点を置き、ピクセル座標 at に水平なラベルを配置する。"""
@@ -302,34 +286,35 @@ def dot(
     x, y = xy(p)
     if label and at:
         tx, ty = at
-        end = (tx - 12 if anchor == 'start' else tx + 12, ty - font * 0.42)
+        gap = SPACE['label_gap']
+        end = (tx - gap if anchor == 'start' else tx + gap, ty - font * SPACE['label_baseline_factor'])
         distance = math.dist((x, y), end)
-        if distance > 26:
+        if distance > SPACE['label_leader_min_distance']:
             # 点の外周から文字の12px手前まで。暗い縁で国境・航路から分離する。
             start = (
-                x + (end[0] - x) * (size + 3) / distance,
-                y + (end[1] - y) * (size + 3) / distance,
+                x + (end[0] - x) * (size + SPACE['label_symbol_gap']) / distance,
+                y + (end[1] - y) * (size + SPACE['label_symbol_gap']) / distance,
             )
             d = path([start, end])
-            add(f'<path d="{d}" fill="none" stroke="#0b1c2b" stroke-width="4.5"/>')
+            add(f'<path d="{d}" fill="none" stroke="{C["ink"]}" stroke-width="{L["label_leader_underlay_width"]}"/>')
             add(
                 f'<path class="label-leader" d="{d}" fill="none" '
-                'stroke="#c4d2dc" stroke-width="1.7"/>'
+                f'stroke="{C["secondary"]}" stroke-width="{L["label_leader_width"]}"/>'
             )
     add(
         f'<circle cx="{x:.2f}" cy="{y:.2f}" r="{size}" fill="{color}" '
-        f'stroke="#0b1c2b" stroke-width="2.5"/>'
+        f'stroke="{C["ink"]}" stroke-width="{SYMBOL["port_border_width"]}"/>'
     )
     if label and at:
         text(
-            tx, ty, label, font, '#f3f7fa', weight, anchor,
+            tx, ty, label, font, C['strong'], weight, anchor,
             css='passage-label' if role == 'passage' else 'place-label',
         )
 
 
-def badge(x, y, s, key, r=16):
+def badge(x, y, s, key):
     """航路のそばに、枠付き注記と対応する番号を置く。"""
-    text(x, y + 6, s, 20, COL[key], 500, 'middle')
+    text(x, y + SPACE['route_key_baseline_offset'], s, color=COL[key], anchor='middle', role='route_key')
 
 
 def bubble(x, y, w, title, key, rows, tail, status=None):
@@ -340,25 +325,28 @@ def bubble(x, y, w, title, key, rows, tail, status=None):
         end = min(route_samples[key], key=lambda p: math.dist(p, end))
     add(
         f'<path class="callout-leader" d="{path([start, end])}" fill="none" '
-        f'stroke="#a7b4bd" stroke-width="1.1" opacity=".8"/>'
+        f'stroke="{C["muted"]}" stroke-width="{CALLOUT["leader_width"]}" '
+        f'opacity="{CALLOUT["leader_opacity"]}"/>'
     )
 
-    # 本文は36pxの行送り。本文2行＋状況1行の枠高は168pxになる。
-    height = 96 + max(0, len(rows) - 1) * 36 + (36 if status else 0)
+    # 共通の余白・行送りから高さを求め、本文行数が増えても下部余白を保つ。
+    line_height = CALLOUT['line_height']
+    height = CALLOUT['base_height'] + max(0, len(rows) - 1) * line_height + (line_height if status else 0)
     add(
         f'<rect class="callout-box" x="{x}" y="{y}" width="{w}" '
-        f'height="{height}" fill="#111e27" fill-opacity=".97" '
-        f'stroke="#71808b" stroke-opacity=".7" stroke-width=".9"/>'
+        f'height="{height}" fill="{C["panel"]}" fill-opacity="{CALLOUT["fill_opacity"]}" '
+        f'stroke="{C["panel_border"]}" stroke-opacity="{CALLOUT["border_opacity"]}" '
+        f'stroke-width="{CALLOUT["border_width"]}"/>'
     )
-    text(x + 21, y + 38, key, 25, COL[key], 600, halo=False)
-    text(x + 55, y + 38, title, TYPE['callout_title'][0], '#e5ebef', TYPE['callout_title'][1], halo=False)
-    yy = y + 78
+    text(x + CALLOUT['padding_x'], y + CALLOUT['title_y'], key, color=COL[key], halo=False, role='callout_key')
+    text(x + CALLOUT['title_x'], y + CALLOUT['title_y'], title, color=C['primary'], halo=False, role='callout_title')
+    yy = y + CALLOUT['body_y']
     if status:
-        text(x + 21, yy, status, TYPE['callout_status'][0], '#aebecb', TYPE['callout_status'][1], halo=False)
-        yy += 36
+        text(x + CALLOUT['padding_x'], yy, status, color=C['muted'], halo=False, role='callout_status')
+        yy += line_height
     for row in rows:
-        text(x + 21, yy, row, TYPE['callout_body'][0], '#dce5ec', TYPE['callout_body'][1], halo=False)
-        yy += 36
+        text(x + CALLOUT['padding_x'], yy, row, color=C['secondary'], halo=False, role='callout_body')
+        yy += line_height
     return height
 
 
@@ -370,32 +358,21 @@ add(
     f'viewBox="0 0 {W} {H}">'
 )
 add(
-    '<defs><style>'
-    'text{font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",'
-    '"Noto Sans CJK JP",sans-serif}'
-    '.halo{paint-order:stroke;stroke:#0b1c2b;stroke-width:3px;stroke-linejoin:round}'
-    '.place-label{stroke-width:3px}'
-    '.passage-label{stroke-width:2px}'
-    '.geographic-label{font-family:"Hiragino Mincho ProN","Yu Mincho",'
-    '"Noto Serif CJK JP","Noto Serif JP",serif;letter-spacing:.04em;stroke:none}'
-    'path{stroke-linecap:round;stroke-linejoin:round}'
-    '</style><clipPath id="map">'
-    '<rect y="145" width="2400" height="1120"/></clipPath></defs>'
+    '<defs><style>' + svg_css(DS)
+    + 'path{stroke-linecap:round;stroke-linejoin:round}'
+    + '</style><clipPath id="map">'
+    + f'<rect y="{TOP}" width="{W}" height="{MH}"/></clipPath></defs>'
 )
-add(f'<rect width="{W}" height="{H}" fill="#0b1721"/>')
-text(48, 62, META['title'], 39, weight=600, halo=False)
-text(48, 111, '中東・北米との往復航路と、日本向け調達のコスト・リスク', 22, '#b8c9d7', 400, halo=False)
+add(f'<rect width="{W}" height="{H}" fill="{C["frame"]}"/>')
+text(SPACE['frame_inset'], 62, META['title'], halo=False, role='title')
+text(SPACE['frame_inset'], 111, '中東・北米との往復航路と、日本向け調達のコスト・リスク', color=C['secondary'], halo=False, role='subtitle')
 text(
-    2352,
+    W - SPACE['frame_inset'],
     59,
     f'{AS_OF.year}年{AS_OF.month}月{AS_OF.day}日 基準 ／ {ADDED.month}月{ADDED.day}日 航路追記',
-    23,
-    '#d4dfe7',
-    400,
-    'end',
-    False,
+    color=C['secondary'], anchor='end', halo=False, role='date',
 )
-text(2352, 104, '公開情報による模式図  ｜  線の太さは輸送量を示さない', 19, '#a5bacb', 400, 'end', False)
+text(W - SPACE['frame_inset'], 104, '公開情報による模式図  ｜  線の太さは輸送量を示さない', color=C['muted'], anchor='end', halo=False, role='header_note')
 img = base64.b64encode((D / 'assets/osm-dark-world.png').read_bytes()).decode()
 add(
     f'<image x="0" y="{TOP}" width="2400" height="1120" href="data:image/png;base64,{img}"/>',
@@ -456,7 +433,7 @@ route(
         [28.6, 32],
     ],
     '3',
-    width=2.6,
+    width=L['canal_width'],
     arrows=(),
 )
 
@@ -504,7 +481,7 @@ route(
     '喜望峰 → インド洋 → マラッカ海峡',
     common_cape,
     'common',
-    width=4.5,
+    width=L['route_width'],
     arrows=(0.44,),
     start_dir=(1, 0),
     end_dir=(1, 0),
@@ -540,21 +517,21 @@ gulf = [
     [56.75, 25.78],
     [57.2, 25.3],
 ]
-route('湾内発 → ホルムズ海峡 → アジア方面（直航・積替えの共通区間）', gulf, '1', width=2.7, arrows=())
+route('湾内発 → ホルムズ海峡 → アジア方面（直航・積替えの共通区間）', gulf, '1', width=L['connection_width'], arrows=())
 route(
     'フジャイラ沖の積替え接続（模式）',
     [[56.75, 25.78], [56.6, 25.3], fuj],
     '1',
-    dash='3 5',
-    width=2.7,
+    dash=L['connection_dash'],
+    width=L['connection_width'],
     arrows=(),
 )
 route(
     'ソハール沖の積替え接続（模式）',
     [[56.75, 25.78], [57.0, 25.2], [57.0, 24.7], [58.0, 24.4], [59.5, 23.8]],
     '1',
-    dash='3 5',
-    width=2.7,
+    dash=L['connection_dash'],
+    width=L['connection_width'],
     arrows=(),
 )
 
@@ -565,7 +542,7 @@ route(
     'ミナ・アル・ハファル沖 STS／原油SBM積載 → 日本方面（模式）',
     [fahal, [59.2, 23.78], [59.65, 23.4], [61.5, 21]],
     '1',
-    width=2.7,
+    width=L['connection_width'],
     arrows=(),
 )
 features[-1]['properties'].update(
@@ -597,8 +574,8 @@ route(
     'ヤンブー → バブ・エル・マンデブ → 日本方面（航行制約）',
     south,
     '2',
-    dash='10 8',
-    width=4.3,
+    dash=L['restricted_dash'],
+    width=L['route_width'],
     arrows=(0.5,),
     end_dir=(1, 0),
 )
@@ -616,7 +593,7 @@ asian = [
     [138.8, 34.1],
     japan,
 ]
-route('中東・喜望峰方面の日本向け共通区間', asian, 'common', width=5, arrows=(0.63,), start_dir=(1, 0))
+route('中東・喜望峰方面の日本向け共通区間', asian, 'common', width=L['route_width'], arrows=(0.63,), start_dir=(1, 0))
 
 # 北米から太平洋を横断する航路。
 
@@ -679,7 +656,7 @@ for lon, lat, label in [
     (287, -4, '南アメリカ'),
 ]:
     text(
-        *xy((lon, lat)), label, TYPE['continent'][0], '#8b9eab',
+        *xy((lon, lat)), label, TYPE['continent'][0], C['geography'],
         TYPE['continent'][1], 'middle', halo=False, css='geographic-label',
     )
 for lon, lat, label in [
@@ -688,10 +665,10 @@ for lon, lat, label in [
     (-28, 21, '大西洋'),
 ]:
     text(
-        *xy((lon, lat)), label, TYPE['ocean'][0], '#587c95',
+        *xy((lon, lat)), label, TYPE['ocean'][0], C['ocean'],
         TYPE['ocean'][1], 'middle', halo=False, css='geographic-label',
     )
-dot(japan, '日本', (1314, 537), size=9, anchor='start', role='destination')
+dot(japan, '日本', (1314, 537), size=SYMBOL['destination_radius'], anchor='start', role='destination')
 dot(us, '米国メキシコ湾岸', (2110, 594), anchor='end')
 dot(canada[0], 'バンクーバー', (2020, 434))
 dot(yanbu, 'ヤンブー', (581, 690), anchor='end')
@@ -699,8 +676,8 @@ dot(sidi, 'シディ・ケリル', (546, 505), anchor='end')
 text(546, 535, '沖合SBMで原油積載', TYPE['detail'][0], COL['S'], TYPE['detail'][1], 'end', halo=False)
 sx, sy = xy(sidi)
 add(
-    f'<circle cx="{sx}" cy="{sy}" r="10" fill="none" '
-    f'stroke="{COL["S"]}" stroke-width="2"/>'
+    f'<circle cx="{sx}" cy="{sy}" r="{SYMBOL["loading_radius"]}" fill="none" '
+    f'stroke="{COL["S"]}" stroke-width="{SYMBOL["loading_border_width"]}"/>'
 )
 features.append({
     'type': 'Feature',
@@ -717,11 +694,11 @@ features.append({
 # 湾岸の3本の引出線を上下へ分け、隣接する文字の前を横切らせない。
 dot(fuj, 'フジャイラ／ソハール', (824, 651))
 dot(fahal, 'ミナ・アル・ハファル沖', (815, 701))
-text(815, 731, 'STS／原油SBM（模式）', TYPE['detail'][0], '#e6dcae', TYPE['detail'][1], halo=False)
+text(815, 731, 'STS／原油SBM（模式）', TYPE['detail'][0], COL['S'], TYPE['detail'][1], halo=False)
 fx, fy = xy(fahal)
 add(
-    f'<circle cx="{fx}" cy="{fy}" r="9" fill="none" '
-    f'stroke="{COL["S"]}" stroke-width="1.8"/>'
+    f'<circle cx="{fx}" cy="{fy}" r="{SYMBOL["fahal_loading_radius"]}" fill="none" '
+    f'stroke="{COL["S"]}" stroke-width="{SYMBOL["fahal_loading_border_width"]}"/>'
 )
 features.append(
     {
@@ -740,17 +717,17 @@ dot([20, -34.8], '喜望峰周辺', (540, 1008), role='passage')
 dot([43.4, 12.6], 'バブ・エル・マンデブ海峡', (630, 799), anchor='end', role='passage')
 dot([56.3, 26.45], 'ホルムズ海峡', (815, 600), role='passage')
 dot([-5.6, 35.9], 'ジブラルタル海峡', (303, 539), anchor='end', role='passage')
-text(609, 631, '紅海', TYPE['local_sea'][0], '#95c4d8', TYPE['local_sea'][1], 'middle', halo=False, css='geographic-label')
-text(665, 603, 'ペルシャ湾', TYPE['local_sea'][0], '#95c4d8', TYPE['local_sea'][1], 'middle', halo=False, css='geographic-label')
-text(1105, 822, 'マラッカ海峡', TYPE['passage'][0], '#b5cfde', TYPE['passage'][1], css='passage-label')
+text(609, 631, '紅海', TYPE['local_sea'][0], C['local_water'], TYPE['local_sea'][1], 'middle', halo=False, css='geographic-label')
+text(665, 603, 'ペルシャ湾', TYPE['local_sea'][0], C['local_water'], TYPE['local_sea'][1], 'middle', halo=False, css='geographic-label')
+text(1105, 822, 'マラッカ海峡', TYPE['passage'][0], C['passage'], TYPE['passage'][1], css='passage-label')
 
 # 積替え区域の代表位置。全貨物に必須の経由地を示すものではない。
 
 for p in [[56.7, 25.1], [101.95, 2.4]]:
     x, y = xy(p)
     add(
-        f'<circle cx="{x}" cy="{y}" r="10" fill="none" '
-        f'stroke="{COL["S"]}" stroke-width="2"/>'
+        f'<circle cx="{x}" cy="{y}" r="{SYMBOL["loading_radius"]}" fill="none" '
+        f'stroke="{COL["S"]}" stroke-width="{SYMBOL["loading_border_width"]}"/>'
     )
 dot([101.95, 2.4], 'マラッカ沖（リンギ等）', (1105, 873), role='loading_area')
 features.append({
@@ -777,8 +754,8 @@ for x, y, key in [
     (1710, 509, '6'),
 ]:
     badge(x, y, key, key)
-text(712, 1085, '3・4  喜望峰経由・日本と往復', 21, '#c1ced7', 400)
-text(1211, 717, '1–4', 20, '#c1ced7', 400)
+text(712, 1085, '3・4  喜望峰経由・日本と往復', color=C['route_note'], role='route_note')
+text(1211, 717, '1–4', color=C['route_note'], role='route_group')
 
 # --- コスト・リスク等の注記 --------------------------------------------------
 # 注記の矩形・引出線は画面上の座標で配置する。tail の末尾だけ地理座標から投影。
@@ -855,59 +832,54 @@ bubble(
 )
 # --- 凡例・留保・クレジット --------------------------------------------------
 
-line([(65, 1172), (135, 1172)], '#dce7ee', 3, under=False)
-roundtrip_arrows([(65, 1172), (135, 1172)], '#dce7ee', at=0.5, size=7)
-text(152, 1180, '海上経路（往復・模式）', 19, '#cbd8e2', halo=False)
-line([(65, 1210), (135, 1210)], COL['2'], 4.5, '11 10', under=False)
-text(152, 1218, '航行制約・回避', 19, '#cbd8e2', halo=False)
-line([(482, 1172), (552, 1172)], COL['1'], 3.4, '3 5', under=False)
-text(568, 1180, '湾外での積替え接続', 19, '#cbd8e2', halo=False)
+line([(65, 1172), (135, 1172)], COL['common'], L['legend_width'], under=False)
+roundtrip_arrows([(65, 1172), (135, 1172)], COL['common'], at=0.5, size=SYMBOL['legend_arrow_size'])
+text(152, 1180, '海上経路（往復・模式）', color=C['secondary'], halo=False, role='legend')
+line([(65, 1210), (135, 1210)], COL['2'], L['legend_restricted_width'], L['legend_restricted_dash'], under=False)
+text(152, 1218, '航行制約・回避', color=C['secondary'], halo=False, role='legend')
+line([(482, 1172), (552, 1172)], COL['1'], L['legend_connection_width'], L['connection_dash'], under=False)
+text(568, 1180, '湾外での積替え接続', color=C['secondary'], halo=False, role='legend')
 add(
-    f'<circle cx="494" cy="1210" r="9" fill="none" '
-    f'stroke="{COL["S"]}" stroke-width="2"/>'
+    f'<circle cx="494" cy="1210" r="{SYMBOL["legend_loading_radius"]}" fill="none" '
+    f'stroke="{COL["S"]}" stroke-width="{SYMBOL["loading_border_width"]}"/>'
 )
-text(518, 1218, 'STS／SBM区域', 19, '#cbd8e2', halo=False)
-text(945, 1247, '白線：複数ルートの共通区間', 18, '#a7bdcd', anchor='end', halo=False)
-text(1136, 1210, 'STS＝船間積替え ／ SBM＝沖合ブイ経由の積載', 18, '#aebecb', halo=False)
+text(518, 1218, 'STS／SBM区域', color=C['secondary'], halo=False, role='legend')
+text(945, 1247, '白線：複数ルートの共通区間', color=C['muted'], anchor='end', halo=False, role='legend_note')
+text(1136, 1210, 'STS＝船間積替え ／ SBM＝沖合ブイ経由の積載', color=C['muted'], halo=False, role='legend_note')
 if USER_LAYER['features']:
     try:
         svg.extend(render_layer(USER_LAYER, xy, W, TOP + MH, wrap=True, top=TOP))
     except ValueError as error:
         parser.error(f"{args.data_file}: {error}")
 add('</g>')
-add('<path d="M 0 1265 H 2400" stroke="#354a59" stroke-width="1"/>')
+add(f'<path d="M 0 {TOP + MH} H {W}" stroke="{C["separator"]}" stroke-width="{L["separator_width"]}"/>')
 text(
-    48,
+    SPACE['frame_inset'],
     1300,
     '双方向矢印は船の往復（模式）。積荷・同じ経路での往復実績・安全を示しません。費用は同条件の運賃比較ではありません。',
-    18,
-    '#b5c5d1',
-    400,
-    halo=False,
+    color=C['secondary'], halo=False, role='footer_note',
 )
-text(2352, 1300, '作図：' + META['credit'], 20, '#d5dfe5', 400, 'end', False)
+text(W - SPACE['frame_inset'], 1300, '作図：' + META['credit'], color=C['secondary'], anchor='end', halo=False, role='credit')
 text(
-    48,
+    SPACE['frame_inset'],
     1338,
     '© OpenStreetMap contributors  ·  OpenFreeMap / © OpenMapTiles',
-    16,
-    '#91a8ba',
+    color=C['muted'], role='attribution',
     halo=False,
 )
 text(
-    2352,
+    W - SPACE['frame_inset'],
     1338,
     '資料：Reuters・S&P Global・GME・NGA・公開AIS・パナマ運河庁ほか',
-    16,
-    '#91a8ba',
+    color=C['muted'], role='attribution',
     anchor='end',
     halo=False,
 )
 if USER_LAYER['features']:
     text(
-        48, H - 12,
+        SPACE['frame_inset'], H - 12,
         f"利用者データ更新：{USER_LAYER['updated_at']} ｜ 追加{len(USER_LAYER['features'])}件（元図の情報基準日は上記）",
-        16, '#cbd8e2', 400, halo=False,
+        color=C['secondary'], halo=False, role='user_update',
     )
 add('</svg>')
 

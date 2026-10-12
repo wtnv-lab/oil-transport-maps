@@ -1,0 +1,200 @@
+{
+  "map": "middle-east",
+  "typography": {
+    "title": {
+      "size": 36,
+      "weight": 600
+    },
+    "port": {
+      "size": 27,
+      "weight": 600
+    },
+    "secondary_port": {
+      "size": 24,
+      "weight": 600
+    },
+    "plant": {
+      "size": 21,
+      "weight": 500
+    },
+    "pipeline": {
+      "size": 24,
+      "weight": 600
+    },
+    "chokepoint": {
+      "size": 24,
+      "weight": 600
+    },
+    "detail": {
+      "size": 18,
+      "weight": 400
+    },
+    "label": {
+      "size": 22,
+      "weight": 500
+    },
+    "country": {
+      "size": 30,
+      "weight": 400
+    },
+    "sea": {
+      "size": 28,
+      "weight": 400
+    },
+    "route": {
+      "size": 24,
+      "weight": 500
+    },
+    "status": {
+      "size": 17,
+      "weight": 400
+    },
+    "legend_heading": {
+      "size": 21,
+      "weight": 600
+    },
+    "legend": {
+      "size": 17,
+      "weight": 500
+    },
+    "footnote": {
+      "size": 18,
+      "weight": 400
+    },
+    "credit": {
+      "size": 14,
+      "weight": 400
+    },
+    "source": {
+      "size": 13,
+      "weight": 400
+    },
+    "scale": {
+      "size": 13,
+      "weight": 400
+    },
+    "north": {
+      "size": 16,
+      "weight": 500
+    },
+    "user_data": {
+      "size": 16,
+      "weight": 400
+    },
+    "gulf_route": {
+      "size": 24,
+      "weight": 600
+    },
+    "route_compact": {
+      "size": 23,
+      "weight": 500
+    },
+    "route_edge": {
+      "size": 19,
+      "weight": 500
+    }
+  },
+  "routes": {
+    "pipeline": "#95e273",
+    "marine": "#ff5576",
+    "water": "{colors.water}",
+    "gulf": "#c7a6ff",
+    "loading": "{colors.loading}"
+  },
+  "colors": {
+    "facility": "#c9d7df",
+    "detail": "#b7c4cc",
+    "pipeline_status": "#bed7b0",
+    "gulf_status": "#d4c5ee",
+    "subtitle": "#b7cbd9",
+    "date": "#aebdc8",
+    "credit": "#9dafbb",
+    "user_data": "#cbd8e2",
+    "leader": "#dce6ed",
+    "leader_casing": "#0b1923",
+    "route_casing": "#10202a",
+    "symbol_stroke": "#132432",
+    "facility_symbol": "#ecf3f7",
+    "legend_fill": "#122330",
+    "legend_border": "#3b4b57",
+    "footer_rule": "#40515d",
+    "scale_light": "#d2dbe0",
+    "scale_dark": "#778894",
+    "scale_label": "#bac7d0",
+    "north": "#b7cbd8"
+  },
+  "lines": {
+    "default_width": 4,
+    "pipeline_width": 4.3,
+    "sumed_width": 4.2,
+    "marine_width": 3.7,
+    "canal_width": 3,
+    "sts_width": 2.7,
+    "legend_width": 3.4,
+    "detail_leader_width": 1,
+    "route_casing_extra": 3,
+    "route_casing_opacity": 0.85,
+    "leader_width": 1.5,
+    "leader_casing_width": 3.6,
+    "leader_casing_opacity": 0.95,
+    "restricted_dash": "12 10",
+    "interpolated_dash": "4 4",
+    "sts_dash": "4 5",
+    "legend_border_width": 1,
+    "legend_opacity": 0.96,
+    "footer_rule_width": 1,
+    "pipeline_arrow": 10,
+    "marine_arrow": 9,
+    "gulf_arrow": 8,
+    "canal_arrow": 7,
+    "sts_arrow": 4,
+    "legend_arrow": 6,
+    "paired_arrow_gap": 18
+  },
+  "symbols": {
+    "port_radius": 6.5,
+    "facility_size": 11,
+    "facility_corner": 1,
+    "stroke_width": 2.5,
+    "passage_radius": 17,
+    "passage_width": 1.5,
+    "passage_opacity": 0.8,
+    "loading_radius": 9,
+    "loading_width": 2,
+    "sts_radius": 5,
+    "sts_width": 2,
+    "scale_height": 5,
+    "arrow_length_factor": 1.6,
+    "arrow_half_width_factor": 0.72,
+    "arrow_notch_factor": 1.25
+  },
+  "spacing": {
+    "label_gap": 10,
+    "leader_min_length": 20,
+    "leader_marker_gap": 9,
+    "label_center_factor": 0.42,
+    "detail_line_height": 28,
+    "passage_leader_gap": 12,
+    "passage_leader_start": 14,
+    "footer_line_height": 29,
+    "user_data_footer_height": 36
+  },
+  "geographic_size_offsets": {
+    "エジプト": 0,
+    "サウジアラビア": 4,
+    "イラク": -4,
+    "イラン": 0,
+    "オマーン": 0,
+    "イエメン": -2,
+    "スーダン": -8,
+    "エリトリア": -11,
+    "ジブチ": -12,
+    "アラブ首長国連邦": -13,
+    "地中海": 1,
+    "紅海": 0,
+    "ペルシャ湾": -4,
+    "オマーン湾": -6,
+    "アラビア海": 4,
+    "アデン湾": -7
+  }
+}

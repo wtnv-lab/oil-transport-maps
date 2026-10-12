@@ -1,0 +1,94 @@
+{
+  "version": "1.0.0",
+  "name": "Oil Transport Maps",
+  "fonts": {
+    "sans": [
+      "Hiragino Sans",
+      "Hiragino Kaku Gothic ProN",
+      "Noto Sans CJK JP",
+      "Yu Gothic",
+      "sans-serif"
+    ],
+    "geographic": [
+      "Hiragino Mincho ProN",
+      "Yu Mincho",
+      "Noto Serif CJK JP",
+      "Noto Serif JP",
+      "serif"
+    ]
+  },
+  "colors": {
+    "frame": "#101c27",
+    "panel": "#12212b",
+    "panel_border": "#526573",
+    "ink": "#0b1c2b",
+    "primary": "#eff4f7",
+    "strong": "#f3f7fa",
+    "secondary": "#c4d2dc",
+    "muted": "#aebecb",
+    "geography": "#93a5b1",
+    "water": "#65d9eb",
+    "loading": "#e6dcae"
+  },
+  "halo": {
+    "default": 2,
+    "port": 3,
+    "passage": 2
+  },
+  "geographic_letter_spacing_em": 0.04,
+  "callout": {
+    "line_height": 36,
+    "padding_x": 21,
+    "title_x": 55,
+    "title_y": 38,
+    "body_y": 78,
+    "base_height": 96,
+    "border_width": 0.9,
+    "fill_opacity": 0.97,
+    "leader_width": 1.1,
+    "leader_opacity": 0.8
+  },
+  "preview": {
+    "desktop_width": 1440,
+    "raster_scale": 2
+  },
+  "spacing": {
+    "frame_inset": 48
+  },
+  "contrast": {
+    "body_target": 4.5,
+    "large_target": 3
+  },
+  "updated_at": "2026-10-12",
+  "user_layer": {
+    "palette": {
+      "port": "{colors.strong}",
+      "route": "#4edce7",
+      "pipeline": "#95e273",
+      "note": "{colors.loading}"
+    },
+    "dashes": {
+      "solid": "",
+      "dashed": "13 9",
+      "dotted": "2 7",
+      "dashdot": "14 7 3 7"
+    },
+    "line_width": 3.5,
+    "label_size": 22,
+    "label_weight": 600,
+    "label_halo": 3,
+    "leader_casing": 4.3,
+    "leader_width": 1.6,
+    "port_radius": 6,
+    "port_border": 2.5,
+    "callout_title": 22,
+    "callout_status": 18,
+    "callout_body": 20,
+    "callout_padding": 18,
+    "callout_first_y": 34,
+    "callout_line_height": 36,
+    "callout_bottom": 18,
+    "callout_border": 1,
+    "callout_opacity": 0.98
+  }
+}

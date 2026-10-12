@@ -61,7 +61,7 @@ AIには、次の順序で必要な部分を読むよう伝えます。各ファ
 
 1. [README](../README.md)：用途、完成画像、ファイル構成、再生成の入口。
 2. [AGENTS.md](../AGENTS.md)：情報の扱い、維持する表現、作業後の確認。
-3. 依頼に合う説明書：[独自データの追加・更新](USER_DATA.md)、[元図の更新・点検](MAINTENANCE.md)。追加データを扱う場合は[入力仕様](USER_DATA_REFERENCE.md)と[JSON Schema](user-data.schema.json)も読む。
+3. 依頼に合う説明書：[独自データの追加・更新](USER_DATA.md)、[元図の更新・点検](MAINTENANCE.md)、[見た目の設計・変更](DESIGN_SYSTEM.md)。追加データを扱う場合は[入力仕様](USER_DATA_REFERENCE.md)と[JSON Schema](user-data.schema.json)も読む。
 4. 対象のコード・データ・設定：下表の編集先と、関連する既存項目を確認する。
 5. 出典資料：対象図の根拠Markdownと、変更を裏付ける資料の該当箇所を確認する。
 
@@ -69,6 +69,8 @@ AIには、次の順序で必要な部分を読むよう伝えます。各ファ
 |---|---|
 | 自分で調べた港・航路・注記を追加、更新、削除 | `user-data/global.geojson` / `user-data/middle-east.geojson` |
 | 元からある航路・地名・バルーンを修正 | `maps/global/build.py` / `maps/middle-east/build.py` |
+| 書体・基本色・余白・縁取りを共通変更 | `design/foundations.json`と[デザインガイド](DESIGN_SYSTEM.md) |
+| 一方の図の文字階層・地名別サイズ差・航路色・線・記号を変更 | `design/profiles/global.json` / `design/profiles/middle-east.json` |
 | 表題・版番号・情報基準日などの設定を変更 | 対象図の `metadata.json`。基準日の変更には、対応する資料の再確認が必要 |
 | 追加・変更の根拠や未確認点を記録 | `docs/` 内の対象図の出典Markdown、追加データの出典欄 |
 | 描画や入力検査の機能そのものを変更 | `scripts/` 内の関係する処理とテスト。通常のデータ追加では変更不要 |
@@ -106,8 +108,13 @@ AIには、次の順序で必要な部分を読むよう伝えます。各ファ
 ```text
 中東図の［地名］のラベルと引出線が重なっています。
 地点・航路の座標と記載内容を保ち、文字サイズとラベル位置を調整してください。
-周囲のラベルも含めてPNGを確認し、混雑しないように整えてください。
+docs/DESIGN_SYSTEM.mdとdesign/の設定を参照し、
+文字サイズは対象図のプロファイル、ラベル位置はbuild.pyで調整してください。
+共通色への参照を維持し、国・海域名の個別サイズ差にはgeographic_size_offsetsを使ってください。
+周囲のラベルも含め通常PNGとPC幅の画像を確認し、混雑しないように整えてください。
 ```
+
+デザイン全体を変える場合は[トークン編集の依頼文と点検手順](DESIGN_SYSTEM.md#7-生成aiに変更を依頼する)を使います。設定だけでなく見本帳と両図を再生成し、色や文字の階層が全体で一貫するか確認します。
 
 更新・削除の依頼例や、チャット型AIからファイルを受け取る手順は[独自データのガイド](USER_DATA.md)にまとめています。
 

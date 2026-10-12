@@ -17,12 +17,14 @@ async function main() {
   const svg = fs.readFileSync(input, 'utf8');
   const width = Number(svg.match(/<svg[^>]*width="(\d+)"/)[1]);
   const height = Number(svg.match(/<svg[^>]*height="(\d+)"/)[1]);
+  const {preview} = JSON.parse(fs.readFileSync(path.join(__dirname, '../design/foundations.json'), 'utf8'));
+  const rasterScale = preview.raster_scale;
   const browser = await launchBrowser();
 
   try {
     const context = await browser.newContext({
       viewport: {width, height},
-      deviceScaleFactor: 2,
+      deviceScaleFactor: rasterScale,
       offline: true,
     });
     const page = await context.newPage();
@@ -34,6 +36,7 @@ async function main() {
     // evaluate内はブラウザー側。DOMの実際の配置を使い、SVG座標の推測を避ける。
     const qa = await page.evaluate(() => {
       const texts = [...document.querySelectorAll('text')].map(element => ({
+        element,
         text: element.textContent,
         bounds: element.getBoundingClientRect(),
       }));
@@ -73,6 +76,21 @@ async function main() {
         }
       });
 
+      // 後から描いた注記枠が既存ラベルを隠す場合、文字同士の比較では見逃す。
+      // 枠より前に描かれた文字だけを対象にし、枠自身の本文を除外する。
+      const calloutTextOcclusions = [];
+      document.querySelectorAll('.callout-box').forEach((box, index) => {
+        const bounds = box.getBoundingClientRect();
+        for (const text of texts) {
+          const paintedBeforeBox = text.element.compareDocumentPosition(box) & Node.DOCUMENT_POSITION_FOLLOWING;
+          if (paintedBeforeBox &&
+              bounds.left < text.bounds.right && bounds.right > text.bounds.left &&
+              bounds.top < text.bounds.bottom && bounds.bottom > text.bounds.top) {
+            calloutTextOcclusions.push({callout: index + 1, text: text.text});
+          }
+        }
+      });
+
       // 独自データのラベルがクリップで欠けないか、実フォントの文字枠で確認。
       // SVG本体の寸法ではなく、各レイヤーの地図領域と変換行列を使用する。
       const userTexts = [...document.querySelectorAll('.user-data-text')];
@@ -100,6 +118,7 @@ async function main() {
       return {
         textOverlaps,
         leaderTextIntersections,
+        calloutTextOcclusions,
         ...(userTexts.length ? {userDataTextOutsideMap} : {}),
         straightLeaders: leaders.every(element => !/[CQAS]/i.test(element.getAttribute('d'))),
         squareCallouts: [...document.querySelectorAll('.callout-box')].every(
@@ -113,11 +132,11 @@ async function main() {
     });
 
     // 異常時にもPNGとQAを残し、修正箇所を確認できるようにする。
-    const result = {width: width * 2, height: height * 2, ...qa};
+    const result = {width: width * rasterScale, height: height * rasterScale, ...qa};
     fs.writeFileSync(output.replace(/\.png$/i, '.qa.json'), JSON.stringify(result, null, 2) + '\n');
     console.log(JSON.stringify({output, ...result}));
     if (
-      qa.textOverlaps.length || qa.leaderTextIntersections.length ||
+      qa.textOverlaps.length || qa.leaderTextIntersections.length || qa.calloutTextOcclusions.length ||
       qa.userDataTextOutsideMap?.length ||
       !qa.straightLeaders || !qa.squareCallouts
     ) {

@@ -1,0 +1,72 @@
+{
+  "maps": {
+    "middle-east": {
+      "version": "1.0.0",
+      "contrast": [
+        {
+          "foreground": "primary",
+          "background": "frame",
+          "ratio": 15.57,
+          "target": 4.5,
+          "pass": true
+        },
+        {
+          "foreground": "secondary",
+          "background": "panel",
+          "ratio": 10.64,
+          "target": 4.5,
+          "pass": true
+        },
+        {
+          "foreground": "muted",
+          "background": "panel",
+          "ratio": 8.63,
+          "target": 4.5,
+          "pass": true
+        },
+        {
+          "foreground": "strong",
+          "background": "ink",
+          "ratio": 16.04,
+          "target": 4.5,
+          "pass": true
+        }
+      ]
+    },
+    "global": {
+      "version": "1.0.0",
+      "contrast": [
+        {
+          "foreground": "primary",
+          "background": "frame",
+          "ratio": 15.57,
+          "target": 4.5,
+          "pass": true
+        },
+        {
+          "foreground": "secondary",
+          "background": "panel",
+          "ratio": 10.64,
+          "target": 4.5,
+          "pass": true
+        },
+        {
+          "foreground": "muted",
+          "background": "panel",
+          "ratio": 8.63,
+          "target": 4.5,
+          "pass": true
+        },
+        {
+          "foreground": "strong",
+          "background": "ink",
+          "ratio": 16.04,
+          "target": 4.5,
+          "pass": true
+        }
+      ]
+    }
+  },
+  "failures": [],
+  "scope": "単色面の文字を対象とする設計検査。地図全体のアクセシビリティ認証ではありません。"
+}

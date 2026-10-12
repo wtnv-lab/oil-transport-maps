@@ -13,11 +13,14 @@ import re
 import unicodedata
 from pathlib import Path
 
+from design_system import load_design
+
 
 MAPS = {"global", "middle-east"}
 STATUS_LABELS = {"confirmed": "確認", "reported": "報道", "hypothetical": "仮定"}
-COLORS = {"port": "#eef4f8", "route": "#4edce7", "pipeline": "#95e273", "note": "#e6dcae"}
-DASHES = {"solid": "", "dashed": "13 9", "dotted": "2 7", "dashdot": "14 7 3 7"}
+# 入力で受け付ける値はデータ仕様。描画時の色・破線寸法とは分けて検証する。
+KINDS = ("port", "route", "pipeline", "note")
+LINE_STYLES = ("solid", "dashed", "dotted", "dashdot")
 
 
 class LayerError(ValueError):
@@ -125,12 +128,12 @@ def load_layer(path: Path, map_name: str) -> dict:
         if "note" in props:
             string(props["note"], "properties.note")
         date(props["observed_on"], "properties.observed_on")
-        enum(props["kind"], "properties.kind", tuple(COLORS))
+        enum(props["kind"], "properties.kind", KINDS)
         enum(props["status"], "properties.status", tuple(STATUS_LABELS))
         if "color" in props and (not isinstance(props["color"], str) or not re.fullmatch(r"#[0-9a-fA-F]{6}", props["color"])):
             fail("properties.color", "#RRGGBB 形式にしてください")
         if "line_style" in props:
-            enum(props["line_style"], "properties.line_style", tuple(DASHES))
+            enum(props["line_style"], "properties.line_style", LINE_STYLES)
         if "width" in props:
             number(props["width"], "properties.width", 1, 8)
         if "arrows" in props and not isinstance(props["arrows"], bool):
@@ -246,21 +249,27 @@ def render_layer(layer, project, width, height, wrap=False, *, top=0):
     """
     if not layer["features"]:
         return []  # 既定の空レイヤーでは既存 SVG を1バイトも変えない。
+    # GeoJSONの明示値を優先し、省略された意匠だけを共通設定で補う。
+    design = load_design(layer["map"])
+    style, colors = design["user_layer"], design["colors"]
     clip_id = "user-layer-clip-" + layer["map"]
     result = [f'<defs><clipPath id="{clip_id}"><rect x="0" y="{top}" width="{width}" height="{height - top}"/></clipPath></defs>',
               f'<g class="user-data-layer" clip-path="url(#{clip_id})">']
     labels = []  # 地点名・注記は全追加航路より手前に描く。
 
-    def text(x, y, value, size=22, color="#eef4f8", anchor="start", halo=True):
-        edge = ' paint-order="stroke" stroke="#0b1c2b" stroke-width="4" stroke-linejoin="round"' if halo else ""
-        return f'<text class="user-data-text" x="{x:.2f}" y="{y:.2f}" font-size="{size}" font-weight="600" text-anchor="{anchor}" fill="{color}"{edge}>{html.escape(value)}</text>'
+    def text(x, y, value, size=style["label_size"], color=colors["primary"], anchor="start", halo=True):
+        edge = (
+            f' paint-order="stroke" stroke="{colors["ink"]}" '
+            f'stroke-width="{style["label_halo"]}" stroke-linejoin="round"'
+        ) if halo else ""
+        return f'<text class="user-data-text" x="{x:.2f}" y="{y:.2f}" font-size="{size}" font-weight="{style["label_weight"]}" text-anchor="{anchor}" fill="{color}"{edge}>{html.escape(value)}</text>'
 
     def leader(a, b, css):
         if math.dist(a, b) < 1:
             return []
         d = _path([a, b])
-        return [f'<path d="{d}" fill="none" stroke="#0b1c2b" stroke-width="4.3"/>',
-                f'<path class="{css}" d="{d}" fill="none" stroke="#c4d2dc" stroke-width="1.6"/>']
+        return [f'<path d="{d}" fill="none" stroke="{colors["ink"]}" stroke-width="{style["leader_casing"]}"/>',
+                f'<path class="{css}" d="{d}" fill="none" stroke="{colors["secondary"]}" stroke-width="{style["leader_width"]}"/>']
 
     def in_bounds(point):
         return 0 <= point[0] <= width and top <= point[1] <= height
@@ -268,8 +277,8 @@ def render_layer(layer, project, width, height, wrap=False, *, top=0):
     for feature in layer["features"]:
         props, geometry = feature["properties"], feature["geometry"]
         kind = props["kind"]
-        color = props.get("color", COLORS[kind])
-        thickness = props.get("width", 3.5)
+        color = props.get("color", style["palette"][kind])
+        thickness = props.get("width", style["line_width"])
 
         def fail(field, message):
             raise LayerError(f"id={feature['id']!r}: {field}: {message}")
@@ -278,7 +287,7 @@ def render_layer(layer, project, width, height, wrap=False, *, top=0):
             anchor = project(geometry["coordinates"])
             if not in_bounds(anchor):
                 fail("geometry.coordinates", "地点が地図の描画範囲外です。対象地図と座標を確認してください")
-            result.append(f'<circle class="user-data-point" cx="{anchor[0]:.2f}" cy="{anchor[1]:.2f}" r="6" fill="{color}" stroke="#0b1c2b" stroke-width="2.5"/>')
+            result.append(f'<circle class="user-data-point" cx="{anchor[0]:.2f}" cy="{anchor[1]:.2f}" r="{style["port_radius"]}" fill="{color}" stroke="{colors["ink"]}" stroke-width="{style["port_border"]}"/>')
         else:
             points = []
             for x, y in map(project, geometry["coordinates"]):
@@ -294,7 +303,7 @@ def render_layer(layer, project, width, height, wrap=False, *, top=0):
             d, samples = _curve(points) if kind == "route" else (_path(points), _line_samples(points))
             offsets = (-width, 0, width) if wrap else (0,)
             visible = []
-            dash = DASHES[props.get("line_style", "solid")]
+            dash = style["dashes"][props.get("line_style", "solid")]
             dash_attr = f' stroke-dasharray="{dash}"' if dash else ""
             for offset in offsets:
                 result.append(f'<path class="user-data-route" d="{d}" transform="translate({offset} 0)" fill="none" stroke="{color}" stroke-width="{thickness}"{dash_attr}/>')
@@ -312,7 +321,7 @@ def render_layer(layer, project, width, height, wrap=False, *, top=0):
             label = props.get("label", {})
             dx, dy = label.get("offset", (18, -18))
             tx, ty = anchor[0] + dx, anchor[1] + dy
-            size, align = label.get("font_size", 22), label.get("anchor", "start")
+            size, align = label.get("font_size", style["label_size"]), label.get("anchor", "start")
             end = (tx - 12 if align == "start" else tx + 12, ty - size * .42)
             distance = math.dist(anchor, end)
             if distance > 22:
@@ -323,16 +332,19 @@ def render_layer(layer, project, width, height, wrap=False, *, top=0):
             callout = props["callout"]
             x, y = (anchor[k] + callout["offset"][k] for k in (0, 1))
             box_width = callout["width"]
-            title_rows = _wrap_text(callout["title"], box_width - 36, 22)
-            status_rows = _wrap_text(f'追加データ・{status}・{props["observed_on"]}', box_width - 36, 18)
-            body_rows = [row for line in callout["lines"] for row in _wrap_text(line, box_width - 36, 20)]
-            rows = [(row, 22, "#eef4f8") for row in title_rows] + [(row, 18, "#b9c8d5") for row in status_rows] + [(row, 20, "#dce5ec") for row in body_rows]
-            box_height = 36 * len(rows) + 18
+            available = box_width - 2 * style["callout_padding"]
+            title_rows = _wrap_text(callout["title"], available, style["callout_title"])
+            status_rows = _wrap_text(f'追加データ・{status}・{props["observed_on"]}', available, style["callout_status"])
+            body_rows = [row for line in callout["lines"] for row in _wrap_text(line, available, style["callout_body"])]
+            rows = ([(row, style["callout_title"], colors["primary"]) for row in title_rows]
+                    + [(row, style["callout_status"], colors["muted"]) for row in status_rows]
+                    + [(row, style["callout_body"], colors["secondary"]) for row in body_rows])
+            box_height = style["callout_line_height"] * len(rows) + style["callout_bottom"]
             if x < 0 or y < top or x + box_width > width or y + box_height > height:
                 fail("properties.callout.offset", "注記枠が地図の描画範囲をはみ出します。offset・width・本文を調整してください")
             nearest = (min(max(anchor[0], x), x + box_width), min(max(anchor[1], y), y + box_height))
             labels.extend(leader(anchor, nearest, "callout-leader"))
-            labels.append(f'<rect class="callout-box" x="{x:.2f}" y="{y:.2f}" width="{box_width}" height="{box_height}" fill="#111e27" fill-opacity=".98" stroke="#71808b" stroke-width="1"/>')
+            labels.append(f'<rect class="callout-box" x="{x:.2f}" y="{y:.2f}" width="{box_width}" height="{box_height}" fill="{colors["panel"]}" fill-opacity="{style["callout_opacity"]}" stroke="{colors["panel_border"]}" stroke-width="{style["callout_border"]}"/>')
             for row_index, (row, size, row_color) in enumerate(rows):
-                labels.append(text(x + 18, y + 34 + 36 * row_index, row, size, row_color, halo=False))
+                labels.append(text(x + style["callout_padding"], y + style["callout_first_y"] + style["callout_line_height"] * row_index, row, size, row_color, halo=False))
     return result + labels + ["</g>"]

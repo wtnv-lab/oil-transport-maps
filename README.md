@@ -49,11 +49,13 @@ README内の「AI向けリポジトリ案内」を入口にしてください。
 
 | 中東の原油輸送ルート | 日本向け原油輸送ルート |
 |---|---|
-| [![中東図](examples/2026-10-12-typefaces/middle-east.png)](examples/2026-10-12-typefaces/middle-east.png) | [![全球図](examples/2026-10-12-typefaces/global.png)](examples/2026-10-12-typefaces/global.png) |
-| [PNG：3600 × 2608 px](examples/2026-10-12-typefaces/middle-east.png) · [SVG](examples/2026-10-12-typefaces/middle-east.svg) | [PNG：4800 × 2730 px](examples/2026-10-12-typefaces/global.png) · [SVG](examples/2026-10-12-typefaces/global.svg) |
-| [PC表示例：幅1440px](examples/2026-10-12-typefaces/middle-east-pc1440.png) | [PC表示例：幅1440px](examples/2026-10-12-typefaces/global-pc1440.png) |
+| [![中東図](examples/2026-10-12-design-system/middle-east.png)](examples/2026-10-12-design-system/middle-east.png) | [![全球図](examples/2026-10-12-design-system/global.png)](examples/2026-10-12-design-system/global.png) |
+| [PNG：3600 × 2608 px](examples/2026-10-12-design-system/middle-east.png) · [SVG](examples/2026-10-12-design-system/middle-east.svg) | [PNG：4800 × 2730 px](examples/2026-10-12-design-system/global.png) · [SVG](examples/2026-10-12-design-system/global.svg) |
+| [PC表示例：幅1440px](examples/2026-10-12-design-system/middle-east-pc1440.png) | [PC表示例：幅1440px](examples/2026-10-12-design-system/global-pc1440.png) |
 
-掲載版は**中東図第14版・全球図第12版**です。文字サイズと太さに加え、国・大陸・海域名は縁なしの明朝体、主要港・パイプライン名は細い縁取りの角ゴシックで描き分けました。設備名・荷役の補足やバルーン本文は縁なしのゴシックです。1440px幅のPC表示、実際に使用された書体、文字・引出線の干渉を確認しています。今回の調整では航路・地点座標・記載内容・情報基準日を変更していません。日付別の完成品は [`examples/`](examples/) に保存しています。過去版は上書きせず、比較できるよう残しています。
+掲載版は**中東図第15版・全球図第13版**です。国・大陸・海域名は縁なしの明朝体、主要港・パイプライン名は細い縁取りの角ゴシックで描き分け、文字の重要性と親子関係を示します。今回、書体・色・線・記号・余白を共通のデザイン設定へ整理しました。航路・地点座標・記載内容・情報基準日は変更していません。日付別の完成品は [`examples/`](examples/) に保存し、過去版も比較できるよう残しています。
+
+**[デザインの方針と編集方法](docs/DESIGN_SYSTEM.md)** · [見本帳（HTML）](docs/design-system.html) · [見本帳（PNG）](docs/design-system.png)
 
 ## 情報の基準日と読み方
 
@@ -141,7 +143,7 @@ GeoJSONも模式的な代表座標です。描画確認用JSONは文字の重な
 1. `README.md`：目的、入口、ファイルの対応、実行方法。
 2. `AGENTS.md`：このリポジトリでの作業方針。
 3. `docs/AI_WORKFLOW.md`：対話による編集の進め方。
-4. 追加データなら `docs/USER_DATA.md` と入力仕様、元図の変更なら `docs/MAINTENANCE.md`。
+4. 追加データなら `docs/USER_DATA.md` と入力仕様、元図の変更なら `docs/MAINTENANCE.md`、見た目の変更なら `docs/DESIGN_SYSTEM.md`。
 5. 対象の作図コード・入力データ・`metadata.json` と、対応する出典Markdown。
 
 地図の版番号・情報基準日は各 `metadata.json`、独自データの形式は `docs/user-data.schema.json` と検査処理を確認します。`dist/` の生成物から入力データを復元しないでください。未コミットの変更や既存の追加項目を確認してから、依頼に必要な箇所を編集します。
@@ -164,6 +166,12 @@ workflow: docs/AI_WORKFLOW.md
 entrypoint: scripts/build.py
 map_ids: [middle-east, global]
 build_targets: [all, middle-east, global]
+design:
+  guide: docs/DESIGN_SYSTEM.md
+  foundations: design/foundations.json
+  profiles: design/profiles/{map_id}.json
+  loader: scripts/design_system.py
+  specimen: docs/design-system.html
 input_schema: docs/user-data.schema.json
 default_output_directory: dist
 maps:
@@ -180,8 +188,12 @@ maps:
 additional_sources: docs/route-additions-20261012.md
 commands:
   validate_data: python3 scripts/build.py all --check-data
+  check_design: python3 scripts/check_design.py
+  build_design_guide: python3 scripts/build_design_guide.py
+  render_design_guide: node scripts/preview.cjs docs/design-system.html docs/design-system.png --selector "#specimen"
   render: python3 scripts/build.py all
   svg_only: python3 scripts/build.py all --svg-only
+  desktop_preview: node scripts/preview.cjs dist/global.svg dist/global-pc1440.png
   user_layer_tests: python3 -m unittest discover -s tests -v
 outputs: ["{map_id}.png", "{map_id}.svg", "{map_id}.geojson", "{map_id}.qa.json"]
 ```
@@ -193,10 +205,14 @@ outputs: ["{map_id}.png", "{map_id}.svg", "{map_id}.geojson", "{map_id}.qa.json"
 | 変更する内容 | 編集するファイル |
 |---|---|
 | 独自の港・航路・注記を追加、更新、削除 | `user-data/global.geojson` / `user-data/middle-east.geojson` |
-| 中東図の経路・地点・文字・配色 | [`maps/middle-east/build.py`](maps/middle-east/build.py) |
-| 全球図の経路・地点・バルーン・配色 | [`maps/global/build.py`](maps/global/build.py) |
+| 中東図の経路・地点・記載内容・ラベル位置 | [`maps/middle-east/build.py`](maps/middle-east/build.py) |
+| 全球図の経路・地点・記載内容・バルーン位置 | [`maps/global/build.py`](maps/global/build.py) |
+| 共通の書体・基本色・余白・縁取り・追加データの既定意匠 | [`design/foundations.json`](design/foundations.json) |
+| 図ごとの文字階層・地名別サイズ差・航路色・線・記号 | [`design/profiles/`](design/profiles/) 内の対象図のJSON |
 | 表題・基準日・版番号・クレジット | 各地図の `metadata.json` |
 | 根拠・出典・確認できていない点 | [`docs/`](docs/) 内の対応する資料 |
+
+見た目の設定では、共通色への `"{colors.loading}"` 等の参照を維持します。中東図の国・海域名の局所的なサイズ差は `geographic_size_offsets` で管理します。[設定の説明](docs/DESIGN_SYSTEM.md)を参照してください。
 
 1. 出典資料を確認し、対象の `build.py` を編集します。地理座標は **`[経度, 緯度]`、単位は度**です。ラベルの位置にはSVG上のピクセル座標も使います。
 2. 情報の確認範囲に合わせて `metadata.json` と出典を更新します。`as_of` は情勢の基準日、`route_additions_as_of` は一部航路の追記日です。描き直した日を、そのまま情報の基準日にしないでください。
@@ -210,6 +226,7 @@ outputs: ["{map_id}.png", "{map_id}.svg", "{map_id}.geojson", "{map_id}.qa.json"
 |---|---|
 | 一方の地図のコード・データ | 対象の入力検査と通常ビルド。PNGと描画確認結果を確認 |
 | 両図に共通する描画処理 | `./build.sh all` で両方を描画・確認 |
+| デザイン設定 | `python3 scripts/check_design.py`、見本帳と両図の再生成、1440px幅での確認。[詳細](docs/DESIGN_SYSTEM.md) |
 | 独自データの検査・描画機能 | 上記に加え、`python3 -m unittest discover -s tests -v` とサンプルの描画 |
 | 説明文のみ | 記載したパス・リンク・コマンドと実装の整合を確認 |
 
@@ -220,7 +237,7 @@ AIは変更したファイル、出典・観測日、未確認事項、実施し
 ## 生成の仕組みとファイル構成
 
 ```text
-公開資料・代表座標 + metadata.json + 保存済みの背景PNG + 独自GeoJSON
+公開資料・代表座標 + metadata.json + デザイン設定 + 保存済みの背景PNG + 独自GeoJSON
   → Pythonで航路・注記をSVG化（GeoJSONも保存）
   → PlaywrightでSVGを開き、PNGと描画確認結果を出力
 ```
@@ -228,6 +245,9 @@ AIは変更したファイル、出典・観測日、未確認事項、実施し
 背景はMapLibre GL JSで取得したOpenStreetMap系データを、独自のダーク配色で描画したものです。地図の文字・航路はPythonで重ねるため、背景を再取得せずに編集できます。
 
 ```text
+design/
+  foundations.json    共通の書体・基本色・余白・表示設定
+  profiles/           中東図・全球図の文字階層・線・記号
 maps/
   middle-east/        中東図の作図コード・設定・背景・地理データ
   global/             全球図の作図コード・設定・背景・代表経路
@@ -235,6 +255,10 @@ scripts/
   build.py            地図を選び、SVG生成とPNG出力を順に実行
   render.cjs          SVGのPNG化と描画確認
   browser.cjs         Chrome / Chromiumの選択
+  design_system.py    デザイン設定の読込みと共通SVGスタイル
+  build_design_guide.py 見本帳の生成
+  check_design.py     トークンとコントラストの点検
+  preview.cjs         PC幅での表示確認用画像
   refresh-basemap.cjs 背景を再取得するコマンド
   user_layers.py      独自GeoJSONの形式確認と描画
 user-data/            利用者が追加するデータ（初期状態は空）

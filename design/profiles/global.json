@@ -1,0 +1,171 @@
+{
+  "description": "全球図：2400px幅のSVG座標を基準とする表示プロファイル。地理座標・情報基準日は含まない。",
+  "typography": {
+    "label": {
+      "size": 22,
+      "weight": 500
+    },
+    "title": {
+      "size": 39,
+      "weight": 600
+    },
+    "subtitle": {
+      "size": 22,
+      "weight": 400
+    },
+    "date": {
+      "size": 23,
+      "weight": 400
+    },
+    "header_note": {
+      "size": 19,
+      "weight": 400
+    },
+    "destination": {
+      "size": 36,
+      "weight": 700
+    },
+    "port": {
+      "size": 26,
+      "weight": 600
+    },
+    "passage": {
+      "size": 23,
+      "weight": 500
+    },
+    "loading_area": {
+      "size": 25,
+      "weight": 600
+    },
+    "detail": {
+      "size": 19,
+      "weight": 400
+    },
+    "continent": {
+      "size": 30,
+      "weight": 400
+    },
+    "ocean": {
+      "size": 31,
+      "weight": 400
+    },
+    "local_sea": {
+      "size": 21,
+      "weight": 400
+    },
+    "callout_title": {
+      "size": 28,
+      "weight": 600
+    },
+    "callout_status": {
+      "size": 19,
+      "weight": 400
+    },
+    "callout_body": {
+      "size": 21,
+      "weight": 400
+    },
+    "callout_key": {
+      "size": 25,
+      "weight": 600
+    },
+    "route_key": {
+      "size": 20,
+      "weight": 500
+    },
+    "route_note": {
+      "size": 21,
+      "weight": 400
+    },
+    "route_group": {
+      "size": 20,
+      "weight": 400
+    },
+    "legend": {
+      "size": 19,
+      "weight": 500
+    },
+    "legend_note": {
+      "size": 18,
+      "weight": 500
+    },
+    "footer_note": {
+      "size": 18,
+      "weight": 400
+    },
+    "credit": {
+      "size": 20,
+      "weight": 400
+    },
+    "attribution": {
+      "size": 16,
+      "weight": 500
+    },
+    "user_update": {
+      "size": 16,
+      "weight": 400
+    }
+  },
+  "routes": {
+    "1": "#70e49d",
+    "2": "#ff727b",
+    "3": "#ffbd62",
+    "4": "#d19bff",
+    "5": "#4edce7",
+    "6": "#70aaff",
+    "S": "{colors.loading}",
+    "common": "#dce7ee"
+  },
+  "colors": {
+    "ocean": "#587c95",
+    "local_water": "#95c4d8",
+    "passage": "#b5cfde",
+    "route_note": "#c1ced7",
+    "line_underlay": "#071925",
+    "separator": "#354a59"
+  },
+  "lines": {
+    "default_width": 4,
+    "underlay_extra": 4,
+    "underlay_opacity": 0.9,
+    "route_width": 3.5,
+    "canal_width": 2.6,
+    "connection_width": 2.7,
+    "connection_dash": "3 5",
+    "restricted_dash": "10 8",
+    "legend_restricted_dash": "11 10",
+    "legend_width": 3,
+    "legend_restricted_width": 4.5,
+    "legend_connection_width": 3.4,
+    "label_leader_width": 1.7,
+    "label_leader_underlay_width": 4.5,
+    "separator_width": 1
+  },
+  "symbols": {
+    "port_radius": 5.4,
+    "destination_radius": 9,
+    "port_border_width": 2.5,
+    "loading_radius": 10,
+    "loading_border_width": 2,
+    "fahal_loading_radius": 9,
+    "fahal_loading_border_width": 1.8,
+    "legend_loading_radius": 9,
+    "arrow_size": 8,
+    "connection_arrow_size": 4,
+    "legend_arrow_size": 7,
+    "arrow_length_factor": 1.75,
+    "arrow_half_width_factor": 0.62,
+    "arrow_pair_half_span_factor": 2.2
+  },
+  "spacing": {
+    "label_gap": 12,
+    "label_leader_min_distance": 26,
+    "label_symbol_gap": 3,
+    "label_baseline_factor": 0.42,
+    "route_key_baseline_offset": 6,
+    "footer_user_data_height": 36
+  },
+  "callout": {
+    "border_opacity": 0.7
+  }
+}

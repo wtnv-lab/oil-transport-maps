@@ -19,6 +19,7 @@ import xml.etree.ElementTree as ET
 
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
 MODULE_SPEC = importlib.util.spec_from_file_location(
     "user_layers", ROOT / "scripts" / "user_layers.py"
 )
