@@ -1,0 +1,100 @@
+{
+  "type": "FeatureCollection",
+  "map": "middle-east",
+  "updated_at": "2026-10-12",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "example-port",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          61,
+          16
+        ]
+      },
+      "properties": {
+        "name": "追加地点の例",
+        "kind": "port",
+        "source": "描画例・実在航路ではない。実データに置き換えて使用してください。",
+        "observed_on": "2026-10-12",
+        "status": "hypothetical",
+        "label": {
+          "offset": [
+            -30,
+            0
+          ],
+          "anchor": "end",
+          "font_size": 20
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "example-route",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            60.5,
+            15.8
+          ],
+          [
+            61,
+            14.6
+          ],
+          [
+            62,
+            13.8
+          ]
+        ]
+      },
+      "properties": {
+        "name": "模式線の例",
+        "kind": "route",
+        "source": "描画例・実在航路ではない。実データに置き換えて使用してください。",
+        "observed_on": "2026-10-12",
+        "status": "hypothetical",
+        "color": "#e6dcae",
+        "line_style": "dotted",
+        "label": {
+          "offset": [
+            -25,
+            -20
+          ],
+          "anchor": "end",
+          "font_size": 18
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "example-note",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          37,
+          29.2
+        ]
+      },
+      "properties": {
+        "name": "描画例",
+        "kind": "note",
+        "source": "描画例・実在航路ではない。実データに置き換えて使用してください。",
+        "observed_on": "2026-10-12",
+        "status": "hypothetical",
+        "callout": {
+          "offset": [
+            60,
+            0
+          ],
+          "width": 360,
+          "title": "独自データの描画例",
+          "lines": [
+            "実在の港・航路ではありません。"
+          ]
+        }
+      }
+    }
+  ]
+}

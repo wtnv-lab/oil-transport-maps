@@ -17,18 +17,32 @@ import datetime
 import html
 import json
 import math
+import sys
 from pathlib import Path
 
 
 # --- 入出力と図の設定 --------------------------------------------------------
 
 D = Path(__file__).resolve().parent
+# 両図で共通の独自データ検査・描画処理。実行時の作業フォルダーに依存しない。
+sys.path.insert(0, str(D.parents[1] / 'scripts'))
+from user_layers import load_layer, render_layer
+
 parser = argparse.ArgumentParser(
     description="Generate the map SVG and representative route geometry"
 )
 parser.add_argument("--output-dir", type=Path, default=D.parents[1] / "dist")
+parser.add_argument("--data-file", type=Path, default=D.parents[1] / "user-data/global.geojson")
 args = parser.parse_args()
+if not args.data_file.is_file():
+    parser.error(f"独自データがありません: {args.data_file}")
+try:
+    USER_LAYER = load_layer(args.data_file, 'global')
+except (ValueError, OSError) as error:
+    parser.error(str(error))
 OUT = args.output_dir.resolve()
+if (OUT / 'global.geojson').resolve() == args.data_file.resolve():
+    parser.error("入力GeoJSONと出力先を別の場所にしてください。")
 OUT.mkdir(parents=True, exist_ok=True)
 
 META = json.loads((D / "metadata.json").read_text())
@@ -37,6 +51,8 @@ ADDED = datetime.date.fromisoformat(META["route_additions_as_of"])
 
 # 幅、地図本体の高さ、上部余白、図全体の高さ（いずれも SVG のピクセル単位）。
 W, MH, TOP, H = 2400, 1120, 145, 1365
+if USER_LAYER['features']:
+    H += 36  # 追加データの日付は元図の基準日と分け、下部の専用帯に表示。
 COL = {
     '1': '#70e49d',
     '2': '#ff727b',
@@ -44,7 +60,6 @@ COL = {
     '4': '#d19bff',
     '5': '#4edce7',
     '6': '#70aaff',
-    '7': '#b9c8d5',
     'S': '#e6dcae',
     'common': '#dce7ee',
 }
@@ -81,13 +96,15 @@ def add(s):
 
 
 def text(
-    x, y, s, size=22, color='#eef4f8', weight=500, anchor='start', halo=True
+    x, y, s, size=22, color='#eef4f8', weight=500, anchor='start', halo=True,
+    css='',
 ):
     """文字列をエスケープして追加する。y は文字のベースライン位置。"""
+    classes = ' '.join(name for name in ('halo' if halo else '', css) if name)
     add(
         f'<text x="{x:.2f}" y="{y:.2f}" font-size="{size}" '
         f'font-weight="{weight}" fill="{color}" text-anchor="{anchor}"'
-        + (' class="halo"' if halo else '')
+        + (f' class="{classes}"' if classes else '')
         + '>' + html.escape(s) + '</text>'
     )
 
@@ -114,7 +131,7 @@ def line(ps, color, width=4, dash=None, under=True, opacity=1):
 
 # --- 航路の補間・経度の連続化・進行方向 -------------------------------------
 
-def arrow(ps, col, at=0.6, size=8):
+def arrow(ps, col, at=0.6, size=8, reverse=False):
     """補間後の点列の長さ比 at の位置に、接線方向の矢印を置く。"""
     lens = [math.dist(a, b) for a, b in zip(ps, ps[1:])]
     target = sum(lens) * at
@@ -124,18 +141,32 @@ def arrow(ps, col, at=0.6, size=8):
             x = a[0] + t * (b[0] - a[0])
             y = a[1] + t * (b[1] - a[1])
             ang = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
+            if reverse:
+                ang += 180
             break
         target -= length
     # 左右に続く世界地図上で、表示範囲内の矢印だけを複製する。
     for offset in (-W, 0, W):
         if 12 < x + offset < W - 12:
             add(
-                f'<path class="route-arrow" d="M 0 0 '
+                f'<path class="route-arrow" data-direction="{"reverse" if reverse else "forward"}" d="M 0 0 '
                 f'L {-size * 1.75} {-size * 0.62} '
                 f'L {-size * 1.75} {size * 0.62} Z" fill="{col}" '
                 f'transform="translate({x + offset:.2f} {y:.2f}) '
                 f'rotate({ang:.2f})"/>'
             )
+
+
+def roundtrip_arrows(ps, col, at=0.6, size=8):
+    """同じ線上に反対向きの矢頭を置く。積荷の流向ではなく船の往復を表す。"""
+    length = sum(math.dist(a, b) for a, b in zip(ps, ps[1:]))
+    if length < 12:
+        return  # 全球縮尺で極端に短い接続は、往復の凡例に従い矢頭を省略。
+    size = min(size, length / 8)
+    half_span = size * 2.2
+    center = min(length - half_span - 1, max(half_span + 1, length * at))
+    arrow(ps, col, (center - half_span) / length, size, reverse=True)
+    arrow(ps, col, (center + half_span) / length, size)
 
 
 def smooth(ps, start_dir=None, end_dir=None):
@@ -225,13 +256,15 @@ def route(
         route_samples.setdefault(key, []).extend(
             [(x + offset, y) for x, y in samples if -10 < x + offset < W + 10]
         )
-    for at in arrows:
-        arrow(samples, COL[key], at)
+    for at in arrows or (0.5,):
+        roundtrip_arrows(samples, COL[key], at, size=8 if arrows else 4)
     features.append({
         'type': 'Feature',
         'properties': {
-            'name': name,
+            'name': name.replace(' → ', ' ↔ '),
             'route': key,
+            'direction': 'bidirectional',
+            'display_note': '船の往復を模式化。原油の逆向き輸送、個船の往復完了、往復で同じ航路を使うことを確認した表示ではない。',
             'geometry_note': '公表された経由地を結ぶ模式航路。AIS航跡ではない。',
         },
         'geometry': {'type': 'LineString', 'coordinates': coords},
@@ -241,19 +274,31 @@ def route(
 
 # --- 地点表示と注記の配置 ----------------------------------------------------
 
-def dot(p, label=None, at=None, color='#f5f8fa', size=5.4, anchor='start', font=21):
+def dot(p, label=None, at=None, color='#f5f8fa', size=5.4, anchor='start', font=22):
     """地理座標 p に点を置き、ピクセル座標 at に水平なラベルを配置する。"""
     x, y = xy(p)
+    if label and at:
+        tx, ty = at
+        end = (tx - 12 if anchor == 'start' else tx + 12, ty - font * 0.42)
+        distance = math.dist((x, y), end)
+        if distance > 26:
+            # 点の外周から文字の12px手前まで。暗い縁で国境・航路から分離する。
+            start = (
+                x + (end[0] - x) * (size + 3) / distance,
+                y + (end[1] - y) * (size + 3) / distance,
+            )
+            d = path([start, end])
+            add(f'<path d="{d}" fill="none" stroke="#0b1c2b" stroke-width="4.5"/>')
+            add(
+                f'<path class="label-leader" d="{d}" fill="none" '
+                'stroke="#c4d2dc" stroke-width="1.7"/>'
+            )
     add(
         f'<circle cx="{x:.2f}" cy="{y:.2f}" r="{size}" fill="{color}" '
         f'stroke="#0b1c2b" stroke-width="2.5"/>'
     )
     if label and at:
-        tx, ty = at
-        end = (tx - 9 if anchor == 'start' else tx + 9, ty - 7)
-        if math.dist((x, y), end) > 34:
-            line([(x, y), end], '#aebdca', 1.15, under=False)
-        text(tx, ty, label, font, anchor=anchor)
+        text(tx, ty, label, font, '#f3f7fa', 600, anchor, css='place-label')
 
 
 def badge(x, y, s, key, r=16):
@@ -303,13 +348,14 @@ add(
     'text{font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",'
     '"Noto Sans CJK JP",sans-serif}'
     '.halo{paint-order:stroke;stroke:#0b1c2b;stroke-width:3px;stroke-linejoin:round}'
+    '.place-label{stroke-width:4.5px}'
     'path{stroke-linecap:round;stroke-linejoin:round}'
     '</style><clipPath id="map">'
     '<rect y="145" width="2400" height="1120"/></clipPath></defs>'
 )
 add(f'<rect width="{W}" height="{H}" fill="#0b1721"/>')
 text(48, 62, META['title'], 39, weight=600, halo=False)
-text(48, 111, '中東・北米の主な経路と輸送コスト・リスク', 22, '#b8c9d7', 400, halo=False)
+text(48, 111, '中東・北米との往復航路と、日本向け調達のコスト・リスク', 22, '#b8c9d7', 400, halo=False)
 text(
     2352,
     59,
@@ -364,6 +410,10 @@ med = [
     cape,
 ]
 route('ヤンブー → SUMED → 地中海 → 喜望峰', med, '3', arrows=(0.38, 0.77), end_dir=(1, 0))
+features[-1]['properties'].update({
+    'direction': 'bidirectional_at_sea',
+    'display_note': '双方向矢印は海上区間の船の往復を模式化。SUMEDの逆送や個別船の往復実績を示さない。',
+})
 
 # SUMED の陸送とは別の接続として、スエズ運河経由も示す。
 route(
@@ -401,7 +451,7 @@ route(
     '米湾岸 → 大西洋 → 喜望峰',
     cape_us,
     '4',
-    arrows=(0.29, 0.77),
+    arrows=(0.26, 0.77),
     wrapped=True,
     end_dir=(1, 0),
 )
@@ -589,66 +639,7 @@ canada = [
 ]
 route('カナダ西岸 → 北太平洋 → 日本', canada, '6', arrows=(0.39, 0.7))
 
-# 日本から積地へ向かう配船。積載・空船の状態は未確認。
-# 逆向きの線を読めるよう沖合で離すが、通過する海域は維持する。
-
-positioning = [
-    japan,
-    [139.6, 34.1],
-    [136, 31],
-    [131, 28],
-    [127, 24],
-    [124, 21.0],
-    [120.5, 18.8],
-    [115, 11.5],
-    [109, 4],
-    [105, 0.4],
-    [103.65, 1.05],
-    [101.0, 2.5],
-    [98, 4.3],
-    [96, 4.8],
-    [91, 4.3],
-    [83, -2],
-    [70, -14],
-    [55, -26],
-    [40, -35],
-    [28, -40],
-    [18, -40],
-    [6, -36],
-    [-7, -24],
-    [-18, -6],
-    [-22, 12],
-    [-18.5, 25],
-    [-12, 33.5],
-    [-5.6, 35.9],
-    [0, 36.6],
-    [7, 37.5],
-    [10, 38.1],
-    [11.1, 37.75],
-    [11.75, 37.1],
-    [12.2, 36.55],
-    [15, 35.5],
-    [18, 34.0],
-    [23, 33.1],
-    [28, 32.2],
-    [29.5, 31.5],
-    [29.68, 31.2],
-]
-route(
-    '日本 → 喜望峰 → ジブラルタル海峡 → シディ・ケリル沖（積地への配船）',
-    positioning,
-    '7',
-    dash='16 6 3 6',
-    width=3,
-    arrows=(0.12, 0.34, 0.58, 0.77, 0.96),
-)
-features[-1]['properties'].update(
-    {
-        'category': 'schematic_positioning',
-        'source_notes': 'docs/route-additions-20261012.md',
-        'geometry_note': 'ユーザー提供の経路を模式化。公開AISは一部寄港順のみ裏付ける。個船の全航跡・積載／空船状態は未確認。',
-    },
-)
+# 配船専用の別線は置かず、各海上経路の往復矢印へ統合する。
 
 # --- 地名・海域名・積替え区域 ------------------------------------------------
 # 地名の位置は見やすさを優先して指定し、文字はすべて水平に置く。
@@ -656,7 +647,7 @@ features[-1]['properties'].update(
 for lon, lat, label in [
     (15, 10, 'アフリカ'),
     (262, 43, '北アメリカ'),
-    (287, 1, '南アメリカ'),
+    (287, -4, '南アメリカ'),
 ]:
     text(*xy((lon, lat)), label, 26, '#8b9eab', 500, 'middle')
 for lon, lat, label in [
@@ -668,11 +659,30 @@ for lon, lat, label in [
 dot(japan, '日本', (1314, 537), size=9, anchor='start', font=29)
 dot(us, '米国メキシコ湾岸', (2110, 594), anchor='end', font=22)
 dot(canada[0], 'バンクーバー', (2020, 434), font=22)
-dot(yanbu, 'ヤンブー', (581, 690), anchor='end', font=21)
-dot(sidi, 'シディ・ケリル', (546, 548), anchor='end', font=20)
-dot(fuj, 'フジャイラ／ソハール', (802, 646), font=20)
-dot(fahal, 'ミナ・アル・ハファル沖', (813, 689), font=19)
-text(813, 716, 'STS／原油SBM（模式）', 17, '#e6dcae', 400)
+dot(yanbu, 'ヤンブー', (581, 690), anchor='end')
+dot(sidi, 'シディ・ケリル', (546, 505), anchor='end')
+text(546, 535, '沖合SBMで原油積載', 19, COL['S'], 500, 'end')
+sx, sy = xy(sidi)
+add(
+    f'<circle cx="{sx}" cy="{sy}" r="10" fill="none" '
+    f'stroke="{COL["S"]}" stroke-width="2"/>'
+)
+features.append({
+    'type': 'Feature',
+    'properties': {
+        'name': 'シディ・ケリル沖（原油SBM積載）',
+        'category': 'loading_area',
+        'loading_method': 'SBM',
+        'source': 'https://www.sumed.org/?p=facilities',
+        'source_notes': 'docs/route-additions-20261012.md',
+        'accuracy': '既存のターミナル代表点で区域を表示。個別ブイ座標や当日の稼働・個船の荷役実績を示さない。',
+    },
+    'geometry': {'type': 'Point', 'coordinates': sidi},
+})
+# 湾岸の3本の引出線を上下へ分け、隣接する文字の前を横切らせない。
+dot(fuj, 'フジャイラ／ソハール', (824, 651))
+dot(fahal, 'ミナ・アル・ハファル沖', (815, 701))
+text(815, 731, 'STS／原油SBM（模式）', 19, '#e6dcae', 500)
 fx, fy = xy(fahal)
 add(
     f'<circle cx="{fx}" cy="{fy}" r="9" fill="none" '
@@ -690,14 +700,14 @@ features.append(
         'geometry': {'type': 'Point', 'coordinates': fahal},
     },
 )
-dot([-79.8, 9.15], 'パナマ運河', (2270, 795), font=20)
-dot([20, -34.8], '喜望峰周辺', (540, 1008), anchor='start', font=20)
-dot([43.4, 12.6], 'バブ・エル・マンデブ海峡', (630, 792), anchor='end', font=18)
-dot([56.3, 26.45], 'ホルムズ海峡', (785, 595), font=19)
-dot([-5.6, 35.9], 'ジブラルタル海峡', (303, 539), anchor='end', font=19)
-text(609, 631, '紅海', 18, '#86b7d1', 500, 'middle')
-text(682, 605, 'ペルシャ湾', 18, '#86b7d1', 500, 'middle')
-text(1105, 822, 'マラッカ海峡', 20, '#a7c2d5')
+dot([-79.8, 9.15], 'パナマ運河', (2265, 795))
+dot([20, -34.8], '喜望峰周辺', (540, 1008))
+dot([43.4, 12.6], 'バブ・エル・マンデブ海峡', (630, 799), anchor='end', font=20)
+dot([56.3, 26.45], 'ホルムズ海峡', (815, 600), font=21)
+dot([-5.6, 35.9], 'ジブラルタル海峡', (303, 539), anchor='end', font=21)
+text(609, 631, '紅海', 20, '#95c4d8', 500, 'middle')
+text(677, 603, 'ペルシャ湾', 20, '#95c4d8', 500, 'middle')
+text(1105, 822, 'マラッカ海峡', 22, '#b5cfde')
 
 # 積替え区域の代表位置。全貨物に必須の経由地を示すものではない。
 
@@ -707,7 +717,20 @@ for p in [[56.7, 25.1], [101.95, 2.4]]:
         f'<circle cx="{x}" cy="{y}" r="10" fill="none" '
         f'stroke="{COL["S"]}" stroke-width="2"/>'
     )
-dot([101.95, 2.4], 'リンギ沖', (1042, 858), anchor='end', font=19)
+dot([101.95, 2.4], 'マラッカ沖（リンギ等）', (1105, 873), font=20)
+features.append({
+    'type': 'Feature',
+    'properties': {
+        'name': 'マラッカ沖（リンギ等）：中東原油の日本向けSTS',
+        'category': 'loading_area',
+        'loading_method': 'STS',
+        'source': 'https://www.spglobal.com/energy/en/news-research/latest-news/shipping/060926-japan-refiners-deploy-vlccs-for-ship-transfers-us-crude-amid-hormuz-disruptions',
+        'source_notes': 'docs/route-additions-20261012.md',
+        'reported_on': '2026-06-09',
+        'accuracy': 'リンギ付近の区域代表点。報道されたリンギ・タンジュンブルアス等の船間積替えを模式化。全貨物の必須経由地、10月時点の継続・輸送量、個船の作業位置を示さない。',
+    },
+    'geometry': {'type': 'Point', 'coordinates': [101.95, 2.4]},
+})
 
 # 航路に添える番号。注記内の番号と対応する。
 for x, y, key in [
@@ -717,11 +740,9 @@ for x, y, key in [
     (240, 991, '4'),
     (1835, 646, '5'),
     (1710, 509, '6'),
-    (282, 844, '7'),
-    (796, 1041, '7'),
 ]:
     badge(x, y, key, key)
-text(712, 1085, '3・4  喜望峰から日本へ', 21, '#c1ced7', 400)
+text(712, 1085, '3・4  喜望峰経由・日本と往復', 21, '#c1ced7', 400)
 text(1211, 717, '1–4', 20, '#c1ced7', 400)
 
 # --- コスト・リスク等の注記 --------------------------------------------------
@@ -741,7 +762,7 @@ bubble(
     628,
     198,
     578,
-    '中東からインド洋経由',
+    '中東・インド洋経由',
     '1',
     ['コスト：保険・船腹。積替え便は追加費用', 'リスク：攻撃・混雑。湾内発はホルムズ通過'],
     [(668, 366), xy([57.2, 25.3])],
@@ -791,27 +812,17 @@ bubble(
     1136,
     997,
     574,
-    'STS／SBMでの積載',
+    'マラッカ沖：日本向けSTS',
     'S',
-    ['コスト：荷役・待機。STSは接続船の費用も', 'リスク：荷役混雑、荒天・設備の制約'],
+    ['コスト：接続船・荷役・待機の費用', 'リスク：接続の遅れ、混雑・荒天'],
     [(1161, 997), xy([101.95, 2.4])],
-    'STS＝船間積替え ／ SBM＝沖合ブイ経由の積載',
+    '中東原油を日本行きのタンカーへ／6月報道',
 )
-bubble(
-    1278,
-    700,
-    600,
-    '日本発・シディ・ケリル沖へ',
-    '7',
-    ['コスト：長距離航海・待機で船腹を拘束', 'リスク：喜望峰の荒天、積込待ち'],
-    [(1278, 700), xy([127, 24])],
-    '喜望峰・ジブラルタル経由で積地へ',
-)
-
 # --- 凡例・留保・クレジット --------------------------------------------------
 
-line([(65, 1172), (135, 1172)], '#dce7ee', 4.5, under=False)
-text(152, 1180, '海上経路（模式）', 19, '#cbd8e2', halo=False)
+line([(65, 1172), (135, 1172)], '#dce7ee', 3, under=False)
+roundtrip_arrows([(65, 1172), (135, 1172)], '#dce7ee', at=0.5, size=7)
+text(152, 1180, '海上経路（往復・模式）', 19, '#cbd8e2', halo=False)
 line([(65, 1210), (135, 1210)], COL['2'], 4.5, '11 10', under=False)
 text(152, 1218, '航行制約・回避', 19, '#cbd8e2', halo=False)
 line([(482, 1172), (552, 1172)], COL['1'], 3.4, '3 5', under=False)
@@ -822,14 +833,18 @@ add(
 )
 text(518, 1218, 'STS／SBM区域', 19, '#cbd8e2', halo=False)
 text(945, 1247, '白線：複数ルートの共通区間', 18, '#a7bdcd', anchor='end', halo=False)
-line([(970, 1210), (1040, 1210)], COL['7'], 3, '16 6 3 6', under=False)
-text(1057, 1218, '積地へ向かう配船（模式）', 19, '#cbd8e2', halo=False)
+text(1136, 1210, 'STS＝船間積替え ／ SBM＝沖合ブイ経由の積載', 18, '#aebecb', halo=False)
+if USER_LAYER['features']:
+    try:
+        svg.extend(render_layer(USER_LAYER, xy, W, TOP + MH, wrap=True, top=TOP))
+    except ValueError as error:
+        parser.error(f"{args.data_file}: {error}")
 add('</g>')
 add('<path d="M 0 1265 H 2400" stroke="#354a59" stroke-width="1"/>')
 text(
     48,
     1300,
-    'コストは費用の要因で、同条件の運賃比較ではありません。実線も当日の運航や安全を示しません。',
+    '双方向矢印は船の往復（模式）。積荷・同じ経路での往復実績・安全を示しません。費用は同条件の運賃比較ではありません。',
     18,
     '#b5c5d1',
     400,
@@ -853,6 +868,12 @@ text(
     anchor='end',
     halo=False,
 )
+if USER_LAYER['features']:
+    text(
+        48, H - 12,
+        f"利用者データ更新：{USER_LAYER['updated_at']} ｜ 追加{len(USER_LAYER['features'])}件（元図の情報基準日は上記）",
+        16, '#cbd8e2', 400, halo=False,
+    )
 add('</svg>')
 
 # --- 成果物の保存 ------------------------------------------------------------
@@ -867,7 +888,11 @@ add('</svg>')
             'revalidated_at': META.get('revalidated_at'),
             'route_additions_as_of': META.get('route_additions_as_of'),
             'source_notes': 'docs/global-sources-and-costs.md',
-            'features': features,
+            'features': features + USER_LAYER['features'],
+            **({'user_data': {
+                'updated_at': USER_LAYER['updated_at'],
+                'feature_ids': [feature['id'] for feature in USER_LAYER['features']],
+            }} if USER_LAYER['features'] else {}),
         },
         ensure_ascii=False,
         indent=2,

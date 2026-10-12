@@ -73,9 +73,34 @@ async function main() {
         }
       });
 
+      // 独自データのラベルがクリップで欠けないか、実フォントの文字枠で確認。
+      // SVG本体の寸法ではなく、各レイヤーの地図領域と変換行列を使用する。
+      const userTexts = [...document.querySelectorAll('.user-data-text')];
+      const userDataTextOutsideMap = [];
+      for (const element of userTexts) {
+        const layer = element.closest('.user-data-layer');
+        const clipId = layer.getAttribute('clip-path').match(/url\(#([^)]*)\)/)[1];
+        const rect = document.getElementById(clipId).querySelector('rect');
+        const x = Number(rect.getAttribute('x'));
+        const y = Number(rect.getAttribute('y'));
+        const matrix = layer.getScreenCTM();
+        const a = new DOMPoint(x, y).matrixTransform(matrix);
+        const b = new DOMPoint(
+          x + Number(rect.getAttribute('width')), y + Number(rect.getAttribute('height'))
+        ).matrixTransform(matrix);
+        const bounds = element.getBoundingClientRect();
+        if (
+          bounds.left < a.x || bounds.right > b.x ||
+          bounds.top < a.y || bounds.bottom > b.y
+        ) {
+          userDataTextOutsideMap.push(element.textContent);
+        }
+      }
+
       return {
         textOverlaps,
         leaderTextIntersections,
+        ...(userTexts.length ? {userDataTextOutsideMap} : {}),
         straightLeaders: leaders.every(element => !/[CQAS]/i.test(element.getAttribute('d'))),
         squareCallouts: [...document.querySelectorAll('.callout-box')].every(
           element => !element.getAttribute('rx')
@@ -93,9 +118,10 @@ async function main() {
     console.log(JSON.stringify({output, ...result}));
     if (
       qa.textOverlaps.length || qa.leaderTextIntersections.length ||
+      qa.userDataTextOutsideMap?.length ||
       !qa.straightLeaders || !qa.squareCallouts
     ) {
-      throw new Error('文字や引出線の重なり、または枠形状の問題を検出しました。PNGとQA JSONを確認してください。');
+      throw new Error('文字・引出線の重なり、文字のはみ出し、または枠形状の問題を検出しました。PNGとQA JSONを確認してください。');
     }
   } finally {
     await browser.close();

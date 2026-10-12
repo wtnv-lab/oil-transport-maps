@@ -11,6 +11,8 @@ import shutil
 import subprocess
 import sys
 
+from user_layers import load_layer
+
 ROOT = Path(__file__).resolve().parents[1]
 MAPS = ("middle-east", "global")
 
@@ -21,9 +23,34 @@ def main():
     parser.add_argument("map", choices=("all",) + MAPS, nargs="?", default="all")
     parser.add_argument("--svg-only", action="store_true", help="PythonだけでSVG・GeoJSONを作成")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "dist")
+    parser.add_argument(
+        "--data-dir", type=Path, default=ROOT / "user-data",
+        help="独自データのフォルダー（global.geojson / middle-east.geojson）",
+    )
+    parser.add_argument(
+        "--check-data", action="store_true",
+        help="独自データの形式だけを検査。画像・出力ファイルは作成しない",
+    )
     args = parser.parse_args()
     selected = MAPS if args.map == "all" else (args.map,)
+    data_dir = args.data_dir.resolve()
+    # 全対象の入力を先に検査し、途中の地図だけが更新される失敗を避ける。
+    for name in selected:
+        data_file = data_dir / f"{name}.geojson"
+        if not data_file.is_file():
+            parser.error(f"独自データがありません: {data_file}")
+        try:
+            layer = load_layer(data_file, name)
+        except (ValueError, OSError) as error:
+            parser.error(str(error))
+        print(f"{name}: 独自データ {len(layer['features'])} 件を確認", flush=True)
+    if args.check_data:
+        print("形式チェック完了。情報の真偽や配置は、出典と生成画像で確認してください。")
+        return
     output = args.output_dir.resolve()
+    for name in selected:
+        if (output / f"{name}.geojson").resolve() == (data_dir / f"{name}.geojson").resolve():
+            parser.error("入力GeoJSONを上書きしないよう、--output-dir は --data-dir と別の場所にしてください。")
     output.mkdir(parents=True, exist_ok=True)
     node = os.environ.get("NODE", "node")
     # SVGだけを使う人には、Node.jsやブラウザーの準備を要求しない。
@@ -37,7 +64,8 @@ def main():
         # 同じPythonで地図固有の作図処理を実行。作業ディレクトリに依存しない。
         subprocess.run(
             [sys.executable, str(ROOT / "maps" / name / "build.py"),
-             "--output-dir", str(output)],
+             "--output-dir", str(output),
+             "--data-file", str(data_dir / f"{name}.geojson")],
             check=True,
         )
         if not args.svg_only:

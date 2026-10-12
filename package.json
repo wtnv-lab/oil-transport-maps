@@ -1,6 +1,7 @@
 {
   "name": "oil-transport-maps",
   "version": "1.0.0",
+  "license": "CC-BY-4.0",
   "private": true,
   "description": "Reproducible Middle East and global crude-oil transport maps",
   "engines": { "node": ">=20" },
