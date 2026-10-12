@@ -49,10 +49,11 @@ README内の「AI向けリポジトリ案内」を入口にしてください。
 
 | 中東の原油輸送ルート | 日本向け原油輸送ルート |
 |---|---|
-| [![中東図](examples/2026-10-12-label-alignment/middle-east.png)](examples/2026-10-12-label-alignment/middle-east.png) | [![全球図](examples/2026-10-12-sts-sbm/global.png)](examples/2026-10-12-sts-sbm/global.png) |
-| [PNG：3600 × 2608 px](examples/2026-10-12-label-alignment/middle-east.png) · [SVG](examples/2026-10-12-label-alignment/middle-east.svg) | [PNG：4800 × 2730 px](examples/2026-10-12-sts-sbm/global.png) · [SVG](examples/2026-10-12-sts-sbm/global.svg) |
+| [![中東図](examples/2026-10-12-typography/middle-east.png)](examples/2026-10-12-typography/middle-east.png) | [![全球図](examples/2026-10-12-typography/global.png)](examples/2026-10-12-typography/global.png) |
+| [PNG：3600 × 2608 px](examples/2026-10-12-typography/middle-east.png) · [SVG](examples/2026-10-12-typography/middle-east.svg) | [PNG：4800 × 2730 px](examples/2026-10-12-typography/global.png) · [SVG](examples/2026-10-12-typography/global.svg) |
+| [PC表示例：幅1440px](examples/2026-10-12-typography/middle-east-pc1440.png) | [PC表示例：幅1440px](examples/2026-10-12-typography/global-pc1440.png) |
 
-掲載版は**中東図第12版・全球図第10版**です。中東図はヤンブー・ハブシャン・ソハールなどの地名と引出線の配置を調整しました。海上ルートの往復表示、マラッカ沖での中東原油の日本向けSTS、シディ・ケリル沖のSBM積載の説明を維持しています。STS・SBMの2項目は10月12日に資料を確認しており、今回の配置調整では航路・地点座標と既存の情勢・費用の基準日を変えていません。日付別の完成品は [`examples/`](examples/) に保存しています。過去版は上書きせず、比較できるよう残しています。
+掲載版は**中東図第13版・全球図第11版**です。PC画面で読みやすいよう、日本・主要港・幹線名を強調し、海峡・設備・荷役方式の補足と文字サイズ・太さを分けました。国・大陸・海域名は地域の広がりを示す大きさと控えめな太さにしています。1440px幅の表示と文字・引出線の干渉を確認しました。今回の調整では航路・地点座標・記載内容・情報基準日を変更していません。日付別の完成品は [`examples/`](examples/) に保存しています。過去版は上書きせず、比較できるよう残しています。
 
 ## 情報の基準日と読み方
 

@@ -77,6 +77,18 @@ def screenpath(coords):
 # SVG 要素は追加順に重なる。背景、経路、施設、凡例の順で描画する。
 svg = []
 
+# ラベルは役割で階層化する。発着港・幹線を先に読み、設備と荷役説明を
+# その下位に読む設計。国・海域は広がりを示す大きさと控えめな太さを使う。
+TYPE = {
+    "title": 36,
+    "port": 27,
+    "secondary_port": 24,
+    "plant": 21,
+    "pipeline": 24,
+    "chokepoint": 24,
+    "detail": 18,
+}
+
 
 def add(s):
     svg.append(s)
@@ -183,13 +195,16 @@ def label_leader(coords, color="#dce6ed"):
     )
 
 
-def point(p, label, lx, ly, sub=None, kind="port", anchor="start", *, leader_end=None):
+def point(p, label, lx, ly, sub=None, kind="port", anchor="start", *, leader_end=None, role=None):
     """施設代表点と地名を結ぶ。文字・マーカー双方に線の余白を取る。"""
     x, y = xy(p)
+    font = TYPE[role or kind]
+    weight = 500 if kind == "plant" else 600
+    color = "#c9d7df" if kind == "plant" else "#f3f7fa"
     # 地名を施設の右に置くなら start、左なら end にそろえる。
     # 行の反対側へ線を回さず、近い文字端から10px外側・文字高さの中央へ。
     destx = lx - 10 if anchor == "start" else lx + 10
-    desty = ly - 10
+    desty = ly - font * 0.42
     # 真下に置く地名などは、文字の上辺へ結ぶ終点を画面座標で指定できる。
     if leader_end is not None:
         destx, desty = leader_end
@@ -209,9 +224,9 @@ def point(p, label, lx, ly, sub=None, kind="port", anchor="start", *, leader_end
             f'<circle cx="{x}" cy="{y}" r="6.5" fill="#f3f7fa" '
             'stroke="#132432" stroke-width="2.5"/>'
         )
-    txt(lx, ly, label, 23, weight=600, anchor=anchor)
+    txt(lx, ly, label, font, color, weight, anchor)
     if sub:
-        txt(lx, ly + 24, sub, 15, "#b7c4cc", 400, anchor)
+        txt(lx, ly + 28, sub, TYPE["detail"], "#b7c4cc", 400, anchor)
 
 
 def chokepoint(p, label, dx, dy):
@@ -223,15 +238,16 @@ def chokepoint(p, label, dx, dy):
     direction = -1 if dx < 0 else 1
     # 引き出し線は文字の手前で止め、字形と重ならない間隔を取る。
     label_leader(
-        [(x + direction * 14, y - 14), (x + dx - direction * 14, y + dy - 8)],
+        [(x + direction * 14, y - 14), (x + dx - direction * 12, y + dy - TYPE["chokepoint"] * 0.42)],
         "#65d9eb",
     )
     txt(
         x + dx,
         y + dy,
         label,
-        21,
+        TYPE["chokepoint"],
         "#65d9eb",
+        weight=600,
         anchor="end" if dx < 0 else "start",
     )
 
@@ -265,7 +281,7 @@ add(
     '<clipPath id="mapclip"><rect width="1800" height="1080"/></clipPath></defs>'
 )
 add(f'<rect width="{W}" height="{H + TOP + BOT}" fill="#101c27"/>')
-txt(48, 41, META["title"], 33, weight=600, halo=False)
+txt(48, 41, META["title"], TYPE["title"], weight=600, halo=False)
 txt(
     48,
     70,
@@ -292,24 +308,24 @@ add(f'<image width="1800" height="1080" href="data:image/png;base64,{b64}"/>')
 # 地名・水域名は背景画像とは別の編集可能な文字として重ねる。
 # 水域名の角度はすべて 0 度。座標と文字サイズで海域内に収める。
 for lon, lat, t, size in [
-    (29.3, 25.7, "エジプト", 24),
-    (44.5, 21.8, "サウジアラビア", 30),
-    (44.2, 31, "イラク", 24),
-    (55.4, 30, "イラン", 27),
-    (57.7, 19.6, "オマーン", 25),
-    (47, 16, "イエメン", 25),
+    (29.3, 25.7, "エジプト", 30),
+    (44.5, 21.8, "サウジアラビア", 34),
+    (44.2, 31, "イラク", 26),
+    (55.4, 30, "イラン", 30),
+    (57.7, 19.6, "オマーン", 30),
+    (47, 16, "イエメン", 28),
     (29.9, 20.0, "スーダン", 22),
     (37.2, 15.8, "エリトリア", 19),
     (42.7, 11.8, "ジブチ", 18),
     (53.45, 22.70, "アラブ首長国連邦", 17),
 ]:
-    geo(lon, lat, t, size=size, color="#aab4bb", weight=400, anchor="middle")
+    geo(lon, lat, t, size=size, color="#93a5b1", weight=400, anchor="middle")
 for lon, lat, t, size, rotate in [
-    (33.8, 32.1, "地中海", 24, 0),
-    (38.1, 20.3, "紅海", 24, 0),
-    (53.3, 25.1, "ペルシャ湾", 23, 0),
+    (33.8, 32.1, "地中海", 29, 0),
+    (38.1, 20.3, "紅海", 28, 0),
+    (53.3, 25.1, "ペルシャ湾", 24, 0),
     (61.1, 24.9, "オマーン湾", 22, 0),
-    (59, 17.8, "アラビア海", 28, 0),
+    (59, 17.8, "アラビア海", 32, 0),
     (47.65, 13.8, "アデン湾", 21, 0),
 ]:
     x, y = xy([lon, lat])
@@ -366,8 +382,8 @@ feat(
     "https://www.openstreetmap.org/way/54729631 ; https://www.openstreetmap.org/way/1044430260",
     "公開OSM線形。測量精度を保証しない。港湾支線を含まない。",
 )
-txt(841, 401, "東西原油パイプライン", 22, G, 500, "middle")
-txt(841, 372, "9/28 輸出再開報道", 16, "#bed7b0", 400, "middle")
+txt(841, 401, "東西原油パイプライン", TYPE["pipeline"], G, 600, "middle")
+txt(841, 370, "9/28 輸出再開報道", TYPE["detail"], "#bed7b0", 400, "middle")
 
 gem = json.loads((D / "data/gem_selected_pipelines.geojson").read_text())["features"]
 adc = next(f for f in gem if "Bab-Habshan" in f["properties"]["project"])
@@ -381,9 +397,9 @@ feat(
     "Global Energy Monitor, public map dataset 2024-06-12",
     "公開資料に基づく概略線形。",
 )
-txt(1270, 567, "アブダビ原油パイプライン", 21, G, 500)
+txt(1234, 574, "アブダビ原油パイプライン", TYPE["pipeline"], G, 600)
 line(
-    [xy([54.82, 24.28]), (1415, 541), (1402, 546)],
+    [xy([54.82, 24.28]), (1415, 541), (1402, 548)],
     G,
     1,
     screen=True,
@@ -408,7 +424,7 @@ for f in sf:
         f["properties"]["accuracy"],
     )
 arrow(sd, G, 0.7, 10)
-txt(75, 245, "SUMEDパイプライン", 22, G, 500)
+txt(75, 250, "SUMEDパイプライン", TYPE["pipeline"], G, 600)
 line([xy([31.23, 29.72]), (283, 215), (283, 225)], G, 1, screen=True, under=False)
 
 # 海上経路：海域内の代表点を結ぶ模式線で、観測された AIS 航跡ではない。
@@ -587,9 +603,9 @@ add(
     f'<circle cx="{fx}" cy="{fy}" r="9" fill="#101c27" '
     f'stroke="{LOAD}" stroke-width="2"/>'
 )
-label_leader([(fx + 5, fy + 10), (1592, 562)], LOAD)
-txt(1752, 590, "ミナ・アル・ハファル沖", 23, weight=600, anchor="end")
-txt(1752, 616, "STS／原油SBM（模式）", 17, LOAD, 400, "end")
+label_leader([(fx + 5, fy + 10), (1592, 578)], LOAD)
+txt(1752, 610, "ミナ・アル・ハファル沖", TYPE["secondary_port"], weight=600, anchor="end")
+txt(1752, 638, "STS／原油SBM（模式）", TYPE["detail"], LOAD, 400, "end")
 features.append(
     {
         "type": "Feature",
@@ -656,8 +672,8 @@ for name, branch in [
         gulf_source,
         "沖合積替えの代表位置。全便の寄港・積替え、特定のラス・タヌラ発シャトル便を示すものではない。",
     )
-txt(1200, 308, "湾内 ↔ 湾外", 21, SH)
-txt(1240, 282, "9月の通航回復／危険は継続", 15, "#d4c5ee", 400)
+txt(1200, 308, "湾内 ↔ 湾外", 24, SH, 600)
+txt(1240, 276, "9月の通航回復／危険は継続", 17, "#d4c5ee", 400)
 txt(1735, 472, "日本方面と往復", 24, R, 500, "end")
 txt(1356, 953, "日本方面と往復", 23, R)
 
@@ -666,8 +682,8 @@ txt(1356, 953, "日本方面と往復", 23, R)
 chokepoint([56.45, 26.57], "ホルムズ海峡", 64, -46)
 chokepoint([43.31, 12.58], "バブ・エル・マンデブ海峡", -70, -45)
 x, y = xy([32.43, 30.5])
-label_leader([(x, y), (451, 105)], C)
-txt(465, 113, "スエズ運河", 22, C)
+label_leader([(x, y), (453, 127)], C)
+txt(465, 137, "スエズ運河", TYPE["chokepoint"], C, 600)
 
 # 各行は、名称・代表点・文字の x/y・補足・種別・文字の基準位置。
 points = [
@@ -732,11 +748,12 @@ for name, p, lx, ly, sub, kind, anchor in points:
     # 荷役方式の補足は短い1行に限定し、スエズ運河の引出線との余白を取る。
     # 施設代表点は既存位置のままとし、個別の沖合ブイ座標には置き換えない。
     # ソハールは港のほぼ真下。右端へ線を回さず、文字の上辺へ垂直に結ぶ。
-    leader_end = (xy(p)[0], ly - 32) if name == "ソハール" else None
-    point(p, name, lx, ly, None, kind, anchor, leader_end=leader_end)
+    role = "secondary_port" if name == "ソハール" else kind
+    leader_end = (xy(p)[0], ly - TYPE[role] - 10) if name == "ソハール" else None
+    point(p, name, lx, ly, None, kind, anchor, leader_end=leader_end, role=role)
     sidi = name == "シディ・ケリル"
     if sidi:
-        txt(lx, ly + 24, "SBMで原油積載", 17, LOAD, 400, anchor)
+        txt(lx, ly + 28, "SBMで原油積載", TYPE["detail"], LOAD, 400, anchor)
     features.append(
         {
             "type": "Feature",
@@ -760,7 +777,7 @@ add(
     '<rect x="46" y="718" width="431" height="195" fill="#122330" '
     'opacity=".96" stroke="#3b4b57" stroke-width="1"/>'
 )
-txt(68, 752, "凡例", 20, halo=False)
+txt(68, 752, "凡例", 21, weight=600, halo=False)
 for y, col, dash, t in [
     (786, G, None, "原油パイプライン（概略・一部補間）"),
     (821, R, None, "海上経路（船の往復・模式）"),

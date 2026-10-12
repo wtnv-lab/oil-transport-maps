@@ -64,6 +64,23 @@ COL = {
     'common': '#dce7ee',
 }
 
+# PCで縮小して見る際も、目的地→発着地→通過点→補足の順に読める字級。
+# 大陸・大洋は地理的な親として大きくするが、細い字と控えめな色で背景に置く。
+# 各役割の値は (font-size, font-weight)。航路色・地理座標とは独立して管理する。
+TYPE = {
+    'destination': (36, 700),
+    'port': (26, 600),
+    'passage': (23, 500),
+    'loading_area': (25, 600),
+    'detail': (19, 400),
+    'continent': (30, 400),
+    'ocean': (31, 400),
+    'local_sea': (21, 400),
+    'callout_title': (28, 600),
+    'callout_status': (19, 400),
+    'callout_body': (21, 400),
+}
+
 
 # --- 投影と SVG の基本要素 ---------------------------------------------------
 
@@ -274,8 +291,12 @@ def route(
 
 # --- 地点表示と注記の配置 ----------------------------------------------------
 
-def dot(p, label=None, at=None, color='#f5f8fa', size=5.4, anchor='start', font=22):
+def dot(
+    p, label=None, at=None, color='#f5f8fa', size=5.4, anchor='start',
+    role='port',
+):
     """地理座標 p に点を置き、ピクセル座標 at に水平なラベルを配置する。"""
+    font, weight = TYPE[role]
     x, y = xy(p)
     if label and at:
         tx, ty = at
@@ -298,7 +319,7 @@ def dot(p, label=None, at=None, color='#f5f8fa', size=5.4, anchor='start', font=
         f'stroke="#0b1c2b" stroke-width="2.5"/>'
     )
     if label and at:
-        text(tx, ty, label, font, '#f3f7fa', 600, anchor, css='place-label')
+        text(tx, ty, label, font, '#f3f7fa', weight, anchor, css='place-label')
 
 
 def badge(x, y, s, key, r=16):
@@ -324,14 +345,14 @@ def bubble(x, y, w, title, key, rows, tail, status=None):
         f'height="{height}" fill="#111e27" fill-opacity=".97" '
         f'stroke="#71808b" stroke-opacity=".7" stroke-width=".9"/>'
     )
-    text(x + 21, y + 38, key, 23, COL[key], 500, halo=False)
-    text(x + 55, y + 38, title, 24, '#e5ebef', 500, halo=False)
+    text(x + 21, y + 38, key, 25, COL[key], 600, halo=False)
+    text(x + 55, y + 38, title, TYPE['callout_title'][0], '#e5ebef', TYPE['callout_title'][1], halo=False)
     yy = y + 78
     if status:
-        text(x + 21, yy, status, 19, '#aebecb', 400, halo=False)
+        text(x + 21, yy, status, TYPE['callout_status'][0], '#aebecb', TYPE['callout_status'][1], halo=False)
         yy += 36
     for row in rows:
-        text(x + 21, yy, row, 21, '#dce5ec', 400, halo=False)
+        text(x + 21, yy, row, TYPE['callout_body'][0], '#dce5ec', TYPE['callout_body'][1], halo=False)
         yy += 36
     return height
 
@@ -649,19 +670,19 @@ for lon, lat, label in [
     (262, 43, '北アメリカ'),
     (287, -4, '南アメリカ'),
 ]:
-    text(*xy((lon, lat)), label, 26, '#8b9eab', 500, 'middle')
+    text(*xy((lon, lat)), label, TYPE['continent'][0], '#8b9eab', TYPE['continent'][1], 'middle')
 for lon, lat, label in [
     (79, -22, 'インド洋'),
     (185, 23, '太平洋'),
     (-28, 21, '大西洋'),
 ]:
-    text(*xy((lon, lat)), label, 26, '#587c95', 500, 'middle')
-dot(japan, '日本', (1314, 537), size=9, anchor='start', font=29)
-dot(us, '米国メキシコ湾岸', (2110, 594), anchor='end', font=22)
-dot(canada[0], 'バンクーバー', (2020, 434), font=22)
+    text(*xy((lon, lat)), label, TYPE['ocean'][0], '#587c95', TYPE['ocean'][1], 'middle')
+dot(japan, '日本', (1314, 537), size=9, anchor='start', role='destination')
+dot(us, '米国メキシコ湾岸', (2110, 594), anchor='end')
+dot(canada[0], 'バンクーバー', (2020, 434))
 dot(yanbu, 'ヤンブー', (581, 690), anchor='end')
 dot(sidi, 'シディ・ケリル', (546, 505), anchor='end')
-text(546, 535, '沖合SBMで原油積載', 19, COL['S'], 500, 'end')
+text(546, 535, '沖合SBMで原油積載', TYPE['detail'][0], COL['S'], TYPE['detail'][1], 'end')
 sx, sy = xy(sidi)
 add(
     f'<circle cx="{sx}" cy="{sy}" r="10" fill="none" '
@@ -682,7 +703,7 @@ features.append({
 # 湾岸の3本の引出線を上下へ分け、隣接する文字の前を横切らせない。
 dot(fuj, 'フジャイラ／ソハール', (824, 651))
 dot(fahal, 'ミナ・アル・ハファル沖', (815, 701))
-text(815, 731, 'STS／原油SBM（模式）', 19, '#e6dcae', 500)
+text(815, 731, 'STS／原油SBM（模式）', TYPE['detail'][0], '#e6dcae', TYPE['detail'][1])
 fx, fy = xy(fahal)
 add(
     f'<circle cx="{fx}" cy="{fy}" r="9" fill="none" '
@@ -700,14 +721,14 @@ features.append(
         'geometry': {'type': 'Point', 'coordinates': fahal},
     },
 )
-dot([-79.8, 9.15], 'パナマ運河', (2265, 795))
-dot([20, -34.8], '喜望峰周辺', (540, 1008))
-dot([43.4, 12.6], 'バブ・エル・マンデブ海峡', (630, 799), anchor='end', font=20)
-dot([56.3, 26.45], 'ホルムズ海峡', (815, 600), font=21)
-dot([-5.6, 35.9], 'ジブラルタル海峡', (303, 539), anchor='end', font=21)
-text(609, 631, '紅海', 20, '#95c4d8', 500, 'middle')
-text(677, 603, 'ペルシャ湾', 20, '#95c4d8', 500, 'middle')
-text(1105, 822, 'マラッカ海峡', 22, '#b5cfde')
+dot([-79.8, 9.15], 'パナマ運河', (2265, 795), role='passage')
+dot([20, -34.8], '喜望峰周辺', (540, 1008), role='passage')
+dot([43.4, 12.6], 'バブ・エル・マンデブ海峡', (630, 799), anchor='end', role='passage')
+dot([56.3, 26.45], 'ホルムズ海峡', (815, 600), role='passage')
+dot([-5.6, 35.9], 'ジブラルタル海峡', (303, 539), anchor='end', role='passage')
+text(609, 631, '紅海', TYPE['local_sea'][0], '#95c4d8', TYPE['local_sea'][1], 'middle')
+text(677, 603, 'ペルシャ湾', TYPE['local_sea'][0], '#95c4d8', TYPE['local_sea'][1], 'middle')
+text(1105, 822, 'マラッカ海峡', TYPE['passage'][0], '#b5cfde', TYPE['passage'][1])
 
 # 積替え区域の代表位置。全貨物に必須の経由地を示すものではない。
 
@@ -717,7 +738,7 @@ for p in [[56.7, 25.1], [101.95, 2.4]]:
         f'<circle cx="{x}" cy="{y}" r="10" fill="none" '
         f'stroke="{COL["S"]}" stroke-width="2"/>'
     )
-dot([101.95, 2.4], 'マラッカ沖（リンギ等）', (1105, 873), font=20)
+dot([101.95, 2.4], 'マラッカ沖（リンギ等）', (1105, 873), role='loading_area')
 features.append({
     'type': 'Feature',
     'properties': {
@@ -785,7 +806,7 @@ bubble(
     '紅海南下',
     '2',
     ['コスト：短距離だが保険・通航条件が不安定', 'リスク：フーシ派の攻撃・拿捕'],
-    [(1288, 556), xy([86, 5])],
+    [(752, 556), xy([47.5, 13])],
     'ヤンブー発／大型原油船の回避・全船閉鎖ではない',
 )
 bubble(
