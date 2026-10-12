@@ -49,11 +49,11 @@ README内の「AI向けリポジトリ案内」を入口にしてください。
 
 | 中東の原油輸送ルート | 日本向け原油輸送ルート |
 |---|---|
-| [![中東図](examples/2026-10-12-typography/middle-east.png)](examples/2026-10-12-typography/middle-east.png) | [![全球図](examples/2026-10-12-typography/global.png)](examples/2026-10-12-typography/global.png) |
-| [PNG：3600 × 2608 px](examples/2026-10-12-typography/middle-east.png) · [SVG](examples/2026-10-12-typography/middle-east.svg) | [PNG：4800 × 2730 px](examples/2026-10-12-typography/global.png) · [SVG](examples/2026-10-12-typography/global.svg) |
-| [PC表示例：幅1440px](examples/2026-10-12-typography/middle-east-pc1440.png) | [PC表示例：幅1440px](examples/2026-10-12-typography/global-pc1440.png) |
+| [![中東図](examples/2026-10-12-typefaces/middle-east.png)](examples/2026-10-12-typefaces/middle-east.png) | [![全球図](examples/2026-10-12-typefaces/global.png)](examples/2026-10-12-typefaces/global.png) |
+| [PNG：3600 × 2608 px](examples/2026-10-12-typefaces/middle-east.png) · [SVG](examples/2026-10-12-typefaces/middle-east.svg) | [PNG：4800 × 2730 px](examples/2026-10-12-typefaces/global.png) · [SVG](examples/2026-10-12-typefaces/global.svg) |
+| [PC表示例：幅1440px](examples/2026-10-12-typefaces/middle-east-pc1440.png) | [PC表示例：幅1440px](examples/2026-10-12-typefaces/global-pc1440.png) |
 
-掲載版は**中東図第13版・全球図第11版**です。PC画面で読みやすいよう、日本・主要港・幹線名を強調し、海峡・設備・荷役方式の補足と文字サイズ・太さを分けました。国・大陸・海域名は地域の広がりを示す大きさと控えめな太さにしています。1440px幅の表示と文字・引出線の干渉を確認しました。今回の調整では航路・地点座標・記載内容・情報基準日を変更していません。日付別の完成品は [`examples/`](examples/) に保存しています。過去版は上書きせず、比較できるよう残しています。
+掲載版は**中東図第14版・全球図第12版**です。文字サイズと太さに加え、国・大陸・海域名は縁なしの明朝体、主要港・パイプライン名は細い縁取りの角ゴシックで描き分けました。設備名・荷役の補足やバルーン本文は縁なしのゴシックです。1440px幅のPC表示、実際に使用された書体、文字・引出線の干渉を確認しています。今回の調整では航路・地点座標・記載内容・情報基準日を変更していません。日付別の完成品は [`examples/`](examples/) に保存しています。過去版は上書きせず、比較できるよう残しています。
 
 ## 情報の基準日と読み方
 
@@ -73,7 +73,7 @@ README内の「AI向けリポジトリ案内」を入口にしてください。
 | SVG・GeoJSONのみ生成 | Python 3.9以降（標準ライブラリのみ） |
 | PNGと描画確認結果も生成 | 上記に加え、Node.js 20以降・npm・ChromeまたはPlaywrightのChromium・日本語フォント |
 
-日本語フォントは、macOSではヒラギノ、その他の環境ではNoto Sans CJK JP等を使用します。確認済みの環境はmacOSです。OS・フォント・ブラウザーが異なると、文字幅や配置が変わる場合があります。
+日本語フォントは、macOSではヒラギノのゴシック体と明朝体、その他の環境ではNoto Sans CJK JP・Noto Serif CJK JP等を使用します。書体ファイルは同梱せず、利用環境にあるフォントを参照します。確認済みの環境はmacOSです。OS・フォント・ブラウザーが異なると、文字幅や配置が変わる場合があります。
 
 ### 最初の実行（macOS / Linux）
 

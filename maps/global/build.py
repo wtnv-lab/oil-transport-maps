@@ -67,6 +67,8 @@ COL = {
 # PCで縮小して見る際も、目的地→発着地→通過点→補足の順に読める字級。
 # 大陸・大洋は地理的な親として大きくするが、細い字と控えめな色で背景に置く。
 # 各役割の値は (font-size, font-weight)。航路色・地理座標とは独立して管理する。
+# 広域名は縁なしの明朝、港は細い縁を付けたゴシック、通過点はさらに細い縁。
+# 補足・凡例・バルーンの本文は縁を付けず、地物ラベルとの役割の違いを示す。
 TYPE = {
     'destination': (36, 700),
     'port': (26, 600),
@@ -319,7 +321,10 @@ def dot(
         f'stroke="#0b1c2b" stroke-width="2.5"/>'
     )
     if label and at:
-        text(tx, ty, label, font, '#f3f7fa', weight, anchor, css='place-label')
+        text(
+            tx, ty, label, font, '#f3f7fa', weight, anchor,
+            css='passage-label' if role == 'passage' else 'place-label',
+        )
 
 
 def badge(x, y, s, key, r=16):
@@ -369,7 +374,10 @@ add(
     'text{font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans",'
     '"Noto Sans CJK JP",sans-serif}'
     '.halo{paint-order:stroke;stroke:#0b1c2b;stroke-width:3px;stroke-linejoin:round}'
-    '.place-label{stroke-width:4.5px}'
+    '.place-label{stroke-width:3px}'
+    '.passage-label{stroke-width:2px}'
+    '.geographic-label{font-family:"Hiragino Mincho ProN","Yu Mincho",'
+    '"Noto Serif CJK JP","Noto Serif JP",serif;letter-spacing:.04em;stroke:none}'
     'path{stroke-linecap:round;stroke-linejoin:round}'
     '</style><clipPath id="map">'
     '<rect y="145" width="2400" height="1120"/></clipPath></defs>'
@@ -670,19 +678,25 @@ for lon, lat, label in [
     (262, 43, '北アメリカ'),
     (287, -4, '南アメリカ'),
 ]:
-    text(*xy((lon, lat)), label, TYPE['continent'][0], '#8b9eab', TYPE['continent'][1], 'middle')
+    text(
+        *xy((lon, lat)), label, TYPE['continent'][0], '#8b9eab',
+        TYPE['continent'][1], 'middle', halo=False, css='geographic-label',
+    )
 for lon, lat, label in [
     (79, -22, 'インド洋'),
     (185, 23, '太平洋'),
     (-28, 21, '大西洋'),
 ]:
-    text(*xy((lon, lat)), label, TYPE['ocean'][0], '#587c95', TYPE['ocean'][1], 'middle')
+    text(
+        *xy((lon, lat)), label, TYPE['ocean'][0], '#587c95',
+        TYPE['ocean'][1], 'middle', halo=False, css='geographic-label',
+    )
 dot(japan, '日本', (1314, 537), size=9, anchor='start', role='destination')
 dot(us, '米国メキシコ湾岸', (2110, 594), anchor='end')
 dot(canada[0], 'バンクーバー', (2020, 434))
 dot(yanbu, 'ヤンブー', (581, 690), anchor='end')
 dot(sidi, 'シディ・ケリル', (546, 505), anchor='end')
-text(546, 535, '沖合SBMで原油積載', TYPE['detail'][0], COL['S'], TYPE['detail'][1], 'end')
+text(546, 535, '沖合SBMで原油積載', TYPE['detail'][0], COL['S'], TYPE['detail'][1], 'end', halo=False)
 sx, sy = xy(sidi)
 add(
     f'<circle cx="{sx}" cy="{sy}" r="10" fill="none" '
@@ -703,7 +717,7 @@ features.append({
 # 湾岸の3本の引出線を上下へ分け、隣接する文字の前を横切らせない。
 dot(fuj, 'フジャイラ／ソハール', (824, 651))
 dot(fahal, 'ミナ・アル・ハファル沖', (815, 701))
-text(815, 731, 'STS／原油SBM（模式）', TYPE['detail'][0], '#e6dcae', TYPE['detail'][1])
+text(815, 731, 'STS／原油SBM（模式）', TYPE['detail'][0], '#e6dcae', TYPE['detail'][1], halo=False)
 fx, fy = xy(fahal)
 add(
     f'<circle cx="{fx}" cy="{fy}" r="9" fill="none" '
@@ -726,9 +740,9 @@ dot([20, -34.8], '喜望峰周辺', (540, 1008), role='passage')
 dot([43.4, 12.6], 'バブ・エル・マンデブ海峡', (630, 799), anchor='end', role='passage')
 dot([56.3, 26.45], 'ホルムズ海峡', (815, 600), role='passage')
 dot([-5.6, 35.9], 'ジブラルタル海峡', (303, 539), anchor='end', role='passage')
-text(609, 631, '紅海', TYPE['local_sea'][0], '#95c4d8', TYPE['local_sea'][1], 'middle')
-text(677, 603, 'ペルシャ湾', TYPE['local_sea'][0], '#95c4d8', TYPE['local_sea'][1], 'middle')
-text(1105, 822, 'マラッカ海峡', TYPE['passage'][0], '#b5cfde', TYPE['passage'][1])
+text(609, 631, '紅海', TYPE['local_sea'][0], '#95c4d8', TYPE['local_sea'][1], 'middle', halo=False, css='geographic-label')
+text(665, 603, 'ペルシャ湾', TYPE['local_sea'][0], '#95c4d8', TYPE['local_sea'][1], 'middle', halo=False, css='geographic-label')
+text(1105, 822, 'マラッカ海峡', TYPE['passage'][0], '#b5cfde', TYPE['passage'][1], css='passage-label')
 
 # 積替え区域の代表位置。全貨物に必須の経由地を示すものではない。
 

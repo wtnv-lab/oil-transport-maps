@@ -79,6 +79,7 @@ svg = []
 
 # ラベルは役割で階層化する。発着港・幹線を先に読み、設備と荷役説明を
 # その下位に読む設計。国・海域は広がりを示す大きさと控えめな太さを使う。
+# 国・海域には縁なしの明朝、港・経路には細縁の角ゴシックを使い分ける。
 TYPE = {
     "title": 36,
     "port": 27,
@@ -104,11 +105,13 @@ def txt(
     anchor="start",
     halo=True,
     extra="",
+    css="",
 ):
+    classes = " ".join(name for name in ("halo" if halo else "", css) if name)
     add(
         f'<text x="{x}" y="{y}" font-size="{size}" font-weight="{weight}" '
         f'fill="{color}" text-anchor="{anchor}" '
-        f'class="{"halo" if halo else ""}" {extra}>{html.escape(t)}</text>'
+        f'class="{classes}" {extra}>{html.escape(t)}</text>'
     )
 
 
@@ -224,9 +227,11 @@ def point(p, label, lx, ly, sub=None, kind="port", anchor="start", *, leader_end
             f'<circle cx="{x}" cy="{y}" r="6.5" fill="#f3f7fa" '
             'stroke="#132432" stroke-width="2.5"/>'
         )
-    txt(lx, ly, label, font, color, weight, anchor)
+    # 地形と重なる主要港は細い縁で分離。内陸設備は縁なしで一段控えめに。
+    txt(lx, ly, label, font, color, weight, anchor,
+        halo=kind != "plant", css="port-label" if kind != "plant" else "facility-label")
     if sub:
-        txt(lx, ly + 28, sub, TYPE["detail"], "#b7c4cc", 400, anchor)
+        txt(lx, ly + 28, sub, TYPE["detail"], "#b7c4cc", 400, anchor, halo=False)
 
 
 def chokepoint(p, label, dx, dy):
@@ -249,6 +254,7 @@ def chokepoint(p, label, dx, dy):
         "#65d9eb",
         weight=600,
         anchor="end" if dx < 0 else "start",
+        css="passage-label",
     )
 
 
@@ -276,7 +282,11 @@ add(
 )
 add(
     '<defs><style>text{font-family:"Hiragino Sans","Noto Sans CJK JP","Yu Gothic",sans-serif}'
-    '.halo{paint-order:stroke;stroke:#13202a;stroke-width:5;stroke-linejoin:round}'
+    '.area-label{font-family:"Hiragino Mincho ProN","Yu Mincho",'
+    '"Noto Serif CJK JP","Noto Serif JP",serif;letter-spacing:.04em}'
+    '.halo{paint-order:stroke;stroke:#13202a;stroke-width:2;stroke-linejoin:round}'
+    '.port-label.halo{stroke-width:3}'
+    '.passage-label.halo,.pipeline-label.halo{stroke-width:2}'
     'path{stroke-linecap:round;stroke-linejoin:round}</style>'
     '<clipPath id="mapclip"><rect width="1800" height="1080"/></clipPath></defs>'
 )
@@ -319,7 +329,8 @@ for lon, lat, t, size in [
     (42.7, 11.8, "ジブチ", 18),
     (53.45, 22.70, "アラブ首長国連邦", 17),
 ]:
-    geo(lon, lat, t, size=size, color="#93a5b1", weight=400, anchor="middle")
+    geo(lon, lat, t, size=size, color="#93a5b1", weight=400, anchor="middle",
+        halo=False, css="area-label")
 for lon, lat, t, size, rotate in [
     (33.8, 32.1, "地中海", 29, 0),
     (38.1, 20.3, "紅海", 28, 0),
@@ -337,7 +348,9 @@ for lon, lat, t, size, rotate in [
         C,
         400,
         "middle",
+        halo=False,
         extra=f'transform="rotate({rotate} {x} {y})"',
+        css="area-label",
     )
 
 # GeoJSON には投影前の地理座標を保存し、出典・精度の説明を添える。
@@ -382,8 +395,8 @@ feat(
     "https://www.openstreetmap.org/way/54729631 ; https://www.openstreetmap.org/way/1044430260",
     "公開OSM線形。測量精度を保証しない。港湾支線を含まない。",
 )
-txt(841, 401, "東西原油パイプライン", TYPE["pipeline"], G, 600, "middle")
-txt(841, 370, "9/28 輸出再開報道", TYPE["detail"], "#bed7b0", 400, "middle")
+txt(841, 401, "東西原油パイプライン", TYPE["pipeline"], G, 600, "middle", css="pipeline-label")
+txt(841, 370, "9/28 輸出再開報道", TYPE["detail"], "#bed7b0", 400, "middle", halo=False)
 
 gem = json.loads((D / "data/gem_selected_pipelines.geojson").read_text())["features"]
 adc = next(f for f in gem if "Bab-Habshan" in f["properties"]["project"])
@@ -397,7 +410,7 @@ feat(
     "Global Energy Monitor, public map dataset 2024-06-12",
     "公開資料に基づく概略線形。",
 )
-txt(1234, 574, "アブダビ原油パイプライン", TYPE["pipeline"], G, 600)
+txt(1234, 574, "アブダビ原油パイプライン", TYPE["pipeline"], G, 600, css="pipeline-label")
 line(
     [xy([54.82, 24.28]), (1415, 541), (1402, 548)],
     G,
@@ -424,7 +437,7 @@ for f in sf:
         f["properties"]["accuracy"],
     )
 arrow(sd, G, 0.7, 10)
-txt(75, 250, "SUMEDパイプライン", TYPE["pipeline"], G, 600)
+txt(75, 250, "SUMEDパイプライン", TYPE["pipeline"], G, 600, css="pipeline-label")
 line([xy([31.23, 29.72]), (283, 215), (283, 225)], G, 1, screen=True, under=False)
 
 # 海上経路：海域内の代表点を結ぶ模式線で、観測された AIS 航跡ではない。
@@ -506,7 +519,7 @@ cape = [
 ]
 line(cape, R, 3.7)
 roundtrip_arrows(cape, R, 0.70, 9)
-txt(45, 165, "喜望峰経由 ↔ 日本方面", 19, R)
+txt(45, 165, "喜望峰経由 ↔ 日本方面", 19, R, halo=False)
 feat(
     "シディ・ケリル ↔ 地中海・ジブラルタル・喜望峰 ↔ 日本方面（表示範囲内のみ）",
     cape,
@@ -604,8 +617,8 @@ add(
     f'stroke="{LOAD}" stroke-width="2"/>'
 )
 label_leader([(fx + 5, fy + 10), (1592, 578)], LOAD)
-txt(1752, 610, "ミナ・アル・ハファル沖", TYPE["secondary_port"], weight=600, anchor="end")
-txt(1752, 638, "STS／原油SBM（模式）", TYPE["detail"], LOAD, 400, "end")
+txt(1752, 610, "ミナ・アル・ハファル沖", TYPE["secondary_port"], weight=600, anchor="end", css="port-label")
+txt(1752, 638, "STS／原油SBM（模式）", TYPE["detail"], LOAD, 400, "end", halo=False)
 features.append(
     {
         "type": "Feature",
@@ -673,9 +686,9 @@ for name, branch in [
         "沖合積替えの代表位置。全便の寄港・積替え、特定のラス・タヌラ発シャトル便を示すものではない。",
     )
 txt(1200, 308, "湾内 ↔ 湾外", 24, SH, 600)
-txt(1240, 276, "9月の通航回復／危険は継続", 17, "#d4c5ee", 400)
-txt(1735, 472, "日本方面と往復", 24, R, 500, "end")
-txt(1356, 953, "日本方面と往復", 23, R)
+txt(1240, 276, "9月の通航回復／危険は継続", 17, "#d4c5ee", 400, halo=False)
+txt(1735, 472, "日本方面と往復", 24, R, 500, "end", halo=False)
+txt(1356, 953, "日本方面と往復", 23, R, halo=False)
 
 # 海峡・運河と施設名。引き出し線の終点や文字位置は画面座標で調整する。
 # 地理座標を動かさずに注記だけを配置し、狭い海域の重なりを避ける。
@@ -683,7 +696,7 @@ chokepoint([56.45, 26.57], "ホルムズ海峡", 64, -46)
 chokepoint([43.31, 12.58], "バブ・エル・マンデブ海峡", -70, -45)
 x, y = xy([32.43, 30.5])
 label_leader([(x, y), (453, 127)], C)
-txt(465, 137, "スエズ運河", TYPE["chokepoint"], C, 600)
+txt(465, 137, "スエズ運河", TYPE["chokepoint"], C, 600, css="passage-label")
 
 # 各行は、名称・代表点・文字の x/y・補足・種別・文字の基準位置。
 points = [
@@ -753,7 +766,7 @@ for name, p, lx, ly, sub, kind, anchor in points:
     point(p, name, lx, ly, None, kind, anchor, leader_end=leader_end, role=role)
     sidi = name == "シディ・ケリル"
     if sidi:
-        txt(lx, ly + 28, "SBMで原油積載", TYPE["detail"], LOAD, 400, anchor)
+        txt(lx, ly + 28, "SBMで原油積載", TYPE["detail"], LOAD, 400, anchor, halo=False)
     features.append(
         {
             "type": "Feature",
