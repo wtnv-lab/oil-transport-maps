@@ -10,10 +10,10 @@
 
 | 中東の原油輸送ルート | 日本向け原油輸送ルート |
 |---|---|
-| [![中東図](examples/2026-10-12/middle-east.png)](examples/2026-10-12/middle-east.png) | [![全球図](examples/2026-10-12/global.png)](examples/2026-10-12/global.png) |
-| [PNG：3600 × 2608 px](examples/2026-10-12/middle-east.png) · [SVG](examples/2026-10-12/middle-east.svg) | [PNG：4800 × 2730 px](examples/2026-10-12/global.png) · [SVG](examples/2026-10-12/global.svg) |
+| [![中東図](examples/2026-10-12/middle-east.png)](examples/2026-10-12/middle-east.png) | [![全球図](examples/2026-10-12-global-v7/global.png)](examples/2026-10-12-global-v7/global.png) |
+| [PNG：3600 × 2608 px](examples/2026-10-12/middle-east.png) · [SVG](examples/2026-10-12/middle-east.svg) | [PNG：4800 × 2730 px](examples/2026-10-12-global-v7/global.png) · [SVG](examples/2026-10-12-global-v7/global.svg) |
 
-掲載版は**中東図第8版・全球図第6版**です。日付別の完成品は [`examples/`](examples/) に保存しています。過去版は上書きせず、比較できるよう残しています。
+掲載版は**中東図第8版・全球図第7版**です。日付別の完成品は [`examples/`](examples/) に保存しています。過去版は上書きせず、比較できるよう残しています。
 
 ## 情報の基準日と読み方
 
