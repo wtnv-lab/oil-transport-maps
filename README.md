@@ -45,13 +45,13 @@ README内の「AI向けリポジトリ案内」を入口にしてください。
 
 ## 完成した地図を見る
 
-画像を見るだけなら、実行環境の準備は不要です。下の画像から高解像度PNGを開けます。
+画像を見るだけなら、実行環境の準備は不要です。下の画像から高解像度PNGを開けます。**作図更新：2026年10月12日**（情報の基準日とは別です）。
 
-| 中東の原油輸送ルート | 日本向け原油輸送ルート |
+| 中東の原油輸送ルート · 第15版 | 日本向け原油輸送ルート · 第13版 |
 |---|---|
-| [![中東図](examples/2026-10-12-design-system/middle-east.png)](examples/2026-10-12-design-system/middle-east.png) | [![全球図](examples/2026-10-12-design-system/global.png)](examples/2026-10-12-design-system/global.png) |
-| [PNG：3600 × 2608 px](examples/2026-10-12-design-system/middle-east.png) · [SVG](examples/2026-10-12-design-system/middle-east.svg) | [PNG：4800 × 2730 px](examples/2026-10-12-design-system/global.png) · [SVG](examples/2026-10-12-design-system/global.svg) |
-| [PC表示例：幅1440px](examples/2026-10-12-design-system/middle-east-pc1440.png) | [PC表示例：幅1440px](examples/2026-10-12-design-system/global-pc1440.png) |
+| [![中東図](examples/2026-10-12-design-system/middle-east.png?v=15-20b47336428a)](examples/2026-10-12-design-system/middle-east.png?v=15-20b47336428a) | [![全球図](examples/2026-10-12-design-system/global.png?v=13-cf14ff9308b2)](examples/2026-10-12-design-system/global.png?v=13-cf14ff9308b2) |
+| [PNG：3600 × 2608 px](examples/2026-10-12-design-system/middle-east.png?v=15-20b47336428a) · [SVG](examples/2026-10-12-design-system/middle-east.svg?v=15-1a635fe61fdb) | [PNG：4800 × 2730 px](examples/2026-10-12-design-system/global.png?v=13-cf14ff9308b2) · [SVG](examples/2026-10-12-design-system/global.svg?v=13-93d932a7ffb0) |
+| [PC表示例：幅1440px](examples/2026-10-12-design-system/middle-east-pc1440.png?v=15-8f88aabec9e8) | [PC表示例：幅1440px](examples/2026-10-12-design-system/global-pc1440.png?v=13-d0177e7e3dca) |
 
 掲載版は**中東図第15版・全球図第13版**です。国・大陸・海域名は縁なしの明朝体、主要港・パイプライン名は細い縁取りの角ゴシックで描き分け、文字の重要性と親子関係を示します。今回、書体・色・線・記号・余白を共通のデザイン設定へ整理しました。航路・地点座標・記載内容・情報基準日は変更していません。日付別の完成品は [`examples/`](examples/) に保存し、過去版も比較できるよう残しています。
 
