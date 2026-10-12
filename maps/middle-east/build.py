@@ -1,201 +1,820 @@
-import json, math, base64, html, argparse, datetime
+"""公開資料と保存済みの背景地図から、中東の原油輸送ルートを作図する。
+
+入力はこのファイルと同じディレクトリの metadata.json、data/、assets/。
+経路と施設の地理座標は GeoJSON と同じ [経度, 緯度] の順序で扱う。
+背景地図に合わせた SVG と、描いた経路・代表点の GeoJSON を出力する。
+海上経路は模式線であり、個船の実航跡や当日の運航状況を示すものではない。
+Python の標準ライブラリのみを使用し、PNG への変換は別の工程で行う。
+"""
+
+import argparse
+import base64
+import datetime
+import html
+import json
+import math
 from pathlib import Path
 
-D=Path(__file__).resolve().parent
-parser=argparse.ArgumentParser(description="Generate the map SVG and representative route geometry")
-parser.add_argument("--output-dir",type=Path,default=D.parents[1]/"dist")
-args=parser.parse_args()
-OUT=args.output_dir.resolve()
-OUT.mkdir(parents=True,exist_ok=True)
-META=json.loads((D/"metadata.json").read_text())
-AS_OF=datetime.date.fromisoformat(META["as_of"])
-ADDED=datetime.date.fromisoformat(META["route_additions_as_of"])
-W,H,TOP,BOT=1800,1080,84,140
-M=lambda a: math.log(math.tan(math.pi/4+math.radians(a)/2))
-m=json.loads((D/'data/base-projection.json').read_text())
-(west,south),(east,north)=m['bounds']
-def xy(p): return ((p[0]-west)/(east-west)*W,(M(north)-M(p[1]))/(M(north)-M(south))*H)
-def path(coords): return 'M '+' L '.join(f'{x:.2f},{y:.2f}' for x,y in map(xy,coords))
-def screenpath(coords): return 'M '+' L '.join(f'{x:.2f},{y:.2f}' for x,y in coords)
-svg=[]
-def add(s): svg.append(s)
-def txt(x,y,t,size=22,color='#eff4f7',weight=500,anchor='start',halo=True,extra=''):
-    add(f'<text x="{x}" y="{y}" font-size="{size}" font-weight="{weight}" fill="{color}" text-anchor="{anchor}" class="{"halo" if halo else ""}" {extra}>{html.escape(t)}</text>')
-def geo(lon,lat,t,**kw): txt(*xy([lon,lat]),t,**kw)
-def line(coords,color,width=4,dash=None,opacity=1,screen=False,under=True,css=''):
-    d=screenpath(coords) if screen else path(coords)
-    if under:add(f'<path d="{d}" fill="none" stroke="#10202a" stroke-width="{width+3}" opacity="0.85"/>')
-    add(f'<path class="{css}" d="{d}" fill="none" stroke="{color}" stroke-width="{width}" opacity="{opacity}"'+(f' stroke-dasharray="{dash}"' if dash else '')+'/>')
-def arrow(coords,color,at=.7,size=10,screen=False):
-    ps=coords if screen else list(map(xy,coords))
-    lengths=[math.dist(a,b) for a,b in zip(ps,ps[1:])];target=sum(lengths)*at
-    for a,b,l in zip(ps,ps[1:],lengths):
-        if target<=l:
-            t=target/l;x=a[0]+t*(b[0]-a[0]);y=a[1]+t*(b[1]-a[1]);ang=math.degrees(math.atan2(b[1]-a[1],b[0]-a[0]));break
-        target-=l
-    add(f'<path d="M 0 0 L {-size*1.6} {-size*.72} L {-size*1.25} 0 L {-size*1.6} {size*.72} Z" fill="{color}" transform="translate({x:.2f} {y:.2f}) rotate({ang:.2f})"/>')
-def point(p,label,lx,ly,sub=None,kind='port',anchor='start'):
-    x,y=xy(p);destx=lx-8 if anchor=='start' else lx+8
-    if math.dist((x,y),(destx,ly-7))>30:line([(x,y),(destx,ly-7)],'#d4e0e8',1.1,screen=True,under=False,opacity=.65)
-    if kind=='plant':add(f'<rect x="{x-5.5}" y="{y-5.5}" width="11" height="11" rx="1" transform="rotate(45 {x} {y})" fill="#ecf3f7" stroke="#132432" stroke-width="2.5"/>')
-    else:add(f'<circle cx="{x}" cy="{y}" r="6.5" fill="#f3f7fa" stroke="#132432" stroke-width="2.5"/>')
-    txt(lx,ly,label,22,anchor=anchor)
-    if sub:txt(lx,ly+22,sub,15,'#b7c4cc',400,anchor)
-def chokepoint(p,label,dx,dy):
-    x,y=xy(p);add(f'<circle cx="{x}" cy="{y}" r="17" stroke="#65d9eb" stroke-width="1.5" fill="none" opacity=".8"/>')
-    direction=-1 if dx<0 else 1
-    # Attach to the near edge of the label, with a clear gap outside the glyphs.
-    line([(x+direction*12,y-12),(x+dx-direction*12,y+dy-7)],'#65d9eb',1.2,screen=True,under=False,css='label-leader')
-    txt(x+dx,y+dy,label,21,'#65d9eb',anchor='end' if dx<0 else 'start')
 
-G='#95e273';R='#ff5576';C='#65d9eb';SH='#c7a6ff';P='#b9c8d5';LOAD='#e6dcae'
-add(f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{W}" height="{H+TOP+BOT}" viewBox="0 0 {W} {H+TOP+BOT}" role="img" aria-labelledby="title desc">')
-add('<title id="title">中東の原油輸送ルート</title><desc id="desc">公開資料による原油輸送経路の概念図。ヤンブー南航はサウジ関連船への航行制約を示す赤破線で、全船の完全封鎖ではない。湾内発はホルムズを通過し、直航と湾外積替えの両方がある。海路・積替地点は模式的な代表位置で、当日の稼働・輸送量・個別貨物の日本向け実績を示さない。LNGなどは対象外。</desc>')
-add('<defs><style>text{font-family:"Hiragino Sans","Noto Sans CJK JP","Yu Gothic",sans-serif}.halo{paint-order:stroke;stroke:#13202a;stroke-width:5;stroke-linejoin:round}path{stroke-linecap:round;stroke-linejoin:round}</style><clipPath id="mapclip"><rect width="1800" height="1080"/></clipPath></defs>')
-add(f'<rect width="{W}" height="{H+TOP+BOT}" fill="#101c27"/>')
-txt(48,41,META['title'],33,weight=600,halo=False)
-txt(48,70,'公開資料による主要経路の整理 ｜ 当日の運航・稼働・輸送量を示す図ではありません',17,'#b7cbd9',400,halo=False)
-txt(1752,42,f'{AS_OF:%Y.%m.%d} 基準 ／ {ADDED:%m.%d} 航路追記',17,'#aebdc8',400,'end',False)
+# 入出力と作図基準日。日付・タイトルは metadata.json に集約する。
+D = Path(__file__).resolve().parent
+parser = argparse.ArgumentParser(
+    description="Generate the map SVG and representative route geometry"
+)
+parser.add_argument("--output-dir", type=Path, default=D.parents[1] / "dist")
+args = parser.parse_args()
+OUT = args.output_dir.resolve()
+OUT.mkdir(parents=True, exist_ok=True)
+META = json.loads((D / "metadata.json").read_text())
+AS_OF = datetime.date.fromisoformat(META["as_of"])
+ADDED = datetime.date.fromisoformat(META["route_additions_as_of"])
+
+# W/H は地図本体、TOP/BOT は上下の見出し・注記のための余白。
+W, H, TOP, BOT = 1800, 1080, 84, 140
+m = json.loads((D / "data/base-projection.json").read_text())
+(west, south), (east, north) = m["bounds"]
+
+
+# 背景画像は Web Mercator。経度は線形、緯度はメルカトル式で投影する。
+def M(a):
+    return math.log(math.tan(math.pi / 4 + math.radians(a) / 2))
+
+
+def xy(p):
+    """[経度, 緯度] を地図左上原点の SVG 座標へ変換する。"""
+    return (
+        (p[0] - west) / (east - west) * W,
+        (M(north) - M(p[1])) / (M(north) - M(south)) * H,
+    )
+
+
+def path(coords):
+    """地理座標列から SVG の折れ線パスを作る。"""
+    return "M " + " L ".join(f"{x:.2f},{y:.2f}" for x, y in map(xy, coords))
+
+
+def screenpath(coords):
+    """配置済みの画面座標列から、再投影せずにパスを作る。"""
+    return "M " + " L ".join(f"{x:.2f},{y:.2f}" for x, y in coords)
+
+
+# SVG 要素は追加順に重なる。背景、経路、施設、凡例の順で描画する。
+svg = []
+
+
+def add(s):
+    svg.append(s)
+
+
+def txt(
+    x,
+    y,
+    t,
+    size=22,
+    color="#eff4f7",
+    weight=500,
+    anchor="start",
+    halo=True,
+    extra="",
+):
+    add(
+        f'<text x="{x}" y="{y}" font-size="{size}" font-weight="{weight}" '
+        f'fill="{color}" text-anchor="{anchor}" '
+        f'class="{"halo" if halo else ""}" {extra}>{html.escape(t)}</text>'
+    )
+
+
+def geo(lon, lat, t, **kw):
+    txt(*xy([lon, lat]), t, **kw)
+
+
+def line(
+    coords,
+    color,
+    width=4,
+    dash=None,
+    opacity=1,
+    screen=False,
+    under=True,
+    css="",
+):
+    d = screenpath(coords) if screen else path(coords)
+    if under:
+        add(
+            f'<path d="{d}" fill="none" stroke="#10202a" '
+            f'stroke-width="{width + 3}" opacity="0.85"/>'
+        )
+    add(
+        f'<path class="{css}" d="{d}" fill="none" stroke="{color}" '
+        f'stroke-width="{width}" opacity="{opacity}"'
+        + (f' stroke-dasharray="{dash}"' if dash else "")
+        + "/>"
+    )
+
+
+def arrow(coords, color, at=0.7, size=10, screen=False):
+    """投影後の線長に対する割合 at の位置に進行方向の矢印を置く。"""
+    ps = coords if screen else list(map(xy, coords))
+    lengths = [math.dist(a, b) for a, b in zip(ps, ps[1:])]
+    target = sum(lengths) * at
+    for a, b, segment_length in zip(ps, ps[1:], lengths):
+        if target <= segment_length:
+            t = target / segment_length
+            x = a[0] + t * (b[0] - a[0])
+            y = a[1] + t * (b[1] - a[1])
+            ang = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
+            break
+        target -= segment_length
+    add(
+        f'<path d="M 0 0 L {-size * 1.6} {-size * 0.72} '
+        f'L {-size * 1.25} 0 L {-size * 1.6} {size * 0.72} Z" '
+        f'fill="{color}" transform="translate({x:.2f} {y:.2f}) '
+        f'rotate({ang:.2f})"/>'
+    )
+
+
+def point(p, label, lx, ly, sub=None, kind="port", anchor="start"):
+    """施設代表点にマーカーと、画面座標で指定した地名を付ける。"""
+    x, y = xy(p)
+    destx = lx - 8 if anchor == "start" else lx + 8
+    if math.dist((x, y), (destx, ly - 7)) > 30:
+        line(
+            [(x, y), (destx, ly - 7)],
+            "#d4e0e8",
+            1.1,
+            screen=True,
+            under=False,
+            opacity=0.65,
+        )
+    if kind == "plant":
+        add(
+            f'<rect x="{x - 5.5}" y="{y - 5.5}" width="11" height="11" '
+            f'rx="1" transform="rotate(45 {x} {y})" fill="#ecf3f7" '
+            'stroke="#132432" stroke-width="2.5"/>'
+        )
+    else:
+        add(
+            f'<circle cx="{x}" cy="{y}" r="6.5" fill="#f3f7fa" '
+            'stroke="#132432" stroke-width="2.5"/>'
+        )
+    txt(lx, ly, label, 22, anchor=anchor)
+    if sub:
+        txt(lx, ly + 22, sub, 15, "#b7c4cc", 400, anchor)
+
+
+def chokepoint(p, label, dx, dy):
+    x, y = xy(p)
+    add(
+        f'<circle cx="{x}" cy="{y}" r="17" stroke="#65d9eb" '
+        'stroke-width="1.5" fill="none" opacity=".8"/>'
+    )
+    direction = -1 if dx < 0 else 1
+    # 引き出し線は文字の手前で止め、字形と重ならない間隔を取る。
+    line(
+        [(x + direction * 12, y - 12), (x + dx - direction * 12, y + dy - 7)],
+        "#65d9eb",
+        1.2,
+        screen=True,
+        under=False,
+        css="label-leader",
+    )
+    txt(
+        x + dx,
+        y + dy,
+        label,
+        21,
+        "#65d9eb",
+        anchor="end" if dx < 0 else "start",
+    )
+
+
+# 色分け：パイプライン、海上経路、水域、湾内発、配船、積載区域。
+G = "#95e273"
+R = "#ff5576"
+C = "#65d9eb"
+SH = "#c7a6ff"
+P = "#b9c8d5"
+LOAD = "#e6dcae"
+
+# 文書枠と背景地図。画像は埋め込み、SVG 単体で表示できるようにする。
+add(
+    '<svg xmlns="http://www.w3.org/2000/svg" '
+    'xmlns:xlink="http://www.w3.org/1999/xlink" '
+    f'width="{W}" height="{H + TOP + BOT}" '
+    f'viewBox="0 0 {W} {H + TOP + BOT}" role="img" aria-labelledby="title desc">'
+)
+add(
+    '<title id="title">中東の原油輸送ルート</title><desc id="desc">'
+    '公開資料による原油輸送経路の概念図。ヤンブー南航はサウジ関連船への航行制約を示す赤破線で、全船の完全封鎖ではない。'
+    '湾内発はホルムズを通過し、直航と湾外積替えの両方がある。'
+    '海路・積替地点は模式的な代表位置で、当日の稼働・輸送量・個別貨物の日本向け実績を示さない。'
+    'LNGなどは対象外。</desc>'
+)
+add(
+    '<defs><style>text{font-family:"Hiragino Sans","Noto Sans CJK JP","Yu Gothic",sans-serif}'
+    '.halo{paint-order:stroke;stroke:#13202a;stroke-width:5;stroke-linejoin:round}'
+    'path{stroke-linecap:round;stroke-linejoin:round}</style>'
+    '<clipPath id="mapclip"><rect width="1800" height="1080"/></clipPath></defs>'
+)
+add(f'<rect width="{W}" height="{H + TOP + BOT}" fill="#101c27"/>')
+txt(48, 41, META["title"], 33, weight=600, halo=False)
+txt(
+    48,
+    70,
+    "公開資料による主要経路の整理 ｜ 当日の運航・稼働・輸送量を示す図ではありません",
+    17,
+    "#b7cbd9",
+    400,
+    halo=False,
+)
+txt(
+    1752,
+    42,
+    f"{AS_OF:%Y.%m.%d} 基準 ／ {ADDED:%m.%d} 航路追記",
+    17,
+    "#aebdc8",
+    400,
+    "end",
+    False,
+)
 add(f'<g transform="translate(0 {TOP})" clip-path="url(#mapclip)">')
-b64=base64.b64encode((D/'assets/osm-dark-base.png').read_bytes()).decode()
+b64 = base64.b64encode((D / "assets/osm-dark-base.png").read_bytes()).decode()
 add(f'<image width="1800" height="1080" href="data:image/png;base64,{b64}"/>')
 
-# Country and water labels are separate from the sourced basemap.
-for lon,lat,t,size in [(29.3,25.7,'エジプト',24),(44.5,21.8,'サウジアラビア',30),(44.2,31,'イラク',24),(55.4,30,'イラン',27),(57.7,19.6,'オマーン',25),(47,16,'イエメン',25),(29.9,20.0,'スーダン',22),(37.2,15.8,'エリトリア',19),(42.7,11.8,'ジブチ',18),(53.45,22.70,'アラブ首長国連邦',17)]:
-    geo(lon,lat,t,size=size,color='#aab4bb',weight=400,anchor='middle')
-for lon,lat,t,size,rotate in [(33.8,32.1,'地中海',24,0),(38.1,20.3,'紅海',24,0),(53.3,25.1,'ペルシャ湾',23,0),(61.1,24.9,'オマーン湾',22,0),(59,17.8,'アラビア海',28,0),(47.65,13.8,'アデン湾',21,0)]:
-    x,y=xy([lon,lat]);txt(x,y,t,size,C,400,'middle',extra=f'transform="rotate({rotate} {x} {y})"')
+# 地名・水域名は背景画像とは別の編集可能な文字として重ねる。
+# 水域名の角度はすべて 0 度。座標と文字サイズで海域内に収める。
+for lon, lat, t, size in [
+    (29.3, 25.7, "エジプト", 24),
+    (44.5, 21.8, "サウジアラビア", 30),
+    (44.2, 31, "イラク", 24),
+    (55.4, 30, "イラン", 27),
+    (57.7, 19.6, "オマーン", 25),
+    (47, 16, "イエメン", 25),
+    (29.9, 20.0, "スーダン", 22),
+    (37.2, 15.8, "エリトリア", 19),
+    (42.7, 11.8, "ジブチ", 18),
+    (53.45, 22.70, "アラブ首長国連邦", 17),
+]:
+    geo(lon, lat, t, size=size, color="#aab4bb", weight=400, anchor="middle")
+for lon, lat, t, size, rotate in [
+    (33.8, 32.1, "地中海", 24, 0),
+    (38.1, 20.3, "紅海", 24, 0),
+    (53.3, 25.1, "ペルシャ湾", 23, 0),
+    (61.1, 24.9, "オマーン湾", 22, 0),
+    (59, 17.8, "アラビア海", 28, 0),
+    (47.65, 13.8, "アデン湾", 21, 0),
+]:
+    x, y = xy([lon, lat])
+    txt(
+        x,
+        y,
+        t,
+        size,
+        C,
+        400,
+        "middle",
+        extra=f'transform="rotate({rotate} {x} {y})"',
+    )
 
-features=[]
-def feat(name,coords,kind,source,note):
-    features.append({'type':'Feature','properties':{'name':name,'category':kind,'source':source,'accuracy':note},'geometry':{'type':'LineString','coordinates':coords}})
+# GeoJSON には投影前の地理座標を保存し、出典・精度の説明を添える。
+features = []
 
-crude=json.loads((D/'data/petroline-osm.geojson').read_text())['features'][0]['geometry']['coordinates']
-line(crude,G,4.3);arrow(crude,G,.51,10);arrow(crude,G,.83,10)
-feat('東西原油パイプライン（Petroline）',crude,'crude_pipeline','https://www.openstreetmap.org/way/54729631 ; https://www.openstreetmap.org/way/1044430260','公開OSM線形。測量精度を保証しない。港湾支線を含まない。')
-txt(841,401,'東西原油パイプライン',22,G,500,'middle')
-txt(841,372,'9/28 輸出再開報道',16,'#bed7b0',400,'middle')
 
-gem=json.loads((D/'data/gem_selected_pipelines.geojson').read_text())['features']
-adc=next(f for f in gem if 'Bab-Habshan' in f['properties']['project'])
-ac=adc['geometry']['coordinates'][0]+adc['geometry']['coordinates'][2][1:]
-line(ac,G,4.3);arrow(ac,G,.61,10)
-feat('ハブシャン—フジャイラ原油パイプライン（ADCOP）',ac,'crude_pipeline','Global Energy Monitor, public map dataset 2024-06-12','公開資料に基づく概略線形。')
-txt(1270,567,'アブダビ原油パイプライン',21,G,500)
-line([xy([54.82,24.28]),(1415,541),(1402,546)],G,1,screen=True,under=False,opacity=.8)
+def feat(name, coords, kind, source, note):
+    features.append(
+        {
+            "type": "Feature",
+            "properties": {
+                "name": name,
+                "category": kind,
+                "source": source,
+                "accuracy": note,
+            },
+            "geometry": {"type": "LineString", "coordinates": coords},
+        }
+    )
 
-# SUMED uses the vetted route when it becomes available; fallback geometry remains explicit.
-sumedfile=D/'data/sumed_onshore_with_gap.geojson'
-sf=json.loads(sumedfile.read_text())['features'];sd=[]
+
+# パイプライン：Petroline は保存済み OSM 線形、ADCOP は GEM の公開線形。
+# 地理座標の出典と精度の注記は、各経路と一緒に GeoJSON へ書き出す。
+crude = json.loads((D / "data/petroline-osm.geojson").read_text())["features"][0][
+    "geometry"
+]["coordinates"]
+line(crude, G, 4.3)
+arrow(crude, G, 0.51, 10)
+arrow(crude, G, 0.83, 10)
+feat(
+    "東西原油パイプライン（Petroline）",
+    crude,
+    "crude_pipeline",
+    "https://www.openstreetmap.org/way/54729631 ; https://www.openstreetmap.org/way/1044430260",
+    "公開OSM線形。測量精度を保証しない。港湾支線を含まない。",
+)
+txt(841, 401, "東西原油パイプライン", 22, G, 500, "middle")
+txt(841, 372, "9/28 輸出再開報道", 16, "#bed7b0", 400, "middle")
+
+gem = json.loads((D / "data/gem_selected_pipelines.geojson").read_text())["features"]
+adc = next(f for f in gem if "Bab-Habshan" in f["properties"]["project"])
+ac = adc["geometry"]["coordinates"][0] + adc["geometry"]["coordinates"][2][1:]
+line(ac, G, 4.3)
+arrow(ac, G, 0.61, 10)
+feat(
+    "ハブシャン—フジャイラ原油パイプライン（ADCOP）",
+    ac,
+    "crude_pipeline",
+    "Global Energy Monitor, public map dataset 2024-06-12",
+    "公開資料に基づく概略線形。",
+)
+txt(1270, 567, "アブダビ原油パイプライン", 21, G, 500)
+line(
+    [xy([54.82, 24.28]), (1415, 541), (1402, 546)],
+    G,
+    1,
+    screen=True,
+    under=False,
+    opacity=0.8,
+)
+
+# SUMED は確認済み線形と未収録区間の補間を読み込み、補間だけを破線にする。
+sumedfile = D / "data/sumed_onshore_with_gap.geojson"
+sf = json.loads(sumedfile.read_text())["features"]
+sd = []
 for f in sf:
-    c=f['geometry']['coordinates'];sd+=c
-    line(c,G,4.2,'4 4' if f['properties']['is_interpolated'] else None)
-    feat('SUMEDパイプライン'+('（未収録区間の補間）' if f['properties']['is_interpolated'] else ''),c,'crude_pipeline',f['properties']['source'],f['properties']['accuracy'])
-arrow(sd,G,.7,10)
-txt(75,245,'SUMEDパイプライン',22,G,500)
-line([xy([31.23,29.72]),(283,215),(283,225)],G,1,screen=True,under=False)
+    c = f["geometry"]["coordinates"]
+    sd += c
+    line(c, G, 4.2, "4 4" if f["properties"]["is_interpolated"] else None)
+    feat(
+        "SUMEDパイプライン"
+        + ("（未収録区間の補間）" if f["properties"]["is_interpolated"] else ""),
+        c,
+        "crude_pipeline",
+        f["properties"]["source"],
+        f["properties"]["accuracy"],
+    )
+arrow(sd, G, 0.7, 10)
+txt(75, 245, "SUMEDパイプライン", 22, G, 500)
+line([xy([31.23, 29.72]), (283, 215), (283, 225)], G, 1, screen=True, under=False)
 
-# Shipping lines are geographical sketches, not observed AIS tracks.
-yanbu=[38.235,23.935]
-northsea=[yanbu,[37.85,24.05],[37.05,25.1],[36.3,25.9],[35.4,26.7],[34.7,27.35],[34.05,27.85],[33.7,28.15],[33.33,28.7],[32.79,29.25],[32.43,29.55],[32.338333,29.598333]]
-line(northsea,R,3.7);arrow(northsea,R,.36,10);arrow(northsea,R,.78,10)
-feat('ヤンブー→アイン・スフナ（海上・概略）',northsea,'schematic_shipping','作図用の海域内代表点','概略航路。実航跡・現在の運航を示さない。')
-canalfile=D/'data/suez-canal-main.geojson'
+# 海上経路：海域内の代表点を結ぶ模式線で、観測された AIS 航跡ではない。
+# 各座標列は進行方向順に並ぶため、矢印もこの順序に従う。
+yanbu = [38.235, 23.935]
+northsea = [
+    yanbu,
+    [37.85, 24.05],
+    [37.05, 25.1],
+    [36.3, 25.9],
+    [35.4, 26.7],
+    [34.7, 27.35],
+    [34.05, 27.85],
+    [33.7, 28.15],
+    [33.33, 28.7],
+    [32.79, 29.25],
+    [32.43, 29.55],
+    [32.338333, 29.598333],
+]
+line(northsea, R, 3.7)
+arrow(northsea, R, 0.36, 10)
+arrow(northsea, R, 0.78, 10)
+feat(
+    "ヤンブー→アイン・スフナ（海上・概略）",
+    northsea,
+    "schematic_shipping",
+    "作図用の海域内代表点",
+    "概略航路。実航跡・現在の運航を示さない。",
+)
+
+# スエズ運河の保存済み線形を北向きにそろえ、南北の海路へ接続する。
+# ファイルがない場合だけ、明示的な代表点列にフォールバックする。
+canalfile = D / "data/suez-canal-main.geojson"
 if canalfile.exists():
-    cc=json.loads(canalfile.read_text())['features'][0]['geometry']['coordinates']
-    if cc[0][1]>cc[-1][1]:cc=cc[::-1]
+    cc = json.loads(canalfile.read_text())["features"][0]["geometry"]["coordinates"]
+    if cc[0][1] > cc[-1][1]:
+        cc = cc[::-1]
 else:
-    cc=[[32.572,29.932],[32.566,30.10],[32.508,30.24],[32.39,30.44],[32.326,30.574],[32.346,30.735],[32.31,31.0],[32.31,31.27]]
-suez=[[32.43,29.64]]+cc+[[32.34,31.48],[31.8,31.60],[30.85,31.58],[30.0,31.48],[29.30,31.40]]
-line(suez,R,3.0);arrow(suez,R,.63,9)
-feat('スエズ運河経由→地中海西航（海上・概略）',suez,'schematic_shipping','Suez Canal Authority; OSM; SUMED; cartographic route','運河北上後に地中海西航へ合流する概念線。全船のシディ・ケリル寄港を示さない。SUMED利用・再積載との組合せは船型・喫水等で異なる。')
-# Only the westbound Mediterranean segment is within the map extent.
-cape=[[29.6824996,31.0510105],[29.60,31.20],[29.30,31.40],[28.70,31.55],[27.80,31.68],[26.60,31.85],[25.22,31.99]]
-line(cape,R,3.7);arrow(cape,R,.97,12)
-txt(45,165,'喜望峰回り → 日本方面',19,R)
-feat('シディ・ケリル→地中海→ジブラルタル→喜望峰回り（表示範囲内のみ）',cape,'schematic_shipping','ユーザー指定の迂回ルート。The National 2026-09-12','地中海西航の一部のみ描画。ジブラルタル・喜望峰は図外。実航跡ではない。')
-# The incoming positioning voyage is separate from the loaded westbound route.
-incoming=[[25.22,32.48],[26.6,32.37],[27.8,32.25],[28.7,32.10],[29.4,31.7],[29.68,31.2]]
-line(incoming,P,3,'16 6 3 6');arrow(incoming,P,.46,9);arrow(incoming,P,.94,9)
-txt(45,110,'日本から積地へ',18,P)
-txt(45,135,'（喜望峰経由）',17,P)
-feat('日本 → 喜望峰 → ジブラルタル → シディ・ケリル沖（地中海部分）',incoming,'schematic_positioning','docs/route-additions-20261012.md','積地へ向かう配船の模式線。日本・喜望峰・ジブラルタルは図外。個船の積載状態は未確認。')
-southsea=[yanbu,[37.98,23.7],[38.1,22.5],[38.75,20.8],[39.6,18.9],[40.5,17.15],[41.5,15.5],[42.4,14.0],[43.08,12.75],[43.25,12.55],[43.7,12.23],[44.3,12.03],[45.4,12.10],[47.3,12.6],[49.6,13.0],[52.4,13.65]]
-line(southsea,R,3.7,'12 10');arrow(southsea,R,.20,10);arrow(southsea,R,.48,10);arrow(southsea,R,.985,12)
-feat('ヤンブー→バブ・エル・マンデブ→日本方面（航行制約・破線）',southsea,'restricted_schematic_shipping','ユーザー指定の破線。EIA September 2026 STEO; The National 2026-09-12','サウジ関連船への航行制約を示す。全船の一律完全封鎖とは断定しない。実航跡ではない。')
-fuj=[[56.358639,25.187944],[56.60,25.22],[57.18,25.10],[58.2,24.87],[59.4,24.20],[60.55,23.53],[61.7,23.20],[63.15,23.12]]
-soh=[[56.63,24.511667],[57.0,24.51],[57.55,24.46],[58.2,24.1],[59.4,23.5],[60.6,22.91],[61.7,22.66],[63.15,22.63]]
-for name,route in [('フジャイラ→日本方面',fuj),('ソハール→日本方面',soh)]:
-    line(route,R,3.7);arrow(route,R,.98,12);feat(name,route,'schematic_shipping','作図用の海域内代表点','日本方面を示す模式的な線。運航実績は未検証。')
-# Mina al Fahal: area-level location, shared marker for two distinct methods.
-fahal=[58.533333,23.65]
-fahal_out=[fahal,[59.05,23.70],[59.6,23.35],[60.4,22.85],[61.5,22.3],[63.15,22.1]]
-line(fahal_out,R,3.7);arrow(fahal_out,R,.98,12)
-feat('ミナ・アル・ハファル沖 STS／原油SBM積載 → 日本方面',fahal_out,'schematic_shipping','docs/route-additions-20261012.md','原油積載区域を代表点で表示。STSとSBMは別の積載方式。個別ブイ位置・接続船・日本向け貨物は未確定。')
-fx,fy=xy(fahal)
-add(f'<circle cx="{fx}" cy="{fy}" r="9" fill="#101c27" stroke="{LOAD}" stroke-width="2"/>')
-line([(fx,fy),(1592,565)],LOAD,1.1,screen=True,under=False,css='label-leader')
-txt(1752,586,'ミナ・アル・ハファル沖',21,anchor='end')
-txt(1752,612,'STS／原油SBM（模式）',17,LOAD,400,'end')
-features.append({'type':'Feature','properties':{'name':'ミナ・アル・ハファル沖（STS／原油SBM）','category':'loading_area','source':'docs/route-additions-20261012.md','accuracy':'NGA水路誌の港域代表点。個別SBMやSTS船の正確な位置ではない。'},'geometry':{'type':'Point','coordinates':fahal}})
-# A common offshore corridor supports direct voyages and optional STS.
-# Ras Tanura exports and Sohar STS are documented; these are not AIS tracks.
-gulf=[[50.33,26.80],[50.75,27.00],[51.5,27.05],[52.5,26.9],[53.6,26.6],[54.6,26.55],[55.5,26.55],[56.1,26.60],[56.45,26.58],[56.70,26.43],[56.77,26.10],[56.75,25.78],[56.90,25.48],[57.18,25.10]]
-line(gulf,SH,3.7);arrow(gulf,SH,.28,10);arrow(gulf,SH,.70,10)
-gulf_source='https://energynow.com/2026/09/gulf-of-oman-ship-to-ship-oil-transfers-reach-limit-as-saudi-exports-surge/'
-feat('ラス・タヌラ付近→ホルムズ海峡→湾外（直航・積替えの共通区間）',gulf,'schematic_gulf_shipping',gulf_source,'湾内発の直航と湾外STSの併存を模式化。個船の実航跡・日本仕向け実績を示さない。')
-for name,branch in [
-    ('フジャイラ沖',[[56.75,25.78],[56.70,25.47],[56.64,25.22]]),
-    ('ソハール沖',[[56.90,25.48],[56.96,25.10],[57.02,24.78],[57.0,24.51]])]:
-    line(branch,SH,2.7,'4 5');arrow(branch,SH,.70,7)
-    sx,sy=xy(branch[-1]);add(f'<circle cx="{sx}" cy="{sy}" r="5" fill="#0b1c2b" stroke="{SH}" stroke-width="2"/>')
-    feat(name+'の積替え接続（模式）',branch,'schematic_sts_connection',gulf_source,'沖合積替えの代表位置。全便の寄港・積替え、特定のラス・タヌラ発シャトル便を示すものではない。')
-txt(1200,308,'湾内発（直航・積替え）',21,SH)
-txt(1240,282,'9月の通航回復／危険は継続',15,'#d4c5ee',400)
-txt(1735,472,'日本方面へ',24,R,500,'end')
-txt(1356,953,'日本方面へ',23,R)
+    cc = [
+        [32.572, 29.932],
+        [32.566, 30.10],
+        [32.508, 30.24],
+        [32.39, 30.44],
+        [32.326, 30.574],
+        [32.346, 30.735],
+        [32.31, 31.0],
+        [32.31, 31.27],
+    ]
+suez = (
+    [[32.43, 29.64]]
+    + cc
+    + [
+        [32.34, 31.48],
+        [31.8, 31.60],
+        [30.85, 31.58],
+        [30.0, 31.48],
+        [29.30, 31.40],
+    ]
+)
+line(suez, R, 3.0)
+arrow(suez, R, 0.63, 9)
+feat(
+    "スエズ運河経由→地中海西航（海上・概略）",
+    suez,
+    "schematic_shipping",
+    "Suez Canal Authority; OSM; SUMED; cartographic route",
+    "運河北上後に地中海西航へ合流する概念線。全船のシディ・ケリル寄港を示さない。SUMED利用・再積載との組合せは船型・喫水等で異なる。",
+)
 
-chokepoint([56.45,26.57],'ホルムズ海峡',64,-46)
-chokepoint([43.31,12.58],'バブ・エル・マンデブ海峡',-70,-45)
-x,y=xy([32.43,30.5]);line([(x,y),(455,110)],C,1.2,screen=True,under=False);txt(465,113,'スエズ運河',22,C)
+# 喜望峰回りは地中海西航の区間だけを描く。ジブラルタル・喜望峰は図外。
+cape = [
+    [29.6824996, 31.0510105],
+    [29.60, 31.20],
+    [29.30, 31.40],
+    [28.70, 31.55],
+    [27.80, 31.68],
+    [26.60, 31.85],
+    [25.22, 31.99],
+]
+line(cape, R, 3.7)
+arrow(cape, R, 0.97, 12)
+txt(45, 165, "喜望峰回り → 日本方面", 19, R)
+feat(
+    "シディ・ケリル→地中海→ジブラルタル→喜望峰回り（表示範囲内のみ）",
+    cape,
+    "schematic_shipping",
+    "ユーザー指定の迂回ルート。The National 2026-09-12",
+    "地中海西航の一部のみ描画。ジブラルタル・喜望峰は図外。実航跡ではない。",
+)
 
-points=[
- ('シディ・ケリル',[29.6824996,31.0510105],345,67,'SUMED北端・再積込み','port','start'),
- ('アイン・スフナ',[32.3214022,29.6069879],371,219,'SUMED南端・荷揚げ','port','start'),
- ('ヤンブー',[38.2687784,23.9793099],540,561,'紅海側の輸出拠点','port','start'),
- ('ラス・タヌラ',[50.163,26.645],1110,285,'ペルシャ湾側の輸出港','port','end'),
- ('アブカイク',[49.6855348,25.922357],1202,365,'東西原油ライン起点','plant','start'),
- ('ハブシャン',[53.6176,23.8279],1230,500,None,'plant','start'),
- ('フジャイラ',[56.358639,25.187944],1502,384,None,'port','start'),
- ('ソハール',[56.630,24.511667],1450,481,'独立した港湾拠点','port','end')]
-for name,p,lx,ly,sub,kind,anchor in points:
-    point(p,name,lx,ly,None,kind,anchor)
-    features.append({'type':'Feature','properties':{'name':name,'category':kind,'accuracy':'施設・港の代表点。積出しブイや個別設備の正確な位置ではない。'},'geometry':{'type':'Point','coordinates':p}})
+# 積地へ向かう配船は、積込み後に西へ向かう経路と線種を分ける。
+incoming = [
+    [25.22, 32.48],
+    [26.6, 32.37],
+    [27.8, 32.25],
+    [28.7, 32.10],
+    [29.4, 31.7],
+    [29.68, 31.2],
+]
+line(incoming, P, 3, "16 6 3 6")
+arrow(incoming, P, 0.46, 9)
+arrow(incoming, P, 0.94, 9)
+txt(45, 110, "日本から積地へ", 18, P)
+txt(45, 135, "（喜望峰経由）", 17, P)
+feat(
+    "日本 → 喜望峰 → ジブラルタル → シディ・ケリル沖（地中海部分）",
+    incoming,
+    "schematic_positioning",
+    "docs/route-additions-20261012.md",
+    "積地へ向かう配船の模式線。日本・喜望峰・ジブラルタルは図外。個船の積載状態は未確認。",
+)
 
-# Compact map key placed in unused land area.
-add('<rect x="46" y="718" width="431" height="230" fill="#122330" opacity=".96" stroke="#3b4b57" stroke-width="1"/>')
-txt(68,752,'凡例',20,halo=False)
-for y,col,dash,t in [(786,G,None,'原油パイプライン（概略・一部補間）'),(821,R,None,'海上経路（模式）'),(856,R,'12 10','南航に制約（サウジ関連船）'),(891,SH,None,'湾内発／紫点線は積替え接続'),(926,P,'16 6 3 6','積地へ向かう配船（模式）')]:
-    line([(70,y-6),(122,y-6)],col,3.4,dash,screen=True,under=False);txt(138,y,t,17,halo=False)
+# ヤンブーからの南航は航行制約を示す破線とし、意味を注記にも残す。
+southsea = [
+    yanbu,
+    [37.98, 23.7],
+    [38.1, 22.5],
+    [38.75, 20.8],
+    [39.6, 18.9],
+    [40.5, 17.15],
+    [41.5, 15.5],
+    [42.4, 14.0],
+    [43.08, 12.75],
+    [43.25, 12.55],
+    [43.7, 12.23],
+    [44.3, 12.03],
+    [45.4, 12.10],
+    [47.3, 12.6],
+    [49.6, 13.0],
+    [52.4, 13.65],
+]
+line(southsea, R, 3.7, "12 10")
+arrow(southsea, R, 0.20, 10)
+arrow(southsea, R, 0.48, 10)
+arrow(southsea, R, 0.985, 12)
+feat(
+    "ヤンブー→バブ・エル・マンデブ→日本方面（航行制約・破線）",
+    southsea,
+    "restricted_schematic_shipping",
+    "ユーザー指定の破線。EIA September 2026 STEO; The National 2026-09-12",
+    "サウジ関連船への航行制約を示す。全船の一律完全封鎖とは断定しない。実航跡ではない。",
+)
 
-# Geographically honest scale bar, referenced to latitude 23 N.
-kmdeg=111.32*math.cos(math.radians(23)); length=500/kmdeg/(east-west)*W
-xx,yy=62,1022
-for i in range(2):add(f'<rect x="{xx+i*length/2:.2f}" y="{yy}" width="{length/2:.2f}" height="5" fill="{["#d2dbe0","#778894"][i]}"/>')
-txt(xx,yy-10,'0',13,'#bac7d0',400,halo=False);txt(xx+length,yy-10,'500 km',13,'#bac7d0',400,'end',False)
-add('<path d="M 1739 59 L 1731 89 L 1739 83 L 1747 89 Z" fill="#b7cbd8"/>');txt(1739,45,'N',16,'#b7cbd8',500,'middle',False)
-add('</g>')
+# フジャイラ・ソハールから日本方面へ向かう経路の、図内の区間。
+fuj = [
+    [56.358639, 25.187944],
+    [56.60, 25.22],
+    [57.18, 25.10],
+    [58.2, 24.87],
+    [59.4, 24.20],
+    [60.55, 23.53],
+    [61.7, 23.20],
+    [63.15, 23.12],
+]
+soh = [
+    [56.63, 24.511667],
+    [57.0, 24.51],
+    [57.55, 24.46],
+    [58.2, 24.1],
+    [59.4, 23.5],
+    [60.6, 22.91],
+    [61.7, 22.66],
+    [63.15, 22.63],
+]
+for name, route in [("フジャイラ→日本方面", fuj), ("ソハール→日本方面", soh)]:
+    line(route, R, 3.7)
+    arrow(route, R, 0.98, 12)
+    feat(
+        name,
+        route,
+        "schematic_shipping",
+        "作図用の海域内代表点",
+        "日本方面を示す模式的な線。運航実績は未検証。",
+    )
 
-fy=TOP+H
+# ミナ・アル・ハファル沖は区域の代表点。STS と SBM は別の積載方式。
+# この縮尺では共通マーカーを用い、個別ブイの正確な位置を表さない。
+fahal = [58.533333, 23.65]
+fahal_out = [
+    fahal,
+    [59.05, 23.70],
+    [59.6, 23.35],
+    [60.4, 22.85],
+    [61.5, 22.3],
+    [63.15, 22.1],
+]
+line(fahal_out, R, 3.7)
+arrow(fahal_out, R, 0.98, 12)
+feat(
+    "ミナ・アル・ハファル沖 STS／原油SBM積載 → 日本方面",
+    fahal_out,
+    "schematic_shipping",
+    "docs/route-additions-20261012.md",
+    "原油積載区域を代表点で表示。STSとSBMは別の積載方式。個別ブイ位置・接続船・日本向け貨物は未確定。",
+)
+fx, fy = xy(fahal)
+add(
+    f'<circle cx="{fx}" cy="{fy}" r="9" fill="#101c27" '
+    f'stroke="{LOAD}" stroke-width="2"/>'
+)
+line(
+    [(fx, fy), (1592, 565)],
+    LOAD,
+    1.1,
+    screen=True,
+    under=False,
+    css="label-leader",
+)
+txt(1752, 586, "ミナ・アル・ハファル沖", 21, anchor="end")
+txt(1752, 612, "STS／原油SBM（模式）", 17, LOAD, 400, "end")
+features.append(
+    {
+        "type": "Feature",
+        "properties": {
+            "name": "ミナ・アル・ハファル沖（STS／原油SBM）",
+            "category": "loading_area",
+            "source": "docs/route-additions-20261012.md",
+            "accuracy": "NGA水路誌の港域代表点。個別SBMやSTS船の正確な位置ではない。",
+        },
+        "geometry": {"type": "Point", "coordinates": fahal},
+    }
+)
+
+# 湾内発は直航と湾外 STS に共通する区間を描き、積替え接続だけを点線にする。
+# ラス・タヌラの輸出とソハールの STS に関する資料を参照した模式線。
+gulf = [
+    [50.33, 26.80],
+    [50.75, 27.00],
+    [51.5, 27.05],
+    [52.5, 26.9],
+    [53.6, 26.6],
+    [54.6, 26.55],
+    [55.5, 26.55],
+    [56.1, 26.60],
+    [56.45, 26.58],
+    [56.70, 26.43],
+    [56.77, 26.10],
+    [56.75, 25.78],
+    [56.90, 25.48],
+    [57.18, 25.10],
+]
+line(gulf, SH, 3.7)
+arrow(gulf, SH, 0.28, 10)
+arrow(gulf, SH, 0.70, 10)
+gulf_source = (
+    "https://energynow.com/2026/09/"
+    "gulf-of-oman-ship-to-ship-oil-transfers-reach-limit-as-saudi-exports-surge/"
+)
+feat(
+    "ラス・タヌラ付近→ホルムズ海峡→湾外（直航・積替えの共通区間）",
+    gulf,
+    "schematic_gulf_shipping",
+    gulf_source,
+    "湾内発の直航と湾外STSの併存を模式化。個船の実航跡・日本仕向け実績を示さない。",
+)
+for name, branch in [
+    ("フジャイラ沖", [[56.75, 25.78], [56.70, 25.47], [56.64, 25.22]]),
+    (
+        "ソハール沖",
+        [[56.90, 25.48], [56.96, 25.10], [57.02, 24.78], [57.0, 24.51]],
+    ),
+]:
+    line(branch, SH, 2.7, "4 5")
+    arrow(branch, SH, 0.70, 7)
+    sx, sy = xy(branch[-1])
+    add(
+        f'<circle cx="{sx}" cy="{sy}" r="5" fill="#0b1c2b" '
+        f'stroke="{SH}" stroke-width="2"/>'
+    )
+    feat(
+        name + "の積替え接続（模式）",
+        branch,
+        "schematic_sts_connection",
+        gulf_source,
+        "沖合積替えの代表位置。全便の寄港・積替え、特定のラス・タヌラ発シャトル便を示すものではない。",
+    )
+txt(1200, 308, "湾内発（直航・積替え）", 21, SH)
+txt(1240, 282, "9月の通航回復／危険は継続", 15, "#d4c5ee", 400)
+txt(1735, 472, "日本方面へ", 24, R, 500, "end")
+txt(1356, 953, "日本方面へ", 23, R)
+
+# 海峡・運河と施設名。引き出し線の終点や文字位置は画面座標で調整する。
+# 地理座標を動かさずに注記だけを配置し、狭い海域の重なりを避ける。
+chokepoint([56.45, 26.57], "ホルムズ海峡", 64, -46)
+chokepoint([43.31, 12.58], "バブ・エル・マンデブ海峡", -70, -45)
+x, y = xy([32.43, 30.5])
+line([(x, y), (455, 110)], C, 1.2, screen=True, under=False)
+txt(465, 113, "スエズ運河", 22, C)
+
+# 各行は、名称・代表点・文字の x/y・補足・種別・文字の基準位置。
+points = [
+    (
+        "シディ・ケリル",
+        [29.6824996, 31.0510105],
+        345,
+        67,
+        "SUMED北端・再積込み",
+        "port",
+        "start",
+    ),
+    (
+        "アイン・スフナ",
+        [32.3214022, 29.6069879],
+        371,
+        219,
+        "SUMED南端・荷揚げ",
+        "port",
+        "start",
+    ),
+    (
+        "ヤンブー",
+        [38.2687784, 23.9793099],
+        540,
+        561,
+        "紅海側の輸出拠点",
+        "port",
+        "start",
+    ),
+    (
+        "ラス・タヌラ",
+        [50.163, 26.645],
+        1110,
+        285,
+        "ペルシャ湾側の輸出港",
+        "port",
+        "end",
+    ),
+    (
+        "アブカイク",
+        [49.6855348, 25.922357],
+        1202,
+        365,
+        "東西原油ライン起点",
+        "plant",
+        "start",
+    ),
+    ("ハブシャン", [53.6176, 23.8279], 1230, 500, None, "plant", "start"),
+    ("フジャイラ", [56.358639, 25.187944], 1502, 384, None, "port", "start"),
+    (
+        "ソハール",
+        [56.630, 24.511667],
+        1450,
+        481,
+        "独立した港湾拠点",
+        "port",
+        "end",
+    ),
+]
+for name, p, lx, ly, sub, kind, anchor in points:
+    # 補足文はデータに残しつつ、図上には施設名のみを表示する。
+    point(p, name, lx, ly, None, kind, anchor)
+    features.append(
+        {
+            "type": "Feature",
+            "properties": {
+                "name": name,
+                "category": kind,
+                "accuracy": "施設・港の代表点。積出しブイや個別設備の正確な位置ではない。",
+            },
+            "geometry": {"type": "Point", "coordinates": p},
+        }
+    )
+
+# 凡例は注記の少ない陸域に配置する。
+add(
+    '<rect x="46" y="718" width="431" height="230" fill="#122330" '
+    'opacity=".96" stroke="#3b4b57" stroke-width="1"/>'
+)
+txt(68, 752, "凡例", 20, halo=False)
+for y, col, dash, t in [
+    (786, G, None, "原油パイプライン（概略・一部補間）"),
+    (821, R, None, "海上経路（模式）"),
+    (856, R, "12 10", "南航に制約（サウジ関連船）"),
+    (891, SH, None, "湾内発／紫点線は積替え接続"),
+    (926, P, "16 6 3 6", "積地へ向かう配船（模式）"),
+]:
+    line([(70, y - 6), (122, y - 6)], col, 3.4, dash, screen=True, under=False)
+    txt(138, y, t, 17, halo=False)
+
+# 縮尺は北緯 23 度の経度 1 度当たりの距離に基づく。方位記号は北を示す。
+kmdeg = 111.32 * math.cos(math.radians(23))
+length = 500 / kmdeg / (east - west) * W
+xx, yy = 62, 1022
+for i in range(2):
+    add(
+        f'<rect x="{xx + i * length / 2:.2f}" y="{yy}" '
+        f'width="{length / 2:.2f}" height="5" '
+        f'fill="{["#d2dbe0", "#778894"][i]}"/>'
+    )
+txt(xx, yy - 10, "0", 13, "#bac7d0", 400, halo=False)
+txt(xx + length, yy - 10, "500 km", 13, "#bac7d0", 400, "end", False)
+add('<path d="M 1739 59 L 1731 89 L 1739 83 L 1747 89 Z" fill="#b7cbd8"/>')
+txt(1739, 45, "N", 16, "#b7cbd8", 500, "middle", False)
+add("</g>")
+
+# 下部の注記と帰属表示は地図のクリップ領域外に置く。
+fy = TOP + H
 add(f'<path d="M 0 {fy} H 1800" stroke="#40515d"/>')
-txt(48,fy+29,'海路は模式線。実線も安全な通航を示さず、「日本方面」は方向のみで、個別貨物の仕向地を確認したものではありません。',18,'#c4d2dc',400,halo=False)
-txt(48,fy+58,'赤破線は全船の完全封鎖を意味しません。湾内発はホルムズを通過。直航・湾外積替えがあり、起点・積替地点は代表位置です。',18,'#c4d2dc',400,halo=False)
-txt(48,fy+87,'STS＝船間積替え、SBM＝沖合ブイ経由の積載。配船線は個船の積載状態を示しません。既存の情勢注記は9/29基準です。',18,'#c4d2dc',400,halo=False)
-add(f'<a href="https://www.openstreetmap.org/copyright">')
-txt(48,fy+122,'© OpenStreetMap contributors  ·  OpenFreeMap / © OpenMapTiles',14,'#9dafbb',400,halo=False)
-add('</a>')
-txt(1752,fy+122,'資料：OSM・GEM・SUMED・Reuters・GME・NGA・公開AISほか',13,'#9dafbb',400,'end',False)
-add('</svg>')
-(OUT/'middle-east.svg').write_text('\n'.join(svg))
-(OUT/'middle-east.geojson').write_text(json.dumps({'type':'FeatureCollection','as_of':META['as_of'],'revalidated_at':META.get('revalidated_at'),'route_additions_as_of':META.get('route_additions_as_of'),'source_notes':'docs/middle-east-sources.md','features':features},ensure_ascii=False,indent=2))
-print('Wrote SVG and feature collection')
+txt(
+    48,
+    fy + 29,
+    "海路は模式線。実線も安全な通航を示さず、「日本方面」は方向のみで、個別貨物の仕向地を確認したものではありません。",
+    18,
+    "#c4d2dc",
+    400,
+    halo=False,
+)
+txt(
+    48,
+    fy + 58,
+    "赤破線は全船の完全封鎖を意味しません。湾内発はホルムズを通過。直航・湾外積替えがあり、起点・積替地点は代表位置です。",
+    18,
+    "#c4d2dc",
+    400,
+    halo=False,
+)
+txt(
+    48,
+    fy + 87,
+    "STS＝船間積替え、SBM＝沖合ブイ経由の積載。配船線は個船の積載状態を示しません。既存の情勢注記は9/29基準です。",
+    18,
+    "#c4d2dc",
+    400,
+    halo=False,
+)
+add('<a href="https://www.openstreetmap.org/copyright">')
+txt(
+    48,
+    fy + 122,
+    "© OpenStreetMap contributors  ·  OpenFreeMap / © OpenMapTiles",
+    14,
+    "#9dafbb",
+    400,
+    halo=False,
+)
+add("</a>")
+txt(
+    1752,
+    fy + 122,
+    "資料：OSM・GEM・SUMED・Reuters・GME・NGA・公開AISほか",
+    13,
+    "#9dafbb",
+    400,
+    "end",
+    False,
+)
+add("</svg>")
+
+# 出力は SVG と GeoJSON。要素・属性の順序を維持し、再生成時に比較できる形にする。
+(OUT / "middle-east.svg").write_text("\n".join(svg))
+(OUT / "middle-east.geojson").write_text(
+    json.dumps(
+        {
+            "type": "FeatureCollection",
+            "as_of": META["as_of"],
+            "revalidated_at": META.get("revalidated_at"),
+            "route_additions_as_of": META.get("route_additions_as_of"),
+            "source_notes": "docs/middle-east-sources.md",
+            "features": features,
+        },
+        ensure_ascii=False,
+        indent=2,
+    )
+)
+print("Wrote SVG and feature collection")

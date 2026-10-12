@@ -1,53 +1,108 @@
+/**
+ * 背景を内包したSVGを、オフラインのブラウザーで2倍解像度のPNGに変換する。
+ * QAは文字・引出線の配置を確認する補助。地理・出典の正しさは検証しない。
+ * 使用例: node scripts/render.cjs dist/global.svg dist/global.png
+ */
 const fs = require('node:fs');
 const path = require('node:path');
 const {pathToFileURL} = require('node:url');
 const {launchBrowser} = require('./browser.cjs');
 
-(async () => {
+async function main() {
   const [input, output] = process.argv.slice(2).map(p => path.resolve(p));
-  if (!input || !output) throw new Error('Usage: node scripts/render.cjs map.svg map.png');
+  if (!input || !output) {
+    throw new Error('Usage: node scripts/render.cjs map.svg map.png');
+  }
+
   const svg = fs.readFileSync(input, 'utf8');
   const width = Number(svg.match(/<svg[^>]*width="(\d+)"/)[1]);
   const height = Number(svg.match(/<svg[^>]*height="(\d+)"/)[1]);
   const browser = await launchBrowser();
+
   try {
-    const context = await browser.newContext({viewport: {width, height}, deviceScaleFactor: 2, offline: true});
+    const context = await browser.newContext({
+      viewport: {width, height},
+      deviceScaleFactor: 2,
+      offline: true,
+    });
     const page = await context.newPage();
     await page.goto(pathToFileURL(input).href);
+    // フォント確定前の撮影では字幅とQAの結果が安定しない。
     await page.evaluate(() => document.fonts.ready);
     await page.screenshot({path: output});
+
+    // evaluate内はブラウザー側。DOMの実際の配置を使い、SVG座標の推測を避ける。
     const qa = await page.evaluate(() => {
-      const texts = [...document.querySelectorAll('text')].map(e => ({text:e.textContent, b:e.getBoundingClientRect()}));
+      const texts = [...document.querySelectorAll('text')].map(element => ({
+        text: element.textContent,
+        bounds: element.getBoundingClientRect(),
+      }));
       const textOverlaps = [];
-      for (let i=0; i<texts.length; i++) for (let j=i+1; j<texts.length; j++) {
-        const a=texts[i], b=texts[j];
-        if (a.b.left<b.b.right && a.b.right>b.b.left && a.b.top<b.b.bottom && a.b.bottom>b.b.top) textOverlaps.push([a.text,b.text]);
+      for (let i = 0; i < texts.length; i++) {
+        for (let j = i + 1; j < texts.length; j++) {
+          const a = texts[i];
+          const b = texts[j];
+          if (
+            a.bounds.left < b.bounds.right && a.bounds.right > b.bounds.left &&
+            a.bounds.top < b.bounds.bottom && a.bounds.bottom > b.bounds.top
+          ) {
+            textOverlaps.push([a.text, b.text]);
+          }
+        }
       }
+
+      // 検査対象のクラスを持つ引出線のみ。海路と文字の接触は目視でも確認する。
       const leaders = [...document.querySelectorAll('.callout-leader, .label-leader')];
-      const leaderTextIntersections=[];
-      leaders.forEach((e,i) => {
-        const len=e.getTotalLength(), matrix=e.getScreenCTM();
-        for (const t of texts) for (let s=3; s<len-3; s+=2) {
-          const q=e.getPointAtLength(s), p=new DOMPoint(q.x,q.y).matrixTransform(matrix);
-          if (p.x>t.b.left+1 && p.x<t.b.right-1 && p.y>t.b.top+1 && p.y<t.b.bottom-1) {
-            leaderTextIntersections.push({leader:i+1,text:t.text}); break;
+      const leaderTextIntersections = [];
+      leaders.forEach((element, index) => {
+        const length = element.getTotalLength();
+        const matrix = element.getScreenCTM();
+        for (const text of texts) {
+          // 線の端点と文字枠の外周を少し除外し、境界での過検出を抑える。
+          for (let distance = 3; distance < length - 3; distance += 2) {
+            const point = element.getPointAtLength(distance);
+            const screen = new DOMPoint(point.x, point.y).matrixTransform(matrix);
+            if (
+              screen.x > text.bounds.left + 1 && screen.x < text.bounds.right - 1 &&
+              screen.y > text.bounds.top + 1 && screen.y < text.bounds.bottom - 1
+            ) {
+              leaderTextIntersections.push({leader: index + 1, text: text.text});
+              break;
+            }
           }
         }
       });
+
       return {
-        textOverlaps, leaderTextIntersections,
-        straightLeaders:leaders.every(e => !/[CQAS]/i.test(e.getAttribute('d'))),
-        squareCallouts:[...document.querySelectorAll('.callout-box')].every(e => !e.getAttribute('rx')),
-        researchCreditPresent:document.documentElement.textContent.includes('東京大学大学院 渡邉英徳研究室')
+        textOverlaps,
+        leaderTextIntersections,
+        straightLeaders: leaders.every(element => !/[CQAS]/i.test(element.getAttribute('d'))),
+        squareCallouts: [...document.querySelectorAll('.callout-box')].every(
+          element => !element.getAttribute('rx')
+        ),
+        // 全球図のクレジット確認用。中東図ではfalseでもエラーにしない。
+        researchCreditPresent: document.documentElement.textContent.includes(
+          '東京大学大学院 渡邉英徳研究室'
+        ),
       };
     });
-    const result={width:width*2,height:height*2,...qa};
-    fs.writeFileSync(output.replace(/\.png$/i,'.qa.json'),JSON.stringify(result,null,2)+'\n');
-    console.log(JSON.stringify({output,...result}));
-    if (qa.textOverlaps.length || qa.leaderTextIntersections.length || !qa.straightLeaders || !qa.squareCallouts) {
+
+    // 異常時にもPNGとQAを残し、修正箇所を確認できるようにする。
+    const result = {width: width * 2, height: height * 2, ...qa};
+    fs.writeFileSync(output.replace(/\.png$/i, '.qa.json'), JSON.stringify(result, null, 2) + '\n');
+    console.log(JSON.stringify({output, ...result}));
+    if (
+      qa.textOverlaps.length || qa.leaderTextIntersections.length ||
+      !qa.straightLeaders || !qa.squareCallouts
+    ) {
       throw new Error('文字や引出線の重なり、または枠形状の問題を検出しました。PNGとQA JSONを確認してください。');
     }
   } finally {
     await browser.close();
   }
-})().catch(error => {console.error(error.message);process.exitCode=1;});
+}
+
+main().catch(error => {
+  console.error(error.message);
+  process.exitCode = 1;
+});
