@@ -34,7 +34,7 @@ def typography_specimen(region, world):
 
 def symbol_specimen(d):
     r, c, line, sym = d["routes"], d["colors"], d["lines"], d["symbols"]
-    parts = [svg_open(d, 408, 338, "海上経路、制約、パイプライン、積替えと地点記号")]
+    parts = [svg_open(d, 408, 338, "海上経路・制約・パイプライン・積替え・地点記号")]
     for y, label, color, dash, width, bidirectional in [
         (25, "海上経路・船の往復", r["marine"], None, line["marine_width"], True),
         (85, "原油パイプライン・送油方向", r["pipeline"], None, line["pipeline_width"], False),
@@ -55,7 +55,7 @@ def symbol_specimen(d):
     parts.append(f'<circle cx="273" cy="286" r="{sym["loading_radius"]}" stroke="{r["loading"]}" stroke-width="{sym["loading_width"]}" fill="none"/>')
     for x, label in ((35,"港"),(164,"設備"),(292,"STS / SBM")):
         parts.append(f'<text x="{x}" y="292" font-size="17" fill="{c["primary"]}">{label}</text>')
-    parts.append(f'<text x="0" y="330" font-size="13" fill="{c["muted"]}">色に加え、線種・形・番号・文字で意味を示す。</text>')
+    parts.append(f'<text x="0" y="330" font-size="13" fill="{c["muted"]}">識別要素：色・線種・形・番号・文字</text>')
     return "".join(parts) + "</svg>"
 
 
@@ -69,15 +69,15 @@ def callout_specimen(d):
     for tx, ty, content, role, color in [
         (x+co["padding_x"],y+co["title_y"],"1","callout_key",d["routes"]["1"]),
         (x+co["title_x"],y+co["title_y"],"経路名","callout_title",c["primary"]),
-        (x+co["padding_x"],y+co["body_y"],"状況・対象・確認時点を短く示す","callout_status",c["muted"]),
-        (x+co["padding_x"],y+co["body_y"]+co["line_height"],"コスト：条件と増減の要因","callout_body",c["secondary"]),
-        (x+co["padding_x"],y+co["body_y"]+co["line_height"]*2,"リスク：通航・設備・接続の不確実性","callout_body",c["secondary"]),
+        (x+co["padding_x"],y+co["body_y"],"状況・対象・確認時点","callout_status",c["muted"]),
+        (x+co["padding_x"],y+co["body_y"]+co["line_height"],"コスト：条件・増減要因","callout_body",c["secondary"]),
+        (x+co["padding_x"],y+co["body_y"]+co["line_height"]*2,"リスク：通航・設備・接続","callout_body",c["secondary"]),
     ]:
         parts.append(f'<text x="{tx}" y="{ty}" fill="{color}" font-size="{t[role]["size"]}" font-weight="{t[role]["weight"]}">{content}</text>')
     parts.append(f'<path d="M 20 267 H 562" stroke="{d["routes"]["1"]}" stroke-width="{d["lines"]["route_width"]}"/>')
     parts.append(f'<path d="M 240 267 l 14 -5 v 10 z M 283 267 l -14 -5 v 10 z" fill="{d["routes"]["1"]}"/>')
     parts.append(f'<text x="20" y="312" fill="{c["muted"]}" font-size="18">本文 {t["callout_body"]["size"]}px ／ 行送り {co["line_height"]}px ／ 左右余白 {co["padding_x"]}px</text>')
-    parts.append(f'<text x="20" y="345" fill="{c["muted"]}" font-size="18">直線・矢印なしの引出線。長方形・影なし。</text>')
+    parts.append(f'<text x="20" y="345" fill="{c["muted"]}" font-size="18">引出線：直線・矢印なし ／ 枠：長方形・影なし</text>')
     return "".join(parts) + "</svg>"
 
 
@@ -98,17 +98,17 @@ def main():
     palette = swatches(world,[("1","1 中東・インド洋"),("2","2 紅海南下"),("3","3 地中海・喜望峰"),("4","4 米湾岸・喜望峰"),("5","5 米湾岸・パナマ"),("6","6 カナダ・太平洋"),("S","S 積載区域"),("common","共通区間")])
     regional = "".join(f'<em style="border-color:{region["routes"][key]}">{label}</em>' for key,label in [("pipeline","原油パイプライン"),("marine","海上経路"),("gulf","湾内・湾外"),("loading","積載区域")])
     page = f'''<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>原油輸送マップ｜デザインシステム</title><style>{css}</style><main>
-<div id="specimen"><header><div><div class="eyebrow">OIL TRANSPORT MAPS / DESIGN SYSTEM</div><h1>地理を背景に、輸送の構造を読む。</h1><p class="intro">発着地と経路を先に。地理の広がり、設備、注記は役割に応じて描き分ける。</p></div><div class="version">DESIGN SYSTEM {region['version']}<br>中東図・全球図 共通<br>{region['updated_at'].replace("-", ".")}</div></header>
-<div class="columns"><section><h2><span>01</span>文字の階層</h2><p class="caption">地理は明朝、輸送は角ゴシック。<br>主要な地物だけに細い縁取りを付ける。</p>{typography_specimen(region,world)}</section><section><h2><span>02</span>線と地点記号</h2><p class="caption">鮮やかな線を暗い背景に重ねる。<br>往復・送油方向・通航制約を形でも区別する。</p>{symbol_specimen(region)}</section><section><h2><span>03</span>注記と引出線</h2><p class="caption">見出し → 状況 → コスト → リスク。<br>線を文字に重ねず、対象の線上で止める。</p>{callout_specimen(world)}</section></div>
-<section class="palette"><div class="palette-heading"><h2><span>04</span>航路のパレット</h2><p>全球図は番号と経由地、中東図は輸送手段で区別。両図の色の意味は各凡例に従う。</p></div><div class="swatches">{palette}</div><div class="regional"><b>中東図</b>{regional}</div></section>
-<div class="rules"><section><b>余白と密度</b><p>地図の広さに合わせて文字を配置。<br>近接ラベルは位置・引出線で整理する。</p></section><section><b>情報の確度</b><p>実線は安全、破線は全船封鎖を意味しない。<br>情報基準日・追記日・作図版を分ける。</p></section><section><b>表示の検査</b><p>原寸と1440px幅で確認。単色面の本文は<br>4.5:1を目標にし、重なりと実際の見え方も見る。</p></section></div>
-<footer><span>書体・色・線幅・余白は design/ の設定から生成。見本の数値はSVG座標のpx。</span><span>東京大学大学院 渡邉英徳研究室 / CC BY 4.0</span></footer></div>
+<div id="specimen"><header><div><div class="eyebrow">OIL TRANSPORT MAPS / DESIGN SYSTEM</div><h1>原油輸送マップ デザイン仕様</h1><p class="intro">文字・配色・線・記号・注記の共通仕様</p></div><div class="version">DESIGN SYSTEM {region['version']}<br>中東図・全球図 共通<br>{region['updated_at'].replace("-", ".")}</div></header>
+<div class="columns"><section><h2><span>01</span>文字の階層</h2><p class="caption">地理：明朝体 ／ 輸送：角ゴシック<br>主要地物：細縁</p>{typography_specimen(region,world)}</section><section><h2><span>02</span>線と地点記号</h2><p class="caption">背景：暗色 ／ 航路：鮮明色<br>方向・制約：矢印・線種</p>{symbol_specimen(region)}</section><section><h2><span>03</span>注記と引出線</h2><p class="caption">見出し → 状況 → コスト → リスク<br>引出線：対象線に接続 ／ 文字との重なりなし</p>{callout_specimen(world)}</section></div>
+<section class="palette"><div class="palette-heading"><h2><span>04</span>航路のパレット</h2><p>全球図：番号・経由地 ／ 中東図：輸送手段 ／ 色の意味：各図の凡例</p></div><div class="swatches">{palette}</div><div class="regional"><b>中東図</b>{regional}</div></section>
+<div class="rules"><section><b>余白と密度</b><p>地名：地域面積に応じた配置<br>密集箇所：ラベル移動・引出線</p></section><section><b>情報表現</b><p>実線 ≠ 安全保証 ／ 破線 ≠ 全船封鎖<br>情報基準日・追記日・版番号：別管理</p></section><section><b>表示の検査</b><p>原寸・1440px幅 ／ 重なり・視認性<br>本文コントラスト目標：4.5:1（単色面）</p></section></div>
+<footer><span>設定：design/ ／ 寸法：SVG座標（px）</span><span>東京大学大学院 渡邉英徳研究室 / CC BY 4.0</span></footer></div>
 <div class="details"><nav class="links"><a href="DESIGN_SYSTEM.md">設計・更新ガイド</a><a href="../design/foundations.json">共通設定</a><a href="../design/profiles/middle-east.json">中東図の設定</a><a href="../design/profiles/global.json">全球図の設定</a></nav>
-<h2>設定の正本</h2><p>このHTMLは生成物です。design/ のJSONを変更し、下記のコマンドで再生成してください。図上の座標・注記内容は各地図の作図コードで管理します。</p><pre>python3 scripts/check_design.py
+<h2>設定の正本</h2><p>意匠：design/ のJSON ／ 座標・注記：各図の作図コード<br>出力：生成HTML・PNG</p><pre>python3 scripts/check_design.py
 python3 scripts/build_design_guide.py
 node scripts/preview.cjs docs/design-system.html docs/design-system.png --selector '#specimen'
 ./build.sh all</pre><div class="tables"><section><h2>中東図の文字設定</h2>{table(region)}</section><section><h2>全球図の文字設定</h2>{table(world)}</section></div>
-<h2>参照と適用範囲</h2><p>階層・一貫性・簡潔さは <a href="https://github.com/OrdnanceSurvey/GeoDataViz-Toolkit/blob/master/Cartographic%20Design%20Principles/README.md">Ordnance Surveyの地図設計指針</a>を参照。色以外の符号と単色面の文字コントラストは <a href="https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html">W3Cの色の使用</a>・<a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html">コントラストの解説</a>を参考にしました。地図全体のWCAG適合、色覚特性ごとの完全な識別性、航路・内容の正確性を認証するものではありません。</p></div></main></html>'''
+<h2>参照と適用範囲</h2><p>地図設計：<a href="https://github.com/OrdnanceSurvey/GeoDataViz-Toolkit/blob/master/Cartographic%20Design%20Principles/README.md">Ordnance Survey</a><br>色・文字：<a href="https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html">W3C 色の使用</a> ／ <a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html">文字コントラスト</a><br>検査対象：設定値・単色面の文字・描画配置<br>認証対象外：地図全体のWCAG適合・色覚特性別の識別性・航路と記述の正確性</p></div></main></html>'''
     output = ROOT / "docs/design-system.html"
     output.write_text(page)
     print(f"Wrote {output}")
