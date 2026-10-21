@@ -143,3 +143,8 @@ design/foundations.jsonと対象図のdesign/profiles/*.jsonを確認し、
 - [W3C WAI — Contrast (Minimum)](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html)：文字と背景のコントラストの参考値と適用条件。
 
 上記は一般的な設計・アクセシビリティの参考資料です。石油輸送に関する根拠は、[中東図の出典](middle-east-sources.md)・[全球図の出典](global-sources-and-costs.md)・[航路の追加記録](route-additions-20261012.md)に分けて保存しています。
+
+
+## ホルムズ拡大図の下部注記
+
+`maps/gulf-hormuz-oman/`は中東図のプロファイルを共用します。拡大図専用の`compact_footnote`は15px・400、`compact_footer_line_height`は22px、`compact_footer_height`は80pxです。凡例枠・積載方式の模式図は置かず、注記は2行の言い切り表現とします。既存2図の`footnote`設定は変更しません。

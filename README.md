@@ -45,7 +45,7 @@ README内の「AI向けリポジトリ案内」を入口にしてください。
 
 ## 完成した地図を見る
 
-画像を見るだけなら、実行環境の準備は不要です。下の画像から高解像度PNGを開けます。**作図更新：2026年10月12日**（情報の基準日とは別です）。
+画像を見るだけなら、実行環境の準備は不要です。下の画像から高解像度PNGを開けます。**中東図・全球図の作図更新：2026年10月12日**（情報の基準日とは別です）。
 
 | 中東の原油輸送ルート · 第15版 | 日本向け原油輸送ルート · 第13版 |
 |---|---|
@@ -56,6 +56,20 @@ README内の「AI向けリポジトリ案内」を入口にしてください。
 掲載版は**中東図第15版・全球図第13版**です。国・大陸・海域名は縁なしの明朝体、主要港・パイプライン名は細い縁取りの角ゴシックで描き分け、文字の重要性と親子関係を示します。今回、書体・色・線・記号・余白を共通のデザイン設定へ整理しました。航路・地点座標・記載内容・情報基準日は変更していません。日付別の完成品は [`examples/`](examples/) に保存し、過去版も比較できるよう残しています。
 
 **[デザインの方針と編集方法](docs/DESIGN_SYSTEM.md)** · [見本帳（HTML）](docs/design-system.html) · [見本帳（PNG）](docs/design-system.png)
+
+### ペルシャ湾・ホルムズ海峡の拡大図
+
+**作図更新：2026年10月22日。** ラス・タヌラ、ダス島、ムサンダム沿岸のシャトル輸送、フジャイラ・ソハール・ミナ沖のSTS／SBMを示すWeb用の拡大図です。凡例枠を省き、下部の注記を2行に整理しています。
+
+[![ペルシャ湾・ホルムズ海峡の拡大図](examples/2026-10-22-gulf-hormuz-oman/gulf-hormuz-oman-pc1440.png)](examples/2026-10-22-gulf-hormuz-oman/gulf-hormuz-oman.png)
+
+[PNG：3600 × 1948 px](examples/2026-10-22-gulf-hormuz-oman/gulf-hormuz-oman.png) · [SVG](examples/2026-10-22-gulf-hormuz-oman/gulf-hormuz-oman.svg) · [出典・編集方法・確認範囲](docs/gulf-hormuz-oman.md)
+
+```sh
+./build.sh gulf-hormuz-oman
+```
+
+`dist/gulf-hormuz-oman.*` とPC用画像を生成します。`all` は従来の中東図・全球図の2図です。拡大図は `user-data` レイヤーに未対応で、内蔵のGeoJSONを編集します。**フジャイラ発→ミナ沖STSは提供情報に基づく模式表示で、公開一次資料による独立確認は未了**です。10月22日の部分追加・作図調整を、全面的な情勢更新とは扱いません。
 
 ## 情報の基準日と読み方
 
@@ -99,6 +113,7 @@ Windowsでは、依存ライブラリとChromiumの取得後、PowerShell等か�
 ./build.sh all           # 両方
 ./build.sh middle-east   # 中東図のみ
 ./build.sh global        # 全球図のみ
+./build.sh gulf-hormuz-oman # ホルムズ拡大図のみ
 ```
 
 macOSでは `build.command` をダブルクリックすると、両図を作成して出力フォルダーを開きます。初回の `npm ci` とブラウザーの準備は先に済ませてください。
@@ -164,8 +179,9 @@ working_directory: repository_root
 instructions: AGENTS.md
 workflow: docs/AI_WORKFLOW.md
 entrypoint: scripts/build.py
-map_ids: [middle-east, global]
-build_targets: [all, middle-east, global]
+map_ids: [middle-east, global, gulf-hormuz-oman]
+all_targets: [middle-east, global]
+build_targets: [all, middle-east, global, gulf-hormuz-oman]
 design:
   guide: docs/DESIGN_SYSTEM.md
   foundations: design/foundations.json
@@ -185,6 +201,13 @@ maps:
     metadata: maps/global/metadata.json
     user_data: user-data/global.geojson
     sources: docs/global-sources-and-costs.md
+  gulf-hormuz-oman:
+    builder: maps/gulf-hormuz-oman/build.py
+    metadata: maps/gulf-hormuz-oman/metadata.json
+    routes: maps/gulf-hormuz-oman/data/zoom-routes.geojson
+    design_profile: design/profiles/middle-east.json
+    user_data: unsupported
+    sources: docs/gulf-hormuz-oman.md
 additional_sources: docs/route-additions-20261012.md
 commands:
   validate_data: python3 scripts/build.py all --check-data
@@ -206,6 +229,7 @@ outputs: ["{map_id}.png", "{map_id}.svg", "{map_id}.geojson", "{map_id}.qa.json"
 |---|---|
 | 独自の港・航路・注記を追加、更新、削除 | `user-data/global.geojson` / `user-data/middle-east.geojson` |
 | 中東図の経路・地点・記載内容・ラベル位置 | [`maps/middle-east/build.py`](maps/middle-east/build.py) |
+| ホルムズ拡大図の座標・記載内容・配置 | [`maps/gulf-hormuz-oman/`](maps/gulf-hormuz-oman/) と[専用ガイド](docs/gulf-hormuz-oman.md) |
 | 全球図の経路・地点・記載内容・バルーン位置 | [`maps/global/build.py`](maps/global/build.py) |
 | 共通の書体・基本色・余白・縁取り・追加データの既定意匠 | [`design/foundations.json`](design/foundations.json) |
 | 図ごとの文字階層・地名別サイズ差・航路色・線・記号 | [`design/profiles/`](design/profiles/) 内の対象図のJSON |

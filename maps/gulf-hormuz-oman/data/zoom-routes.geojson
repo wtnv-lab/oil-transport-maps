@@ -1,0 +1,806 @@
+{
+  "type": "FeatureCollection",
+  "as_of": "2026-09-29",
+  "revalidated_at": "2026-09-29T09:48:00+09:00",
+  "route_additions_as_of": "2026-10-12",
+  "source_notes": "docs/middle-east-sources.md",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ハブシャン—フジャイラ原油パイプライン（ADCOP）",
+        "category": "crude_pipeline",
+        "source": "Global Energy Monitor, public map dataset 2024-06-12",
+        "accuracy": "公開資料に基づく概略線形。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            53.6176,
+            23.8279
+          ],
+          [
+            53.6909,
+            23.937
+          ],
+          [
+            54.1381,
+            24.0253
+          ],
+          [
+            54.3781,
+            24.1648
+          ],
+          [
+            54.6168,
+            24.1671
+          ],
+          [
+            54.6572,
+            24.1615
+          ],
+          [
+            54.7243,
+            24.1693
+          ],
+          [
+            54.7912,
+            24.211
+          ],
+          [
+            54.8052,
+            24.273
+          ],
+          [
+            54.8317,
+            24.2699
+          ],
+          [
+            54.8386,
+            24.2781
+          ],
+          [
+            55.0235,
+            24.41
+          ],
+          [
+            55.1303,
+            24.6067
+          ],
+          [
+            55.1916,
+            24.5746
+          ],
+          [
+            55.3609,
+            24.5772
+          ],
+          [
+            55.3677,
+            24.5939
+          ],
+          [
+            55.6388,
+            24.6895
+          ],
+          [
+            55.7521,
+            24.7037
+          ],
+          [
+            55.752499029504314,
+            24.754775776552325
+          ],
+          [
+            55.8028,
+            24.7992
+          ],
+          [
+            55.7827,
+            24.8901
+          ],
+          [
+            55.8882,
+            25.0177
+          ],
+          [
+            55.9794,
+            25.0655
+          ],
+          [
+            56.0259,
+            25.1101
+          ],
+          [
+            56.0351,
+            25.1993
+          ],
+          [
+            56.1821,
+            25.1928
+          ],
+          [
+            56.2127,
+            25.2171
+          ],
+          [
+            56.3413,
+            25.2128
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "フジャイラ ↔ 日本方面",
+        "category": "schematic_shipping",
+        "source": "作図用の海域内代表点",
+        "accuracy": "日本方面を示す模式的な線。運航実績は未検証。",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。日本からの原油輸出、積荷、同一航路での往復実績、安全を示さない。",
+        "layout_note": "港・沖合からの外航輸送を集約して沖合代表点から描画。全便のSTSを意味しない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            56.64,
+            25.22
+          ],
+          [
+            56.9,
+            25.18
+          ],
+          [
+            57.18,
+            25.1
+          ],
+          [
+            58.2,
+            24.87
+          ],
+          [
+            59.4,
+            24.2
+          ],
+          [
+            60.55,
+            23.53
+          ],
+          [
+            61.7,
+            23.2
+          ],
+          [
+            63.15,
+            23.12
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ソハール ↔ 日本方面",
+        "category": "schematic_shipping",
+        "source": "作図用の海域内代表点",
+        "accuracy": "日本方面を示す模式的な線。運航実績は未検証。",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。日本からの原油輸出、積荷、同一航路での往復実績、安全を示さない。",
+        "layout_note": "港・沖合からの外航輸送を集約して沖合代表点から描画。全便のSTSを意味しない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            57.0,
+            24.51
+          ],
+          [
+            57.55,
+            24.46
+          ],
+          [
+            58.2,
+            24.1
+          ],
+          [
+            59.4,
+            23.9
+          ],
+          [
+            60.6,
+            23.4
+          ],
+          [
+            61.7,
+            23.0
+          ],
+          [
+            63.15,
+            22.86
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ミナ・アル・ハファル沖 STS／原油SBM積載区域 ↔ 日本方面",
+        "category": "schematic_shipping",
+        "source": "docs/route-additions-20261012.md",
+        "accuracy": "原油SBM積載とフジャイラ発の船による沖合STSを別記号で表し、外航輸送を沖合で集約。STSの代表位置と共通点は模式配置。個船・積荷・航跡を示さない。",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。日本からの原油輸出、積荷、同一航路での往復実績、安全を示さない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            59.3,
+            23.6
+          ],
+          [
+            59.6,
+            23.35
+          ],
+          [
+            60.4,
+            22.85
+          ],
+          [
+            61.5,
+            22.3
+          ],
+          [
+            63.15,
+            22.1
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ミナ・アル・ハファル沖（STS／原油SBM）",
+        "category": "loading_area",
+        "source": "docs/route-additions-20261012.md",
+        "accuracy": "NGA水路誌の港域代表点。個別SBMやSTS船の正確な位置ではない。"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          58.533333,
+          23.65
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "湾内発シャトル輸送の共通模式区間",
+        "category": "schematic_gulf_shipping",
+        "source": "https://energynow.com/2026/09/gulf-of-oman-ship-to-ship-oil-transfers-reach-limit-as-saudi-exports-surge/",
+        "accuracy": "複数の積出地・湾外STSを図上で集約。実際の同一航路・合流点・固定便を示さない。",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。日本からの原油輸出、積荷、同一航路での往復実績、安全を示さない。",
+        "layout_note": "始点をラス・タヌラ代表点に接続し、ダス島との記号表現を統一。港内航路や特定便を示さない。 海峡東岸の末端を南向きに接続し、東へ張り出して折り返す屈折を除去。",
+        "local_geometry_note": "湾内の陸地横断を修正。JMIC 011-26（2026-06-27）南側回廊を形状参考とし、ムサンダム西岸・北端・東岸沿いに模式化。北端から東岸は角を丸めるため海域内の代表点で補間し、公表座標の厳密な再現ではない。西岸の補助点は線幅の陸地接触を回避するための作図調整。現行の安全航路・個船の実航跡を示さない。",
+        "local_geometry_source": "https://www.ukmto.org/-/media/ukmto/products/jmic-advisory-note-01126-southern-route-widened.pdf",
+        "display_end_bearing": 180,
+        "previous_east_coast_display_points": [
+          [
+            56.359233,
+            26.404333
+          ],
+          [
+            56.4968,
+            26.41655
+          ],
+          [
+            56.540833,
+            26.403533
+          ],
+          [
+            56.5612,
+            26.3495
+          ],
+          [
+            56.55,
+            26.0
+          ],
+          [
+            56.6,
+            25.85
+          ]
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            50.163,
+            26.645
+          ],
+          [
+            50.4,
+            26.8
+          ],
+          [
+            51,
+            26.7
+          ],
+          [
+            52,
+            26.35
+          ],
+          [
+            53,
+            26.05
+          ],
+          [
+            54,
+            25.95
+          ],
+          [
+            54.55,
+            26.05
+          ],
+          [
+            55,
+            25.95
+          ],
+          [
+            55.65,
+            25.98
+          ],
+          [
+            56.0124,
+            26.0455
+          ],
+          [
+            56.15,
+            26.23
+          ],
+          [
+            56.2367,
+            26.3191
+          ],
+          [
+            56.359233,
+            26.404333
+          ],
+          [
+            56.47,
+            26.425
+          ],
+          [
+            56.56,
+            26.4
+          ],
+          [
+            56.62,
+            26.33
+          ],
+          [
+            56.64,
+            26.2
+          ],
+          [
+            56.63,
+            26.03
+          ],
+          [
+            56.6,
+            25.85
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "湾内航路 ↔ フジャイラ沖の積替え接続（往復模式）",
+        "category": "schematic_sts_connection",
+        "source": "https://energynow.com/2026/09/gulf-of-oman-ship-to-ship-oil-transfers-reach-limit-as-saudi-exports-surge/",
+        "accuracy": "沖合積替えの代表位置。全便の寄港・積替え、特定のラス・タヌラ発シャトル便を示すものではない。",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。日本からの原油輸出、積荷、同一航路での往復実績、安全を示さない。",
+        "layout_note": "港の白点と沖合STSの輪を分離。紫線は輪で終端。海域内の模式経由点。 共通線と枝線の南向きの接線を揃え、分岐点の急折れを避ける。方位指定は表示上の曲線制御であり航行指示ではない。",
+        "display_start_bearing": 180
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            56.6,
+            25.85
+          ],
+          [
+            56.72,
+            25.62
+          ],
+          [
+            56.76,
+            25.46
+          ],
+          [
+            56.72,
+            25.34
+          ],
+          [
+            56.64,
+            25.22
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "湾内航路 ↔ ソハール沖の積替え接続（往復模式）",
+        "category": "schematic_sts_connection",
+        "source": "https://energynow.com/2026/09/gulf-of-oman-ship-to-ship-oil-transfers-reach-limit-as-saudi-exports-surge/",
+        "accuracy": "沖合積替えの代表位置。全便の寄港・積替え、特定のラス・タヌラ発シャトル便を示すものではない。",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。日本からの原油輸出、積荷、同一航路での往復実績、安全を示さない。",
+        "layout_note": "港の白点と沖合STSの輪を分離。紫線は輪で終端。海域内の模式経由点。 共通線と枝線の南向きの接線を揃え、分岐点の急折れを避ける。方位指定は表示上の曲線制御であり航行指示ではない。",
+        "display_start_bearing": 180
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            56.6,
+            25.85
+          ],
+          [
+            56.52,
+            25.6
+          ],
+          [
+            56.5,
+            25.1
+          ],
+          [
+            56.7,
+            24.8
+          ],
+          [
+            57.0,
+            24.51
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ラス・タヌラ",
+        "category": "port",
+        "accuracy": "施設・港の代表点。積出しブイや個別設備の正確な位置ではない。"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          50.163,
+          26.645
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ハブシャン",
+        "category": "plant",
+        "accuracy": "施設・港の代表点。積出しブイや個別設備の正確な位置ではない。"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          53.6176,
+          23.8279
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "フジャイラ",
+        "category": "port",
+        "accuracy": "施設・港の代表点。積出しブイや個別設備の正確な位置ではない。"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          56.358639,
+          25.187944
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ソハール",
+        "category": "port",
+        "accuracy": "施設・港の代表点。積出しブイや個別設備の正確な位置ではない。"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          56.63,
+          24.511667
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ダス島（UAE）発シャトル輸送（模式）",
+        "category": "schematic_das_shuttle",
+        "reviewed_at": "2026-10-22",
+        "source": [
+          "https://ppa.adnoc.ae/en/ports/das-zirku-mubarraz/part-iii---7",
+          "https://www.argusmedia.com/de/about-argus/media-centre/press-releases/argus-gulf-of-oman-sts-abu-dhabi-crude-prices",
+          "https://www.bairdmaritime.com/shipping/tankers/adnoc-tests-buyer-appetite-again-with-ninth-spot-crude-tender-since-june"
+        ],
+        "accuracy": "ダス島の代表位置。Das原油の湾内積出・海峡外STSに基づく模式線。個別船の航跡、特定の港間固定便、日本向け貨物を示さない。",
+        "direction": "bidirectional",
+        "local_geometry_note": "ダス島発枝線を湾内の南寄りの共通線に接続。実航跡ではない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            52.88,
+            25.15
+          ],
+          [
+            53.05,
+            25.5
+          ],
+          [
+            53.35,
+            25.8
+          ],
+          [
+            54,
+            25.95
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ダス島（UAE）",
+        "category": "port",
+        "source": "https://ppa.adnoc.ae/en/ports/das-zirku-mubarraz/part-iii---7",
+        "accuracy": "島・原油積出区域の代表点。個別SPM位置ではない。"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          52.88,
+          25.15
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "フジャイラ 原油SBM（ADNOC SPM）",
+        "category": "crude_sbm",
+        "reviewed_at": "2026-10-22",
+        "source": [
+          "https://fujairahport.ae/business-activities/marine-services/",
+          "https://fujairahport.ae/wp-content/uploads/2020/02/Attachment-18-Fujairah-Terminal_Info-Booklet-Revised-01.11.2017.pdf",
+          "https://adnoc.ae/en/adnoc-pipelines/about-us/who-we-are"
+        ],
+        "accuracy": "2017年施設資料のSPM-B座標を設備群の代表点に使用。地図縮尺上、港の白点を重ねずこの積載点で表示。個別船の荷役・当日の稼働・数量を示さない。"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          56.41158333333333,
+          25.218138888888888
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "フジャイラ 原油SBM ↔ 日本方面",
+        "category": "schematic_sbm_shipping",
+        "reviewed_at": "2026-10-22",
+        "source": [
+          "https://fujairahport.ae/business-activities/marine-services/",
+          "https://fujairahport.ae/wp-content/uploads/2020/02/Attachment-18-Fujairah-Terminal_Info-Booklet-Revised-01.11.2017.pdf",
+          "https://adnoc.ae/en/adnoc-pipelines/about-us/who-we-are"
+        ],
+        "accuracy": "SBM積載からの輸出方式を表す海域内模式線。STS地点を経由しない。航跡、日本向け個別貨物、船数・輸送量を示さない。",
+        "direction": "bidirectional"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            56.41158333333333,
+            25.218138888888888
+          ],
+          [
+            56.45,
+            25.32
+          ],
+          [
+            56.62,
+            25.42
+          ],
+          [
+            57.1,
+            25.43
+          ],
+          [
+            58.2,
+            25.15
+          ],
+          [
+            59.4,
+            24.5
+          ],
+          [
+            60.6,
+            23.83
+          ],
+          [
+            61.7,
+            23.55
+          ],
+          [
+            63.15,
+            23.48
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "フジャイラ陸上設備 → 原油SBM（海底管・模式）",
+        "category": "schematic_subsea_loading",
+        "source": [
+          "https://fujairahport.ae/business-activities/marine-services/",
+          "https://fujairahport.ae/wp-content/uploads/2020/02/Attachment-18-Fujairah-Terminal_Info-Booklet-Revised-01.11.2017.pdf",
+          "https://adnoc.ae/en/adnoc-pipelines/about-us/who-we-are"
+        ],
+        "accuracy": "陸上ターミナルと原油SPMの接続関係だけを模式化。実配管線形ではない。",
+        "direction": "forward"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            56.358639,
+            25.187944
+          ],
+          [
+            56.41158333333333,
+            25.218138888888888
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "フジャイラ発 ↔ ミナ・アル・ハファル沖STS（模式）",
+        "category": "schematic_fujairah_mina_sts",
+        "added_at": "2026-10-22",
+        "source": "ユーザー提供情報（2026-10-22）",
+        "evidence_status": "user_provided",
+        "accuracy": "フジャイラ発の船によるミナ・アル・ハファル沖STSという接続関係を模式化。始点はフジャイラ地域を示し、積載設備・油種・数量・個船・航跡を確定しない。ミナ沖STS位置は図示上の代表点。",
+        "direction": "bidirectional",
+        "layout_note": "港とSBMを分離できない縮尺のため、出発線をフジャイラ沖で小さく離して開始。既存金色SBMへの直接接続とせず、発地は文字で示す。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            56.43,
+            25.08
+          ],
+          [
+            56.48,
+            24.95
+          ],
+          [
+            56.67,
+            24.63
+          ],
+          [
+            56.88,
+            24.38
+          ],
+          [
+            57.3,
+            24.18
+          ],
+          [
+            57.8,
+            23.95
+          ],
+          [
+            58.35,
+            23.9
+          ],
+          [
+            58.8,
+            23.75
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ミナ沖SBMからの外航接続",
+        "category": "schematic_export_connection",
+        "source": "作図上の接続関係",
+        "accuracy": "方式別の積載位置を外航輸送へ集約する模式線。実航跡、各船の合流を示さない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            58.533333,
+            23.65
+          ],
+          [
+            58.9,
+            23.7
+          ],
+          [
+            59.12,
+            23.68
+          ],
+          [
+            59.3,
+            23.6
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ミナ沖STSからの外航接続",
+        "category": "schematic_export_connection",
+        "source": "作図上の接続関係",
+        "accuracy": "方式別の積載位置を外航輸送へ集約する模式線。実航跡、各船の合流を示さない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            58.8,
+            23.75
+          ],
+          [
+            59.04,
+            23.72
+          ],
+          [
+            59.3,
+            23.6
+          ]
+        ]
+      }
+    }
+  ],
+  "local_revision": {
+    "updated_at": "2026-10-22",
+    "scope": "ダス島発シャトル、フジャイラ原油SBM積載の追加確認と接続表現の整理。全面的な情勢再検証ではない。"
+  }
+}

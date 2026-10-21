@@ -15,12 +15,13 @@ from user_layers import load_layer
 
 ROOT = Path(__file__).resolve().parents[1]
 MAPS = ("middle-east", "global")
+DETAIL_MAPS = ("gulf-hormuz-oman",)
 
 
 def main():
     """対象地図と出力先を選び、各処理の失敗を終了コードで呼出元へ伝える。"""
-    parser = argparse.ArgumentParser(description="中東図・全球図を再作図します（通常はネット接続不要）")
-    parser.add_argument("map", choices=("all",) + MAPS, nargs="?", default="all")
+    parser = argparse.ArgumentParser(description="中東図・全球図・ホルムズ拡大図を再作図します（通常はネット接続不要）")
+    parser.add_argument("map", choices=("all",) + MAPS + DETAIL_MAPS, nargs="?", default="all")
     parser.add_argument("--svg-only", action="store_true", help="PythonだけでSVG・GeoJSONを作成")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "dist")
     parser.add_argument(
@@ -32,6 +33,16 @@ def main():
         help="独自データの形式だけを検査。画像・出力ファイルは作成しない",
     )
     args = parser.parse_args()
+    # 拡大図は独立入力・専用レンダラーを使用。allと独自レイヤーは従来2図のまま。
+    if args.map in DETAIL_MAPS:
+        if args.check_data or args.data_dir.resolve() != (ROOT / "user-data").resolve():
+            parser.error("拡大図は --check-data / --data-dir に未対応です。maps/gulf-hormuz-oman/data/zoom-routes.geojson を編集してください。")
+        command = [sys.executable, str(ROOT / "maps" / args.map / "generate.py"),
+                   "--output-dir", str(args.output_dir.resolve())]
+        if args.svg_only:
+            command.append("--svg-only")
+        subprocess.run(command, check=True)
+        return
     selected = MAPS if args.map == "all" else (args.map,)
     data_dir = args.data_dir.resolve()
     # 全対象の入力を先に検査し、途中の地図だけが更新される失敗を避ける。

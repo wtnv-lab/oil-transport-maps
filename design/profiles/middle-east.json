@@ -92,6 +92,10 @@
     "route_edge": {
       "size": 19,
       "weight": 500
+    },
+    "compact_footnote": {
+      "size": 15,
+      "weight": 400
     }
   },
   "routes": {
@@ -177,7 +181,9 @@
     "passage_leader_gap": 12,
     "passage_leader_start": 14,
     "footer_line_height": 29,
-    "user_data_footer_height": 36
+    "user_data_footer_height": 36,
+    "compact_footer_height": 80,
+    "compact_footer_line_height": 22
   },
   "geographic_size_offsets": {
     "エジプト": 0,

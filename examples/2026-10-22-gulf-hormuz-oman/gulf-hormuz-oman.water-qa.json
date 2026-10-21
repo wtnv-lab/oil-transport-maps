@@ -1,0 +1,51 @@
+{
+  "method": "Actual SVG curve sampled every 0.25 logical px, at center and both stroke edges against saved OSM raster.",
+  "limitation": "Cartographic overlap only; not navigational validation. First 10 px at departure port symbols excluded.",
+  "routes": [
+    {
+      "category": "schematic_gulf_shipping",
+      "name": "湾内発シャトル輸送の共通模式区間",
+      "samples": 5188,
+      "excludedPortDeparturePx": 10,
+      "centerLandHits": 0,
+      "strokeLandHits": 0,
+      "examples": []
+    },
+    {
+      "category": "schematic_sts_connection",
+      "name": "湾内航路 ↔ フジャイラ沖の積替え接続（往復模式）",
+      "samples": 532,
+      "excludedPortDeparturePx": 0,
+      "centerLandHits": 0,
+      "strokeLandHits": 0,
+      "examples": []
+    },
+    {
+      "category": "schematic_sts_connection",
+      "name": "湾内航路 ↔ ソハール沖の積替え接続（往復模式）",
+      "samples": 1169,
+      "excludedPortDeparturePx": 0,
+      "centerLandHits": 0,
+      "strokeLandHits": 0,
+      "examples": []
+    },
+    {
+      "category": "schematic_das_shuttle",
+      "name": "ダス島（UAE）発シャトル輸送（模式）",
+      "samples": 1042,
+      "excludedPortDeparturePx": 10,
+      "centerLandHits": 0,
+      "strokeLandHits": 0,
+      "examples": []
+    },
+    {
+      "category": "schematic_fujairah_mina_sts",
+      "name": "フジャイラ発 ↔ ミナ・アル・ハファル沖STS（模式）",
+      "samples": 2075,
+      "excludedPortDeparturePx": 0,
+      "centerLandHits": 0,
+      "strokeLandHits": 0,
+      "examples": []
+    }
+  ]
+}
