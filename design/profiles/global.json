@@ -6,67 +6,67 @@
       "weight": 500
     },
     "title": {
-      "size": 39,
+      "size": 48,
       "weight": 600
     },
     "subtitle": {
-      "size": 22,
+      "size": 24,
       "weight": 400
     },
     "date": {
-      "size": 23,
+      "size": 24,
       "weight": 400
     },
     "header_note": {
-      "size": 19,
+      "size": 22,
       "weight": 400
     },
     "destination": {
-      "size": 36,
+      "size": 44,
       "weight": 700
     },
     "port": {
-      "size": 26,
+      "size": 30,
       "weight": 600
     },
     "passage": {
-      "size": 23,
+      "size": 24,
       "weight": 500
     },
     "loading_area": {
-      "size": 25,
-      "weight": 600
-    },
-    "detail": {
-      "size": 19,
-      "weight": 400
-    },
-    "continent": {
-      "size": 30,
-      "weight": 400
-    },
-    "ocean": {
-      "size": 31,
-      "weight": 400
-    },
-    "local_sea": {
-      "size": 21,
-      "weight": 400
-    },
-    "callout_title": {
       "size": 28,
       "weight": 600
     },
-    "callout_status": {
-      "size": 19,
-      "weight": 400
-    },
-    "callout_body": {
+    "detail": {
       "size": 21,
       "weight": 400
     },
+    "continent": {
+      "size": 34,
+      "weight": 400
+    },
+    "ocean": {
+      "size": 36,
+      "weight": 400
+    },
+    "local_sea": {
+      "size": 22,
+      "weight": 400
+    },
+    "callout_title": {
+      "size": 30,
+      "weight": 600
+    },
+    "callout_status": {
+      "size": 21,
+      "weight": 400
+    },
+    "callout_body": {
+      "size": 24,
+      "weight": 400
+    },
     "callout_key": {
-      "size": 25,
+      "size": 28,
       "weight": 600
     },
     "route_key": {
@@ -74,7 +74,7 @@
       "weight": 500
     },
     "route_note": {
-      "size": 21,
+      "size": 23,
       "weight": 400
     },
     "route_group": {
@@ -90,15 +90,15 @@
       "weight": 500
     },
     "footer_note": {
-      "size": 18,
-      "weight": 400
-    },
-    "credit": {
       "size": 20,
       "weight": 400
     },
+    "credit": {
+      "size": 19,
+      "weight": 400
+    },
     "attribution": {
-      "size": 16,
+      "size": 19,
       "weight": 500
     },
     "user_update": {
@@ -163,9 +163,17 @@
     "label_symbol_gap": 3,
     "label_baseline_factor": 0.42,
     "route_key_baseline_offset": 6,
-    "footer_user_data_height": 36
+    "footer_user_data_height": 36,
+    "frame_inset": 64
   },
   "callout": {
-    "border_opacity": 0.7
-  }
+    "border_opacity": 0.7,
+    "line_height": 40,
+    "title_y": 40,
+    "body_y": 81,
+    "base_height": 106,
+    "padding_x": 22,
+    "title_x": 59
+  },
+  "updated_at": "2026-10-22"
 }

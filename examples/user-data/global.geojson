@@ -1,7 +1,7 @@
 {
   "type": "FeatureCollection",
   "map": "global",
-  "updated_at": "2026-10-12",
+  "updated_at": "2026-10-22",
   "features": [
     {
       "type": "Feature",
@@ -83,13 +83,13 @@
         "status": "hypothetical",
         "callout": {
           "offset": [
-            -130,
+            -100,
             35
           ],
-          "width": 390,
+          "width": 350,
           "title": "独自データの描画例",
           "lines": [
-            "実在の港・航路ではありません。"
+            "実在の港・航路ではない描画例"
           ]
         }
       }

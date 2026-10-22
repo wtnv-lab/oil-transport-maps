@@ -1,0 +1,12 @@
+{
+  "width": 4800,
+  "height": 2676,
+  "calloutTextOverflow": [],
+  "textOutsideCanvas": [],
+  "textOverlaps": [],
+  "leaderTextIntersections": [],
+  "calloutTextOcclusions": [],
+  "straightLeaders": true,
+  "squareCallouts": true,
+  "researchCreditPresent": true
+}

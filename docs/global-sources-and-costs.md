@@ -8,6 +8,14 @@
 
 往復矢印は、船の配船・輸送による往復を模式化する。原油が双方へ流れること、個船の往復完了、往復が同じ航路であることを確認した表示ではない。海上の幹線と積替え接続を同じ方針で描き、パイプラインの矢印は原油の送油方向を維持する。
 
+## 2026年10月22日の局所追記・作図更新（第14版）
+
+情勢・費用の基準日は9月29日のまま、10月22日のホルムズ拡大図で整理したダス島発の枝線、ムサンダム沿岸の湾内線形、フジャイラの原油SBM、フジャイラ発→ミナ・アル・ハファル沖STSの接続を全球図へ反映した。世界縮尺では個別ブイを分けず、積載・積替え区域へ集約している。湾内発の直航と湾外での積替えは併存し、全貨物にSTSが必要という意味ではない。
+
+**フジャイラ発の船によるミナ沖STSはユーザー提供情報で、特定区間を裏づける公開一次資料による独立確認は未了。** 個船、積載設備、油種、数量は確定していない。施設・線形の出典と限界は[ホルムズ拡大図の記録](gulf-hormuz-oman.md)を参照。全球図に採用した5本の線形は[`maps/global/data/gulf-routes.geojson`](../maps/global/data/gulf-routes.geojson)に保存し、各Featureの根拠を保持する。
+
+説明枠は「方式・費用要因・リスク」の3行に短縮し、従来の航海日数・再開報道の詳細は本資料へ残した。重要な船型条件、パナマのVLCC通航不可、船の往復と原油の流れの区別は維持する。10月22日時点の運航、安全性、施設稼働、運賃を全面的に再検証した版ではない。
+
 ## 日本向け原油調達の6系統
 
 以下の経路名は日本向け調達の方向を記す。図の往復矢印は船の移動を表し、この表を両方向の原油輸送や往復運賃の説明に変えるものではない。
@@ -23,7 +31,7 @@
 
 **シディ・ケリル行きの調査記録：** 第8版までは、喜望峰・ジブラルタルを経て積地へ向かう船の移動を⑦の一点鎖線と注記枠で示した。第9版では既存の地中海・喜望峰経路上の往復矢印にまとめた。ENEOS ENDEAVORの日本出港・シディ沖所在には部分的な公開AIS裏付けがあるが、全航跡、積載状態、積込完了、日本への復路完了は未確認である。これらの調査記録は保持し、往復表示によって確認済みへ変更しない。長距離の配船・待機による船腹拘束、喜望峰の荒天・積込待ちという一般的な費用・リスク要因を、シディ・ケリル行きだけの特例として図示しない。
 
-**ヤンブーの9月29日基準の状況：** 9月28日のBloomberg配信は、東西パイプライン経由の輸出再開と約350万バレル／日（公称能力約700万バレル／日の半分）の通油を報じた。匿名関係者に基づき、Aramco・政府の確認発表ではないため、図では「9/28 再開報道・全面復旧は未確認」とする。[Rigzone／Bloomberg、9月28日](https://www.rigzone.com/news/wire/saudi_arabias_key_oil_pipeline_starts_exports-28-sep-2026-184718-article/)
+**ヤンブーの9月29日基準の状況：** 9月28日のBloomberg配信は、東西パイプライン経由の輸出再開と約350万バレル／日（公称能力約700万バレル／日の半分）の通油を報じた。匿名関係者に基づき、Aramco・政府の確認発表ではない。第13版までは図に「9/28 再開報道・全面復旧は未確認」と記載した。第14版では図内から省略したが、全面復旧を確認済みとする変更ではない。[Rigzone／Bloomberg、9月28日](https://www.rigzone.com/news/wire/saudi_arabias_key_oil_pipeline_starts_exports-28-sep-2026-184718-article/)
 
 **湾内発の直航とSTSの併存〔報道・暫定推計〕：** 9月28日のReutersはKplerの暫定データとして、9月のホルムズ経由輸出約740万バレル／日、ラス・タヌラ積出し約360万バレル／日、前週のサウジ原油積載VLCCの海峡退出19隻を報じた。輸出量は9月の月間推計、隻数は前週の観測であり、日本向け数量ではない。AIS停止船を把握できない限界もある。[Reuters／MarketScreener、9月28日](https://uk.marketscreener.com/news/mideast-oil-exports-rebound-in-september-as-saudi-arabia-boosts-shipments-ce785adcd880f624)
 
@@ -50,7 +58,7 @@ Worldscale（WS）は航路別の基準運賃に対する指数なので、異�
 
 ## 主な航路・運用の根拠
 
-- **紅海と北回り〔報道〕：** S&P Globalは9月17日時点で、9月9日以降のバブ・エル・マンデブにVLCC通航を確認せず、他船種は通航していると報告。北回り・喜望峰経由は**ヤンブーから紅海を南下する経路と比べて**少なくとも3週間長いとする。図にも比較対象を明記した。9月17日までの観測であり、9月29日の全船通航状況を断定するものではない。[S&P Global、9月17日](https://www.spglobal.com/energy/en/news-research/latest-news/shipping/091726-vlccs-avoid-red-sea-strait-as-houthi-threats-boosts-rates-amid-rising-shipping-risks)
+- **紅海と北回り〔報道〕：** S&P Globalは9月17日時点で、9月9日以降のバブ・エル・マンデブにVLCC通航を確認せず、他船種は通航していると報告。北回り・喜望峰経由は**ヤンブーから紅海を南下する経路と比べて**少なくとも3週間長いとする。第13版までは図にも比較対象を明記した。第14版では「航海延長」と短縮し、日数と比較条件を本資料に残した。9月17日までの観測であり、9月29日の全船通航状況を断定するものではない。[S&P Global、9月17日](https://www.spglobal.com/energy/en/news-research/latest-news/shipping/091726-vlccs-avoid-red-sea-strait-as-houthi-threats-boosts-rates-amid-rising-shipping-risks)
 - **マラッカ沖の日本向けSTS〔報道〕：** ヤンブー・フジャイラ・ミナ・アル・ハファルから運んだ原油をリンギ／タンジュン・ブルアスで日本の元売りが用船するVLCCへ積み替える運用を、6月9日のPlattsが報じた。10月12日に再読して図へ明記したが、10月の実施・輸送量や全貨物の経由を保証しない。[S&P Global、6月9日](https://www.spglobal.com/energy/en/news-research/latest-news/shipping/060926-japan-refiners-deploy-vlccs-for-ship-transfers-us-crude-amid-hormuz-disruptions)
 - **シディ・ケリル沖のSBM〔運営会社公表〕：** SUMED公式の施設案内に基づき、船間積替えのSTSとは別に、沖合ブイ経由の原油積載を示す。記号は区域代表点で、個別ブイ位置や当日の稼働を示さない。[SUMED公式・Facilities、10月12日確認](https://www.sumed.org/?p=facilities)
 - **米国湾岸からの喜望峰航路〔報道〕：** 石油連盟会長への取材による約55日の説明と、VLCCのパナマ通航不可を確認。約55日は5月20日の説明であり、現在の所要日数の保証ではない。[Reuters／MarketScreener、5月20日](https://hk.marketscreener.com/news/japan-oil-refiners-expect-to-secure-enough-supply-to-replace-middle-east-crude-for-summer-ce7f5ad8d089f327)

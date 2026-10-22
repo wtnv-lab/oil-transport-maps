@@ -115,7 +115,25 @@ async function main() {
         }
       }
 
+      // 大きくした本文が枠の外へ出ず、上下の余白を残していることを確認。
+      const calloutTextOverflow = [];
+      document.querySelectorAll('.callout').forEach(group => {
+        const box = group.querySelector('.callout-box').getBoundingClientRect();
+        group.querySelectorAll('text').forEach(element => {
+          const rect = element.getBoundingClientRect();
+          if (rect.left < box.left + 12 || rect.right > box.right - 12 ||
+              rect.top < box.top + 12 || rect.bottom > box.bottom - 12) {
+            calloutTextOverflow.push({key:group.dataset.key, text:element.textContent});
+          }
+        });
+      });
+      const root = document.documentElement.getBoundingClientRect();
+      const textOutsideCanvas = texts.filter(({bounds}) =>
+        bounds.left < root.left || bounds.right > root.right ||
+        bounds.top < root.top || bounds.bottom > root.bottom
+      ).map(({text}) => text);
       return {
+        calloutTextOverflow, textOutsideCanvas,
         textOverlaps,
         leaderTextIntersections,
         calloutTextOcclusions,
@@ -136,6 +154,7 @@ async function main() {
     fs.writeFileSync(output.replace(/\.png$/i, '.qa.json'), JSON.stringify(result, null, 2) + '\n');
     console.log(JSON.stringify({output, ...result}));
     if (
+      qa.calloutTextOverflow.length || qa.textOutsideCanvas.length ||
       qa.textOverlaps.length || qa.leaderTextIntersections.length || qa.calloutTextOcclusions.length ||
       qa.userDataTextOutsideMap?.length ||
       !qa.straightLeaders || !qa.squareCallouts

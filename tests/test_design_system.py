@@ -47,7 +47,7 @@ class DesignSystemTest(unittest.TestCase):
             load_design("global", self.root)
 
     def test_collapsed_callout_spacing_is_rejected(self):
-        self.update("foundations.json", lambda d: d["callout"].update(line_height=10))
+        self.update("profiles/global.json", lambda d: d["callout"].update(line_height=10))
         with self.assertRaisesRegex(ValueError, "行送り"):
             load_design("global", self.root)
 

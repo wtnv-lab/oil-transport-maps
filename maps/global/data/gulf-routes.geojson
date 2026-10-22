@@ -1,0 +1,303 @@
+{
+  "type": "FeatureCollection",
+  "as_of": "2026-09-29",
+  "revalidated_at": "2026-09-29T09:48:00+09:00",
+  "route_additions_as_of": "2026-10-12",
+  "source_notes": "docs/gulf-hormuz-oman.md",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "湾内発シャトル輸送の共通模式区間",
+        "category": "schematic_gulf_shipping",
+        "source": "https://energynow.com/2026/09/gulf-of-oman-ship-to-ship-oil-transfers-reach-limit-as-saudi-exports-surge/",
+        "accuracy": "複数の積出地・湾外STSを図上で集約。実際の同一航路・合流点・固定便を示さない。",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。日本からの原油輸出、積荷、同一航路での往復実績、安全を示さない。",
+        "layout_note": "始点をラス・タヌラ代表点に接続し、ダス島との記号表現を統一。港内航路や特定便を示さない。 海峡東岸の末端を南向きに接続し、東へ張り出して折り返す屈折を除去。",
+        "local_geometry_note": "湾内の陸地横断を修正。JMIC 011-26（2026-06-27）南側回廊を形状参考とし、ムサンダム西岸・北端・東岸沿いに模式化。北端から東岸は角を丸めるため海域内の代表点で補間し、公表座標の厳密な再現ではない。西岸の補助点は線幅の陸地接触を回避するための作図調整。現行の安全航路・個船の実航跡を示さない。",
+        "local_geometry_source": "https://www.ukmto.org/-/media/ukmto/products/jmic-advisory-note-01126-southern-route-widened.pdf",
+        "display_end_bearing": 180,
+        "previous_east_coast_display_points": [
+          [
+            56.359233,
+            26.404333
+          ],
+          [
+            56.4968,
+            26.41655
+          ],
+          [
+            56.540833,
+            26.403533
+          ],
+          [
+            56.5612,
+            26.3495
+          ],
+          [
+            56.55,
+            26.0
+          ],
+          [
+            56.6,
+            25.85
+          ]
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            50.163,
+            26.645
+          ],
+          [
+            50.4,
+            26.8
+          ],
+          [
+            51,
+            26.7
+          ],
+          [
+            52,
+            26.35
+          ],
+          [
+            53,
+            26.05
+          ],
+          [
+            54,
+            25.95
+          ],
+          [
+            54.55,
+            26.05
+          ],
+          [
+            55,
+            25.95
+          ],
+          [
+            55.65,
+            25.98
+          ],
+          [
+            56.0124,
+            26.0455
+          ],
+          [
+            56.15,
+            26.23
+          ],
+          [
+            56.2367,
+            26.3191
+          ],
+          [
+            56.359233,
+            26.404333
+          ],
+          [
+            56.47,
+            26.425
+          ],
+          [
+            56.56,
+            26.4
+          ],
+          [
+            56.62,
+            26.33
+          ],
+          [
+            56.64,
+            26.2
+          ],
+          [
+            56.63,
+            26.03
+          ],
+          [
+            56.6,
+            25.85
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "湾内航路 ↔ フジャイラ沖の積替え接続（往復模式）",
+        "category": "schematic_sts_connection",
+        "source": "https://energynow.com/2026/09/gulf-of-oman-ship-to-ship-oil-transfers-reach-limit-as-saudi-exports-surge/",
+        "accuracy": "沖合積替えの代表位置。全便の寄港・積替え、特定のラス・タヌラ発シャトル便を示すものではない。",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。日本からの原油輸出、積荷、同一航路での往復実績、安全を示さない。",
+        "layout_note": "港の白点と沖合STSの輪を分離。紫線は輪で終端。海域内の模式経由点。 共通線と枝線の南向きの接線を揃え、分岐点の急折れを避ける。方位指定は表示上の曲線制御であり航行指示ではない。",
+        "display_start_bearing": 180
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            56.6,
+            25.85
+          ],
+          [
+            56.72,
+            25.62
+          ],
+          [
+            56.76,
+            25.46
+          ],
+          [
+            56.72,
+            25.34
+          ],
+          [
+            56.64,
+            25.22
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "湾内航路 ↔ ソハール沖の積替え接続（往復模式）",
+        "category": "schematic_sts_connection",
+        "source": "https://energynow.com/2026/09/gulf-of-oman-ship-to-ship-oil-transfers-reach-limit-as-saudi-exports-surge/",
+        "accuracy": "沖合積替えの代表位置。全便の寄港・積替え、特定のラス・タヌラ発シャトル便を示すものではない。",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。日本からの原油輸出、積荷、同一航路での往復実績、安全を示さない。",
+        "layout_note": "港の白点と沖合STSの輪を分離。紫線は輪で終端。海域内の模式経由点。 共通線と枝線の南向きの接線を揃え、分岐点の急折れを避ける。方位指定は表示上の曲線制御であり航行指示ではない。",
+        "display_start_bearing": 180
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            56.6,
+            25.85
+          ],
+          [
+            56.52,
+            25.6
+          ],
+          [
+            56.5,
+            25.1
+          ],
+          [
+            56.7,
+            24.8
+          ],
+          [
+            57.0,
+            24.51
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ダス島（UAE）発シャトル輸送（模式）",
+        "category": "schematic_das_shuttle",
+        "reviewed_at": "2026-10-22",
+        "source": [
+          "https://ppa.adnoc.ae/en/ports/das-zirku-mubarraz/part-iii---7",
+          "https://www.argusmedia.com/de/about-argus/media-centre/press-releases/argus-gulf-of-oman-sts-abu-dhabi-crude-prices",
+          "https://www.bairdmaritime.com/shipping/tankers/adnoc-tests-buyer-appetite-again-with-ninth-spot-crude-tender-since-june"
+        ],
+        "accuracy": "ダス島の代表位置。Das原油の湾内積出・海峡外STSに基づく模式線。個別船の航跡、特定の港間固定便、日本向け貨物を示さない。",
+        "direction": "bidirectional",
+        "local_geometry_note": "ダス島発枝線を湾内の南寄りの共通線に接続。実航跡ではない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            52.88,
+            25.15
+          ],
+          [
+            53.05,
+            25.5
+          ],
+          [
+            53.35,
+            25.8
+          ],
+          [
+            54,
+            25.95
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "フジャイラ発 ↔ ミナ・アル・ハファル沖STS（模式）",
+        "category": "schematic_fujairah_mina_sts",
+        "added_at": "2026-10-22",
+        "source": "ユーザー提供情報（2026-10-22）",
+        "evidence_status": "user_provided",
+        "accuracy": "フジャイラ発の船によるミナ・アル・ハファル沖STSという接続関係を模式化。始点はフジャイラ地域を示し、積載設備・油種・数量・個船・航跡を確定しない。ミナ沖STS位置は図示上の代表点。",
+        "direction": "bidirectional",
+        "layout_note": "港とSBMを分離できない縮尺のため、出発線をフジャイラ沖で小さく離して開始。既存金色SBMへの直接接続とせず、発地は文字で示す。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            56.43,
+            25.08
+          ],
+          [
+            56.48,
+            24.95
+          ],
+          [
+            56.67,
+            24.63
+          ],
+          [
+            56.88,
+            24.38
+          ],
+          [
+            57.3,
+            24.18
+          ],
+          [
+            57.8,
+            23.95
+          ],
+          [
+            58.35,
+            23.9
+          ],
+          [
+            58.8,
+            23.75
+          ]
+        ]
+      }
+    }
+  ],
+  "local_revision": {
+    "updated_at": "2026-10-22",
+    "scope": "ダス島発シャトル、フジャイラ原油SBM積載の追加確認と接続表現の整理。全面的な情勢再検証ではない。"
+  },
+  "snapshot": {
+    "copied_at": "2026-10-22",
+    "source_file": "maps/gulf-hormuz-oman/data/zoom-routes.geojson",
+    "scope": "全球図に採用した5本の線形。情勢・費用の全面再検証ではない。拡大図の将来の更新を自動反映しない。"
+  }
+}

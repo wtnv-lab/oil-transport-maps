@@ -49,9 +49,18 @@ OUT.mkdir(parents=True, exist_ok=True)
 META = json.loads((D / "metadata.json").read_text())
 AS_OF = datetime.date.fromisoformat(META["as_of"])
 ADDED = datetime.date.fromisoformat(META["route_additions_as_of"])
+LOCAL_ADDED = datetime.date.fromisoformat(META["local_revision_as_of"])
+LAYOUT_UPDATED = datetime.date.fromisoformat(META["layout_updated_at"])
+# 基準日・一部追記・作図更新を混同せず、保存済みメタデータから表示する。
+DATE_LABEL = f"{AS_OF:%Y.%m.%d} 基準 ／ {ADDED:%m.%d} 航路追記"
+UPDATE_LABEL = (
+    f"{LOCAL_ADDED:%m.%d} 湾岸追記・作図更新"
+    if LOCAL_ADDED == LAYOUT_UPDATED
+    else f"{LOCAL_ADDED:%m.%d} 湾岸追記 ／ {LAYOUT_UPDATED:%m.%d} 作図更新"
+)
 
 # 幅、地図本体の高さ、上部余白、図全体の高さ（いずれも SVG のピクセル単位）。
-W, MH, TOP, H = 2400, 1120, 145, 1365
+W, MH, TOP, H = 2400, 1120, 112, 1338
 # 色・字級・線・記号は両図で共有する基盤と、この図の表示プロファイルから取得。
 # 地理座標や配置座標はこのスクリプト、見た目の規則は design/ に分ける。
 DS = load_design('global')
@@ -332,6 +341,7 @@ def bubble(x, y, w, title, key, rows, tail, status=None):
     # 共通の余白・行送りから高さを求め、本文行数が増えても下部余白を保つ。
     line_height = CALLOUT['line_height']
     height = CALLOUT['base_height'] + max(0, len(rows) - 1) * line_height + (line_height if status else 0)
+    add(f'<g class="callout" data-key="{key}">')
     add(
         f'<rect class="callout-box" x="{x}" y="{y}" width="{w}" '
         f'height="{height}" fill="{C["panel"]}" fill-opacity="{CALLOUT["fill_opacity"]}" '
@@ -347,6 +357,7 @@ def bubble(x, y, w, title, key, rows, tail, status=None):
     for row in rows:
         text(x + CALLOUT['padding_x'], yy, row, color=C['secondary'], halo=False, role='callout_body')
         yy += line_height
+    add('</g>')
     return height
 
 
@@ -364,15 +375,11 @@ add(
     + f'<rect y="{TOP}" width="{W}" height="{MH}"/></clipPath></defs>'
 )
 add(f'<rect width="{W}" height="{H}" fill="{C["frame"]}"/>')
-text(SPACE['frame_inset'], 62, META['title'], halo=False, role='title')
-text(SPACE['frame_inset'], 111, '中東・北米との往復航路と、日本向け調達のコスト・リスク', color=C['secondary'], halo=False, role='subtitle')
-text(
-    W - SPACE['frame_inset'],
-    59,
-    f'{AS_OF.year}年{AS_OF.month}月{AS_OF.day}日 基準 ／ {ADDED.month}月{ADDED.day}日 航路追記',
-    color=C['secondary'], anchor='end', halo=False, role='date',
-)
-text(W - SPACE['frame_inset'], 104, '公開情報による模式図  ｜  線の太さは輸送量を示さない', color=C['muted'], anchor='end', halo=False, role='header_note')
+text(SPACE['frame_inset'],53,META['title'],halo=False,role='title')
+text(SPACE['frame_inset'],92,'中東・北米との往復航路と、日本向け調達の費用・リスク',color=C['secondary'],halo=False,role='subtitle')
+text(W-SPACE['frame_inset'],53,DATE_LABEL,color=C['secondary'],anchor='end',halo=False,role='date')
+text(W-SPACE['frame_inset'],92,UPDATE_LABEL,color=C['muted'],anchor='end',halo=False,role='header_note')
+
 img = base64.b64encode((D / 'assets/osm-dark-world.png').read_bytes()).decode()
 add(
     f'<image x="0" y="{TOP}" width="2400" height="1120" href="data:image/png;base64,{img}"/>',
@@ -505,52 +512,25 @@ oman = [
     malacca,
 ]
 route('オマーン湾側 → マラッカ海峡', oman, '1', arrows=(0.47,), end_dir=(1, 0))
-gulf = [
-    [50.33, 26.8],
-    [51.5, 27.05],
-    [53.6, 26.6],
-    [55.5, 26.55],
-    [56.1, 26.6],
-    [56.45, 26.58],
-    [56.7, 26.43],
-    [56.77, 26.1],
-    [56.75, 25.78],
-    [57.2, 25.3],
-]
-route('湾内発 → ホルムズ海峡 → アジア方面（直航・積替えの共通区間）', gulf, '1', width=L['connection_width'], arrows=())
-route(
-    'フジャイラ沖の積替え接続（模式）',
-    [[56.75, 25.78], [56.6, 25.3], fuj],
-    '1',
-    dash=L['connection_dash'],
-    width=L['connection_width'],
-    arrows=(),
-)
-route(
-    'ソハール沖の積替え接続（模式）',
-    [[56.75, 25.78], [57.0, 25.2], [57.0, 24.7], [58.0, 24.4], [59.5, 23.8]],
-    '1',
-    dash=L['connection_dash'],
-    width=L['connection_width'],
-    arrows=(),
-)
-
-# この代表点は STS と原油 SBM の区域をまとめたもの。個別ブイの位置ではない。
-
-fahal = [58.533333, 23.65]
-route(
-    'ミナ・アル・ハファル沖 STS／原油SBM積載 → 日本方面（模式）',
-    [fahal, [59.2, 23.78], [59.65, 23.4], [61.5, 21]],
-    '1',
-    width=L['connection_width'],
-    arrows=(),
-)
-features[-1]['properties'].update(
-    {
-        'source_notes': 'docs/route-additions-20261012.md',
-        'accuracy': '区域代表点。STSとSBMは別方式。最新の個船・日本仕向けはユーザー提供観測で、船別実績は独立検証していない。',
-    },
-)
+# 10月22日の拡大図から採用した線形の保存版。拡大図の更新を自動転記しない。
+gulf_data=json.loads((D/'data/gulf-routes.geojson').read_text())['features']
+def gulf_feature(category):
+    return next(f for f in gulf_data if f['properties']['category']==category)
+trunk=gulf_feature('schematic_gulf_shipping')
+route('湾内発 → ホルムズ海峡 → 湾外',trunk['geometry']['coordinates'],'1',width=L['connection_width'],arrows=())
+features[-1]['properties'].update(trunk['properties'])
+das=gulf_feature('schematic_das_shuttle')
+route('ダス島発のシャトル接続',das['geometry']['coordinates'],'1',width=L['connection_width'],arrows=())
+features[-1]['properties'].update(das['properties'])
+# 全球縮尺では積載地点を区域にまとめ、個別ブイの位置差は再現しない。
+route('湾内とオマーン湾側の海上輸送接続',[[56.6,25.85],[57.2,25.3]],'1',width=L['connection_width'],arrows=())
+for category in ['schematic_sts_connection','schematic_fujairah_mina_sts']:
+    for f in [f for f in gulf_data if f['properties']['category']==category]:
+        route(f['properties']['name'],f['geometry']['coordinates'],'1',dash=L['connection_dash'],width=L['connection_width'],arrows=())
+        features[-1]['properties'].update(f['properties'])
+fahal=[58.533333,23.65]
+route('ミナ・アル・ハファル沖の積載 → 日本方面',[fahal,[59.2,23.78],[59.65,23.4],[61.5,21]],'1',width=L['connection_width'],arrows=())
+features[-1]['properties'].update(source_notes='docs/gulf-hormuz-oman.md',accuracy='STS・SBMを区域として集約。個別荷役・貨物・運航の実績を示さない。')
 
 # 紅海南下の制約付き航路と、日本へ向かう共通区間。
 
@@ -653,7 +633,6 @@ route('カナダ西岸 → 北太平洋 → 日本', canada, '6', arrows=(0.39, 
 for lon, lat, label in [
     (15, 10, 'アフリカ'),
     (262, 43, '北アメリカ'),
-    (287, -4, '南アメリカ'),
 ]:
     text(
         *xy((lon, lat)), label, TYPE['continent'][0], C['geography'],
@@ -668,12 +647,12 @@ for lon, lat, label in [
         *xy((lon, lat)), label, TYPE['ocean'][0], C['ocean'],
         TYPE['ocean'][1], 'middle', halo=False, css='geographic-label',
     )
-dot(japan, '日本', (1314, 537), size=SYMBOL['destination_radius'], anchor='start', role='destination')
-dot(us, '米国メキシコ湾岸', (2110, 594), anchor='end')
-dot(canada[0], 'バンクーバー', (2020, 434))
-dot(yanbu, 'ヤンブー', (581, 690), anchor='end')
-dot(sidi, 'シディ・ケリル', (546, 505), anchor='end')
-text(546, 535, '沖合SBMで原油積載', TYPE['detail'][0], COL['S'], TYPE['detail'][1], 'end', halo=False)
+dot(japan, '日本', (1314, 504), size=SYMBOL['destination_radius'], anchor='start', role='destination')
+dot(us, '米国メキシコ湾岸', (2110, 561), anchor='end')
+dot(canada[0], 'バンクーバー', (2020, 401))
+dot(yanbu, 'ヤンブー', (581, 657), anchor='end')
+dot(sidi, 'シディ・ケリル', (546, 472), anchor='end')
+text(546, 502, '沖合SBMで原油積載', TYPE['detail'][0], COL['S'], TYPE['detail'][1], 'end', halo=False)
 sx, sy = xy(sidi)
 add(
     f'<circle cx="{sx}" cy="{sy}" r="{SYMBOL["loading_radius"]}" fill="none" '
@@ -692,9 +671,10 @@ features.append({
     'geometry': {'type': 'Point', 'coordinates': sidi},
 })
 # 湾岸の3本の引出線を上下へ分け、隣接する文字の前を横切らせない。
-dot(fuj, 'フジャイラ／ソハール', (824, 651))
-dot(fahal, 'ミナ・アル・ハファル沖', (815, 701))
-text(815, 731, 'STS／原油SBM（模式）', TYPE['detail'][0], COL['S'], TYPE['detail'][1], halo=False)
+dot(fuj, 'フジャイラ／ソハール', (824, 628))
+text(824, 658, '原油SBM・沖合STS', color=COL['S'], halo=False, role='detail')
+dot(fahal, 'ミナ・アル・ハファル沖', (815, 696))
+text(815, 726, '原油SBM／フジャイラ発STS', TYPE['detail'][0], COL['S'], TYPE['detail'][1], halo=False)
 fx, fy = xy(fahal)
 add(
     f'<circle cx="{fx}" cy="{fy}" r="{SYMBOL["fahal_loading_radius"]}" fill="none" '
@@ -712,14 +692,15 @@ features.append(
         'geometry': {'type': 'Point', 'coordinates': fahal},
     },
 )
-dot([-79.8, 9.15], 'パナマ運河', (2265, 795), role='passage')
-dot([20, -34.8], '喜望峰周辺', (540, 1008), role='passage')
-dot([43.4, 12.6], 'バブ・エル・マンデブ海峡', (630, 799), anchor='end', role='passage')
-dot([56.3, 26.45], 'ホルムズ海峡', (815, 600), role='passage')
-dot([-5.6, 35.9], 'ジブラルタル海峡', (303, 539), anchor='end', role='passage')
-text(609, 631, '紅海', TYPE['local_sea'][0], C['local_water'], TYPE['local_sea'][1], 'middle', halo=False, css='geographic-label')
-text(665, 603, 'ペルシャ湾', TYPE['local_sea'][0], C['local_water'], TYPE['local_sea'][1], 'middle', halo=False, css='geographic-label')
-text(1105, 822, 'マラッカ海峡', TYPE['passage'][0], C['passage'], TYPE['passage'][1], css='passage-label')
+dot([-79.8, 9.15], 'パナマ運河', (2180, 761), anchor='end', role='passage')
+text(2290,812,'南アメリカ',color=C['geography'],anchor='middle',halo=False,css='geographic-label',role='continent')
+dot([20, -34.8], '喜望峰周辺', (540, 975), role='passage')
+dot([43.4, 12.6], 'バブ・エル・マンデブ海峡', (630, 766), anchor='end', role='passage')
+dot([56.3, 26.45], 'ホルムズ海峡', (815, 574), role='passage')
+dot([-5.6, 35.9], 'ジブラルタル海峡', (303, 506), anchor='end', role='passage')
+text(609, 598, '紅海', TYPE['local_sea'][0], C['local_water'], TYPE['local_sea'][1], 'middle', halo=False, css='geographic-label')
+text(665, 570, 'ペルシャ湾', TYPE['local_sea'][0], C['local_water'], TYPE['local_sea'][1], 'middle', halo=False, css='geographic-label')
+text(1105, 789, 'マラッカ海峡', TYPE['passage'][0], C['passage'], TYPE['passage'][1], css='passage-label')
 
 # 積替え区域の代表位置。全貨物に必須の経由地を示すものではない。
 
@@ -729,7 +710,7 @@ for p in [[56.7, 25.1], [101.95, 2.4]]:
         f'<circle cx="{x}" cy="{y}" r="{SYMBOL["loading_radius"]}" fill="none" '
         f'stroke="{COL["S"]}" stroke-width="{SYMBOL["loading_border_width"]}"/>'
     )
-dot([101.95, 2.4], 'マラッカ沖（リンギ等）', (1105, 873), role='loading_area')
+dot([101.95, 2.4], 'マラッカ沖（リンギ等）', (1105, 840), role='loading_area')
 features.append({
     'type': 'Feature',
     'properties': {
@@ -746,163 +727,81 @@ features.append({
 
 # 航路に添える番号。注記内の番号と対応する。
 for x, y, key in [
-    (891, 762, '1'),
-    (753, 795, '2'),
-    (318, 719, '3'),
-    (240, 991, '4'),
-    (1835, 646, '5'),
-    (1710, 509, '6'),
+    (891, 764, '1'),
+    (753, 762, '2'),
+    (318, 686, '3'),
+    (240, 958, '4'),
+    (1835, 613, '5'),
+    (1710, 476, '6'),
 ]:
     badge(x, y, key, key)
-text(712, 1085, '3・4  喜望峰経由・日本と往復', color=C['route_note'], role='route_note')
-text(1211, 717, '1–4', color=C['route_note'], role='route_group')
+text(712, 1052, '3・4  喜望峰経由', color=C['route_note'], role='route_note')
+text(1211, 684, '1–4', color=C['route_note'], role='route_group')
 
-# --- コスト・リスク等の注記 --------------------------------------------------
-# 注記の矩形・引出線は画面上の座標で配置する。tail の末尾だけ地理座標から投影。
+# --- 費用・リスクの説明枠 -----------------------------------------------------
+# 一律の費用順位を付けず、方式・費用要因・リスクを同じ行送りで示す。
+bubble(40,160,550,'地中海・喜望峰経由','3',
+    ['費用：航海延長・荷役・再積載','リスク：設備攻撃・接続遅延'],
+    [(550,346),xy(sidi)], 'ヤンブー発／SUMED／スエズ経由')
+bubble(630,160,610,'中東・インド洋経由','1',
+    ['費用：保険・船腹・積替え荷役','リスク：攻撃・混雑・接続遅延'],
+    [(670,346),xy([57.2,25.3])], '湾内発・湾外積み／直航・STS・SBM')
+bubble(1450,160,600,'カナダ西岸・太平洋経由','6',
+    ['費用：運河料・洋上積替費を回避','リスク：港の喫水制限・油種適合'],
+    [(1806,346),xy([-137,46.35])], 'Aframax級の直航／日本着実績')
+bubble(754,355,500,'紅海南下','2',
+    ['費用：保険・通航条件で変動','リスク：フーシ派の攻撃・拿捕'],
+    [(754,541),xy([47.5,13])], 'サウジ関連船が回避する制約航路')
+bubble(1798,837,554,'米湾岸・パナマ経由','5',
+    ['費用：運河・予約料・積載制約','リスク：予約待ち・水位変動'],
+    [(1798,837),xy([-103,13.6])], '中型船の補完／VLCC通航不可')
+bubble(1778,1034,574,'米湾岸・喜望峰経由','4',
+    ['費用：長距離航海の燃料・用船','リスク：船腹不足・荒天・納期遅延'],
+    [(2352,1084),xy([-56,17.3])], 'VLCCによる大量輸送')
+bubble(1110,970,600,'マラッカ沖の日本向けSTS','S',
+    ['費用：接続船・荷役・待機','リスク：接続遅延・混雑・荒天'],
+    [(1135,970),xy([101.95,2.4])], '中東原油を日本向け船へ積替え')
 
-bubble(
-    40,
-    193,
-    520,
-    '地中海・喜望峰経由',
-    '3',
-    ['コスト：紅海南下比で航海が３週間以上増', 'リスク：設備への再攻撃・積替え接続の遅れ'],
-    [(540, 361), xy([29.7, 31.1])],
-    'ヤンブー発／9/28 再開報道・全面復旧は未確認',
-)
-bubble(
-    628,
-    198,
-    578,
-    '中東・インド洋経由',
-    '1',
-    ['コスト：保険・船腹。積替え便は追加費用', 'リスク：攻撃・混雑。湾内発はホルムズ通過'],
-    [(668, 366), xy([57.2, 25.3])],
-    '湾外積み＋湾内発の直航・STS／9月の通航回復',
-)
-bubble(
-    1452,
-    192,
-    548,
-    'カナダ西岸・太平洋経由',
-    '6',
-    ['コスト：直航で運河料・洋上積替費を回避', 'リスク：積出量・船型制約、油種の適合'],
-    [(1806, 360), xy([-137, 46.35])],
-    'Aframax級で直航／8月に日本着の実績',
-)
-bubble(
-    752,
-    388,
-    536,
-    '紅海南下',
-    '2',
-    ['コスト：短距離だが保険・通航条件が不安定', 'リスク：フーシ派の攻撃・拿捕'],
-    [(752, 556), xy([47.5, 13])],
-    'ヤンブー発／大型原油船の回避・全船閉鎖ではない',
-)
-bubble(
-    1798,
-    881,
-    554,
-    '米湾岸・パナマ経由',
-    '5',
-    ['コスト：運河・予約料金、積載量の制約', 'リスク：予約待ち・水位変動による制約'],
-    [(2100, 881), xy([-103, 13.6])],
-    '中型船による補完輸送／日本着実績あり・VLCC不可',
-)
-bubble(
-    1778,
-    1080,
-    574,
-    '米湾岸・喜望峰経由',
-    '4',
-    ['コスト：長距離で燃料・用船日数が増加', 'リスク：船腹不足、荒天・納期の長期化'],
-    [(2352, 1130), xy([-56, 17.3])],
-    'VLCC（大型原油タンカー）の主な代替経路',
-)
-bubble(
-    1136,
-    997,
-    574,
-    'マラッカ沖：日本向けSTS',
-    'S',
-    ['コスト：接続船・荷役・待機の費用', 'リスク：接続の遅れ、混雑・荒天'],
-    [(1161, 997), xy([101.95, 2.4])],
-    '中東原油を日本行きのタンカーへ／6月報道',
-)
-# --- 凡例・留保・クレジット --------------------------------------------------
-
-line([(65, 1172), (135, 1172)], COL['common'], L['legend_width'], under=False)
-roundtrip_arrows([(65, 1172), (135, 1172)], COL['common'], at=0.5, size=SYMBOL['legend_arrow_size'])
-text(152, 1180, '海上経路（往復・模式）', color=C['secondary'], halo=False, role='legend')
-line([(65, 1210), (135, 1210)], COL['2'], L['legend_restricted_width'], L['legend_restricted_dash'], under=False)
-text(152, 1218, '航行制約・回避', color=C['secondary'], halo=False, role='legend')
-line([(482, 1172), (552, 1172)], COL['1'], L['legend_connection_width'], L['connection_dash'], under=False)
-text(568, 1180, '湾外での積替え接続', color=C['secondary'], halo=False, role='legend')
-add(
-    f'<circle cx="494" cy="1210" r="{SYMBOL["legend_loading_radius"]}" fill="none" '
-    f'stroke="{COL["S"]}" stroke-width="{SYMBOL["loading_border_width"]}"/>'
-)
-text(518, 1218, 'STS／SBM区域', color=C['secondary'], halo=False, role='legend')
-text(945, 1247, '白線：複数ルートの共通区間', color=C['muted'], anchor='end', halo=False, role='legend_note')
-text(1136, 1210, 'STS＝船間積替え ／ SBM＝沖合ブイ経由の積載', color=C['muted'], halo=False, role='legend_note')
+# 凡例枠を増やさず、線・区域記号の意味を地図下の空白へまとめる。
+text(64,1197,'白線：共通区間　金色の円：STS・SBM区域',color=C['muted'],halo=False,role='legend_note')
 if USER_LAYER['features']:
     try:
         svg.extend(render_layer(USER_LAYER, xy, W, TOP + MH, wrap=True, top=TOP))
     except ValueError as error:
         parser.error(f"{args.data_file}: {error}")
 add('</g>')
-add(f'<path d="M 0 {TOP + MH} H {W}" stroke="{C["separator"]}" stroke-width="{L["separator_width"]}"/>')
-text(
-    SPACE['frame_inset'],
-    1300,
-    '双方向矢印は船の往復（模式）。積荷・同じ経路での往復実績・安全を示しません。費用は同条件の運賃比較ではありません。',
-    color=C['secondary'], halo=False, role='footer_note',
-)
-text(W - SPACE['frame_inset'], 1300, '作図：' + META['credit'], color=C['secondary'], anchor='end', halo=False, role='credit')
-text(
-    SPACE['frame_inset'],
-    1338,
-    '© OpenStreetMap contributors  ·  OpenFreeMap / © OpenMapTiles',
-    color=C['muted'], role='attribution',
-    halo=False,
-)
-text(
-    W - SPACE['frame_inset'],
-    1338,
-    '資料：Reuters・S&P Global・GME・NGA・公開AIS・パナマ運河庁ほか',
-    color=C['muted'], role='attribution',
-    anchor='end',
-    halo=False,
-)
+add(f'<path d="M 0 {TOP+MH} H {W}" stroke="{C["separator"]}" stroke-width="{L["separator_width"]}"/>')
+text(SPACE['frame_inset'],1259,
+    '海路の双方向矢印は船の往復の模式線。原油の双方向輸送・個船の実績・安全を示さない。赤破線は全船閉鎖を示さない。',
+    color=C['secondary'],halo=False,role='footer_note')
+text(SPACE['frame_inset'],1288,
+    '費用は増減要因で、同条件の運賃比較ではない。湾内発はホルムズを通過。STS＝船間積替え、SBM＝沖合ブイ積載。',
+    color=C['secondary'],halo=False,role='footer_note')
+text(SPACE['frame_inset'],1321,
+    '© OpenStreetMap contributors · OpenFreeMap / © OpenMapTiles',
+    color=C['muted'],halo=False,role='attribution')
+text(W/2,1321,'資料：Reuters・S&P Global・GME・NGA・公開AIS・パナマ運河庁ほか',
+    color=C['muted'],anchor='middle',halo=False,role='attribution')
+text(W-SPACE['frame_inset'],1321,'作図：'+META['credit'],
+    color=C['secondary'],anchor='end',halo=False,role='credit')
 if USER_LAYER['features']:
-    text(
-        SPACE['frame_inset'], H - 12,
-        f"利用者データ更新：{USER_LAYER['updated_at']} ｜ 追加{len(USER_LAYER['features'])}件（元図の情報基準日は上記）",
-        color=C['secondary'], halo=False, role='user_update',
-    )
+    text(SPACE['frame_inset'],H-12,
+         f"利用者データ更新：{USER_LAYER['updated_at']} ｜ 追加{len(USER_LAYER['features'])}件",
+         color=C['secondary'],halo=False,role='user_update')
 add('</svg>')
-
-# --- 成果物の保存 ------------------------------------------------------------
-# SVG は背景画像を含む完成図、GeoJSON は補間前の代表点と出典上の留保を保存する。
-
-(OUT / 'global.svg').write_text('\n'.join(svg))
-(OUT / 'global.geojson').write_text(
-    json.dumps(
-        {
-            'type': 'FeatureCollection',
-            'as_of': META['as_of'],
-            'revalidated_at': META.get('revalidated_at'),
-            'route_additions_as_of': META.get('route_additions_as_of'),
-            'source_notes': 'docs/global-sources-and-costs.md',
-            'features': features + USER_LAYER['features'],
-            **({'user_data': {
-                'updated_at': USER_LAYER['updated_at'],
-                'feature_ids': [feature['id'] for feature in USER_LAYER['features']],
-            }} if USER_LAYER['features'] else {}),
-        },
-        ensure_ascii=False,
-        indent=2,
-    ),
-)
-print('Wrote map SVG and route geometry')
+(OUT/'global.svg').write_text('\n'.join(svg))
+(OUT/'global.geojson').write_text(json.dumps({
+    'type':'FeatureCollection',
+    'as_of':META['as_of'],
+    'revalidated_at':META.get('revalidated_at'),
+    'route_additions_as_of':META.get('route_additions_as_of'),
+    'layout_updated_at':META['layout_updated_at'],
+    'local_revision_as_of':META['local_revision_as_of'],
+    'source_notes':'docs/global-sources-and-costs.md',
+    'features':features+USER_LAYER['features'],
+    **({'user_data': {
+        'updated_at': USER_LAYER['updated_at'],
+        'feature_ids': [feature['id'] for feature in USER_LAYER['features']],
+    }} if USER_LAYER['features'] else {}),
+},ensure_ascii=False,indent=2))
+print('Wrote global.svg and global.geojson')

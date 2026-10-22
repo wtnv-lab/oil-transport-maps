@@ -1,8 +1,55 @@
 # 原油輸送ルート地図
 
-中東の地域図と、日本向け原油輸送の全球図を作成するスクリプト・地理データ・出典資料です。公開資料とAIS由来の情報を参照した**模式航路**を、OpenStreetMap系のダーク背景に重ねます。完成画像を閲覧するほか、手元で再生成し、航路や注記を編集できます。
+中東の地域図、日本向け原油輸送の全球図、ホルムズ海峡周辺の拡大図を作成するスクリプト・地理データ・出典資料です。公開資料とAIS由来の情報を参照した**模式航路**を、OpenStreetMap系のダーク背景に重ねます。完成画像を閲覧するほか、手元で再生成し、航路や注記を編集できます。
 
 作図：**東京大学大学院 渡邉英徳研究室**。コードの作成・修正にはCodexを使用しています。
+
+## 完成した地図を見る
+
+画像を見るだけなら、実行環境の準備は不要です。下の画像から高解像度PNGを開けます。**作図更新日と、情勢・費用の情報基準日は別です。**
+
+| 中東の原油輸送ルート · 第15版 | 日本向け原油輸送ルート · 第14版 |
+|---|---|
+| 作図更新：2026年10月12日 | 作図更新・湾岸局所追記：2026年10月22日 |
+| [![中東図](examples/2026-10-12-design-system/middle-east-pc1440.png?v=15-8f88aabec9e8)](examples/2026-10-12-design-system/middle-east.png?v=15-20b47336428a) | [![全球図](examples/2026-10-22-global/global-pc1440.png?v=14-d0bd8d4744c2)](examples/2026-10-22-global/global.png?v=14-f284cafedcf7) |
+| [PNG：3600 × 2608 px](examples/2026-10-12-design-system/middle-east.png?v=15-20b47336428a) · [SVG](examples/2026-10-12-design-system/middle-east.svg?v=15-1a635fe61fdb) | [PNG：4800 × 2676 px](examples/2026-10-22-global/global.png?v=14-f284cafedcf7) · [SVG](examples/2026-10-22-global/global.svg?v=14-27ee6551249b) |
+| [PC表示例：幅1440px](examples/2026-10-12-design-system/middle-east-pc1440.png?v=15-8f88aabec9e8) | [PC表示例：幅1440px](examples/2026-10-22-global/global-pc1440.png?v=14-d0bd8d4744c2) |
+
+全球図第14版は、6つの経路とマラッカ沖STSの説明を「方式・費用要因・リスク」に整理し、文字の階層・行間・直線の引出線を調整しています。ダス島発の枝線、ムサンダム沿岸の線形、フジャイラの原油SBM、フジャイラ発→ミナ沖STSの接続も反映しました。**情勢・費用の基準日は9月29日で、10月22日時点の全面的な再検証ではありません。** [局所追記と確認限界](docs/global-sources-and-costs.md)
+
+中東図・全球図とも、国・大陸・海域名は縁なしの明朝体、主要港・パイプライン名は細い縁取りの角ゴシックで描き分けています。日付別の完成品は [`examples/`](examples/) に保存し、過去版も比較できるよう残しています。
+
+**[デザインの方針と編集方法](docs/DESIGN_SYSTEM.md)** · [見本帳（HTML）](docs/design-system.html) · [見本帳（PNG）](docs/design-system.png)
+
+### ペルシャ湾・ホルムズ海峡の拡大図
+
+**作図更新：2026年10月22日。** ラス・タヌラ、ダス島、ムサンダム沿岸のシャトル輸送、フジャイラ・ソハール・ミナ沖のSTS／SBMを示すWeb用の拡大図です。凡例枠を省き、下部の注記を2行に整理しています。
+
+[![ペルシャ湾・ホルムズ海峡の拡大図](examples/2026-10-22-gulf-hormuz-oman/gulf-hormuz-oman-pc1440.png)](examples/2026-10-22-gulf-hormuz-oman/gulf-hormuz-oman.png)
+
+[PNG：3600 × 1948 px](examples/2026-10-22-gulf-hormuz-oman/gulf-hormuz-oman.png) · [SVG](examples/2026-10-22-gulf-hormuz-oman/gulf-hormuz-oman.svg) · [出典・編集方法・確認範囲](docs/gulf-hormuz-oman.md)
+
+```sh
+./build.sh gulf-hormuz-oman
+```
+
+`dist/gulf-hormuz-oman.*` とPC用画像を生成します。`all` は従来の中東図・全球図の2図です。拡大図は `user-data` レイヤーに未対応で、内蔵のGeoJSONを編集します。**フジャイラ発→ミナ沖STSは提供情報に基づく模式表示で、公開一次資料による独立確認は未了**です。10月22日の部分追加・作図調整を、全面的な情勢更新とは扱いません。
+
+## 情報の基準日と読み方
+
+| 記録 | 日付・対象 |
+|---|---|
+| 情勢・費用の情報基準日 | 2026年9月29日 |
+| 共通の航路追記 | 2026年10月12日 |
+| 湾岸の局所追記・作図更新 | 2026年10月22日：全球図・ホルムズ拡大図 |
+
+地図の実行や背景の更新だけでは、最新情報になりません。**フジャイラ発→ミナ・アル・ハファル沖STSは提供情報に基づく模式表示で、特定区間の公開一次資料による独立確認は未了**です。元資料の公表日と、図へ反映した日を区別します。
+
+- 海路は代表地点を結んだ模式線です。往復矢印は船の配船・輸送による往復を表します。原油が両方向へ流れること、個船の往復完了、往復が同じ航路であることを確認した表示ではありません。AIS航跡、当日の運航、輸送量、安全な通航も表しません。パイプラインの矢印は原油の送油方向です。
+- 費用の注記は、日本向け調達に伴う燃料・用船日数・荷役などの発生要因です。往復運賃の実額、同条件の運賃比較、総調達費のランキングではありません。
+- 対象は**原油**です。LNG・LPG・石油製品の輸送網を網羅する図ではありません。
+
+10月12日には、ミナ・アル・ハファル沖のSTS／原油SBM積載と、日本から喜望峰・ジブラルタルを経てシディ・ケリル沖へ向かう配船を追記しました。現行版ではシディ・ケリル行きも他地域と共通の往復矢印で表します。個船の確認範囲や想定は[追加記録](docs/route-additions-20261012.md)に残しています。
 
 ## リポジトリを生成AIに渡して始める
 
@@ -42,43 +89,6 @@ README内の「AI向けリポジトリ案内」を入口にしてください。
 具体的な指示を渡した後は、AIに編集・検査・再描画まで進めてもらい、画像を見ながら調整します。実行機能のないAIでは変更ファイルを受け取り、[手元の環境で再生成](#手元で地図を再生成する)します。
 
 **[読み込み方・対話例・別の会話への引継ぎ](docs/AI_WORKFLOW.md)**
-
-## 完成した地図を見る
-
-画像を見るだけなら、実行環境の準備は不要です。下の画像から高解像度PNGを開けます。**中東図・全球図の作図更新：2026年10月12日**（情報の基準日とは別です）。
-
-| 中東の原油輸送ルート · 第15版 | 日本向け原油輸送ルート · 第13版 |
-|---|---|
-| [![中東図](examples/2026-10-12-design-system/middle-east.png?v=15-20b47336428a)](examples/2026-10-12-design-system/middle-east.png?v=15-20b47336428a) | [![全球図](examples/2026-10-12-design-system/global.png?v=13-cf14ff9308b2)](examples/2026-10-12-design-system/global.png?v=13-cf14ff9308b2) |
-| [PNG：3600 × 2608 px](examples/2026-10-12-design-system/middle-east.png?v=15-20b47336428a) · [SVG](examples/2026-10-12-design-system/middle-east.svg?v=15-1a635fe61fdb) | [PNG：4800 × 2730 px](examples/2026-10-12-design-system/global.png?v=13-cf14ff9308b2) · [SVG](examples/2026-10-12-design-system/global.svg?v=13-93d932a7ffb0) |
-| [PC表示例：幅1440px](examples/2026-10-12-design-system/middle-east-pc1440.png?v=15-8f88aabec9e8) | [PC表示例：幅1440px](examples/2026-10-12-design-system/global-pc1440.png?v=13-d0177e7e3dca) |
-
-掲載版は**中東図第15版・全球図第13版**です。国・大陸・海域名は縁なしの明朝体、主要港・パイプライン名は細い縁取りの角ゴシックで描き分け、文字の重要性と親子関係を示します。今回、書体・色・線・記号・余白を共通のデザイン設定へ整理しました。航路・地点座標・記載内容・情報基準日は変更していません。日付別の完成品は [`examples/`](examples/) に保存し、過去版も比較できるよう残しています。
-
-**[デザインの方針と編集方法](docs/DESIGN_SYSTEM.md)** · [見本帳（HTML）](docs/design-system.html) · [見本帳（PNG）](docs/design-system.png)
-
-### ペルシャ湾・ホルムズ海峡の拡大図
-
-**作図更新：2026年10月22日。** ラス・タヌラ、ダス島、ムサンダム沿岸のシャトル輸送、フジャイラ・ソハール・ミナ沖のSTS／SBMを示すWeb用の拡大図です。凡例枠を省き、下部の注記を2行に整理しています。
-
-[![ペルシャ湾・ホルムズ海峡の拡大図](examples/2026-10-22-gulf-hormuz-oman/gulf-hormuz-oman-pc1440.png)](examples/2026-10-22-gulf-hormuz-oman/gulf-hormuz-oman.png)
-
-[PNG：3600 × 1948 px](examples/2026-10-22-gulf-hormuz-oman/gulf-hormuz-oman.png) · [SVG](examples/2026-10-22-gulf-hormuz-oman/gulf-hormuz-oman.svg) · [出典・編集方法・確認範囲](docs/gulf-hormuz-oman.md)
-
-```sh
-./build.sh gulf-hormuz-oman
-```
-
-`dist/gulf-hormuz-oman.*` とPC用画像を生成します。`all` は従来の中東図・全球図の2図です。拡大図は `user-data` レイヤーに未対応で、内蔵のGeoJSONを編集します。**フジャイラ発→ミナ沖STSは提供情報に基づく模式表示で、公開一次資料による独立確認は未了**です。10月22日の部分追加・作図調整を、全面的な情勢更新とは扱いません。
-
-## 情報の基準日と読み方
-
-- **情勢・コスト評価：2026年9月29日。航路の追記：2026年10月12日。** 地図の実行や背景の更新だけでは、最新情報になりません。
-- 海路は代表地点を結んだ模式線です。往復矢印は船の配船・輸送による往復を表します。原油が両方向へ流れること、個船の往復完了、往復が同じ航路であることを確認した表示ではありません。AIS航跡、当日の運航、輸送量、安全な通航も表しません。パイプラインの矢印は原油の送油方向です。
-- 費用の注記は、日本向け調達に伴う燃料・用船日数・荷役などの発生要因です。往復運賃の実額、同条件の運賃比較、総調達費のランキングではありません。
-- 対象は**原油**です。LNG・LPG・石油製品の輸送網を網羅する図ではありません。
-
-10月12日には、ミナ・アル・ハファル沖のSTS／原油SBM積載と、日本から喜望峰・ジブラルタルを経てシディ・ケリル沖へ向かう配船を追記しました。現行版ではシディ・ケリル行きも他地域と共通の往復矢印で表します。個船の確認範囲や想定は[追加記録](docs/route-additions-20261012.md)に残しています。
 
 ## 手元で地図を再生成する
 
@@ -200,7 +210,10 @@ maps:
     builder: maps/global/build.py
     metadata: maps/global/metadata.json
     user_data: user-data/global.geojson
+    gulf_routes_snapshot: maps/global/data/gulf-routes.geojson
+    published_example: examples/2026-10-22-global/
     sources: docs/global-sources-and-costs.md
+    local_addition_sources: docs/gulf-hormuz-oman.md
   gulf-hormuz-oman:
     builder: maps/gulf-hormuz-oman/build.py
     metadata: maps/gulf-hormuz-oman/metadata.json
@@ -231,6 +244,7 @@ outputs: ["{map_id}.png", "{map_id}.svg", "{map_id}.geojson", "{map_id}.qa.json"
 | 中東図の経路・地点・記載内容・ラベル位置 | [`maps/middle-east/build.py`](maps/middle-east/build.py) |
 | ホルムズ拡大図の座標・記載内容・配置 | [`maps/gulf-hormuz-oman/`](maps/gulf-hormuz-oman/) と[専用ガイド](docs/gulf-hormuz-oman.md) |
 | 全球図の経路・地点・記載内容・バルーン位置 | [`maps/global/build.py`](maps/global/build.py) |
+| 全球図に採用した湾岸線形・出典 | [`maps/global/data/gulf-routes.geojson`](maps/global/data/gulf-routes.geojson)（拡大図から採用した保存版。自動同期なし） |
 | 共通の書体・基本色・余白・縁取り・追加データの既定意匠 | [`design/foundations.json`](design/foundations.json) |
 | 図ごとの文字階層・地名別サイズ差・航路色・線・記号 | [`design/profiles/`](design/profiles/) 内の対象図のJSON |
 | 表題・基準日・版番号・クレジット | 各地図の `metadata.json` |
@@ -239,7 +253,7 @@ outputs: ["{map_id}.png", "{map_id}.svg", "{map_id}.geojson", "{map_id}.qa.json"
 見た目の設定では、共通色への `"{colors.loading}"` 等の参照を維持します。中東図の国・海域名の局所的なサイズ差は `geographic_size_offsets` で管理します。[設定の説明](docs/DESIGN_SYSTEM.md)を参照してください。
 
 1. 出典資料を確認し、対象の `build.py` を編集します。地理座標は **`[経度, 緯度]`、単位は度**です。ラベルの位置にはSVG上のピクセル座標も使います。
-2. 情報の確認範囲に合わせて `metadata.json` と出典を更新します。`as_of` は情勢の基準日、`route_additions_as_of` は一部航路の追記日です。描き直した日を、そのまま情報の基準日にしないでください。
+2. 情報の確認範囲に合わせて `metadata.json` と出典を更新します。`as_of` は情勢の基準日、`route_additions_as_of` は一部航路の追記日です。全球図の湾岸局所追記日は `local_revision_as_of`、作図更新日は `layout_updated_at` に保存します。描き直した日を、そのまま情報の基準日にしないでください。
 3. 対象の地図を再生成し、PNGを目視確認します。文字・線の重なり、海峡や海岸線との関係、矢印の方向、出典との整合を確認してください。
 
 生成済みのSVGだけでなく、元のスクリプトを編集すると再現できます。具体的な作業の流れとコードの読み方は[更新・点検の手順](docs/MAINTENANCE.md)を参照してください。

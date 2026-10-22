@@ -2,7 +2,10 @@
   "as_of": "2026-09-29",
   "title": "日本向け原油輸送ルート",
   "credit": "東京大学大学院 渡邉英徳研究室",
-  "revision": 13,
+  "revision": 14,
   "route_additions_as_of": "2026-10-12",
-  "revalidated_at": "2026-09-29T09:55:19+09:00"
+  "revalidated_at": "2026-09-29T09:55:19+09:00",
+  "layout_updated_at": "2026-10-22",
+  "revision_scope": "Webシリーズの文字・注記・配置を統一。拡大図の湾内・沖合荷役の局所修正を反映。情勢・費用の全面再検証ではない。",
+  "local_revision_as_of": "2026-10-22"
 }
