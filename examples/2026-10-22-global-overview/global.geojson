@@ -1,0 +1,1084 @@
+{
+  "type": "FeatureCollection",
+  "as_of": "2026-09-29",
+  "revalidated_at": "2026-09-29T09:55:19+09:00",
+  "route_additions_as_of": "2026-10-12",
+  "layout_updated_at": "2026-10-22",
+  "local_revision_as_of": "2026-10-22",
+  "source_notes": "docs/global-sources-and-costs.md",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ヤンブー ↔ SUMED ↔ 地中海 ↔ 喜望峰",
+        "route": "3",
+        "direction": "bidirectional_at_sea",
+        "display_note": "双方向矢印は海上区間の船の往復を模式化。SUMEDの逆送や個別船の往復実績を示さない。",
+        "geometry_note": "公表された経由地を結ぶ模式航路。AIS航跡ではない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            38.2,
+            24.0
+          ],
+          [
+            37.7,
+            24.1
+          ],
+          [
+            36.4,
+            25.5
+          ],
+          [
+            34.8,
+            27.2
+          ],
+          [
+            33.4,
+            28
+          ],
+          [
+            32.4,
+            29.6
+          ],
+          [
+            29.7,
+            31.1
+          ],
+          [
+            28.6,
+            32
+          ],
+          [
+            26,
+            33
+          ],
+          [
+            21,
+            34.2
+          ],
+          [
+            16,
+            34.6
+          ],
+          [
+            12,
+            36.4
+          ],
+          [
+            11.5,
+            37
+          ],
+          [
+            11,
+            37.4
+          ],
+          [
+            10,
+            38
+          ],
+          [
+            2,
+            37
+          ],
+          [
+            -5.6,
+            35.9
+          ],
+          [
+            -10,
+            34
+          ],
+          [
+            -16,
+            25
+          ],
+          [
+            -19,
+            13
+          ],
+          [
+            -15,
+            -3
+          ],
+          [
+            -4,
+            -21
+          ],
+          [
+            8,
+            -33
+          ],
+          [
+            18,
+            -38
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "スエズ運河経由の代替接続",
+        "route": "3",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。原油の逆向き輸送、個船の往復完了、往復で同じ航路を使うことを確認した表示ではない。",
+        "geometry_note": "公表された経由地を結ぶ模式航路。AIS航跡ではない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            32.4,
+            29.6
+          ],
+          [
+            32.55,
+            29.9
+          ],
+          [
+            32.57,
+            30.7
+          ],
+          [
+            32.31,
+            31.27
+          ],
+          [
+            31.2,
+            31.6
+          ],
+          [
+            28.6,
+            32
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "米湾岸 ↔ 大西洋 ↔ 喜望峰",
+        "route": "4",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。原油の逆向き輸送、個船の往復完了、往復で同じ航路を使うことを確認した表示ではない。",
+        "geometry_note": "公表された経由地を結ぶ模式航路。AIS航跡ではない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -94.1,
+            28.5
+          ],
+          [
+            -89,
+            26.8
+          ],
+          [
+            -85,
+            24.3
+          ],
+          [
+            -81,
+            23.7
+          ],
+          [
+            -78,
+            26
+          ],
+          [
+            -72,
+            27
+          ],
+          [
+            -60,
+            21
+          ],
+          [
+            -48,
+            10
+          ],
+          [
+            -31,
+            -7
+          ],
+          [
+            -15,
+            -23
+          ],
+          [
+            0,
+            -35
+          ],
+          [
+            18,
+            -38
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "喜望峰 ↔ インド洋 ↔ マラッカ海峡",
+        "route": "common",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。原油の逆向き輸送、個船の往復完了、往復で同じ航路を使うことを確認した表示ではない。",
+        "geometry_note": "公表された経由地を結ぶ模式航路。AIS航跡ではない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            18,
+            -38
+          ],
+          [
+            27,
+            -37
+          ],
+          [
+            40,
+            -33
+          ],
+          [
+            56,
+            -22
+          ],
+          [
+            68,
+            -10
+          ],
+          [
+            82,
+            0
+          ],
+          [
+            92,
+            5.5
+          ],
+          [
+            96,
+            5.7
+          ],
+          [
+            99,
+            4.8
+          ],
+          [
+            101,
+            3
+          ],
+          [
+            103.65,
+            1.2
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "オマーン湾側 ↔ マラッカ海峡",
+        "route": "1",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。原油の逆向き輸送、個船の往復完了、往復で同じ航路を使うことを確認した表示ではない。",
+        "geometry_note": "公表された経由地を結ぶ模式航路。AIS航跡ではない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            56.4,
+            25.2
+          ],
+          [
+            57.2,
+            25.3
+          ],
+          [
+            59.5,
+            23.8
+          ],
+          [
+            61.5,
+            21
+          ],
+          [
+            65,
+            16
+          ],
+          [
+            72,
+            9
+          ],
+          [
+            79,
+            5.2
+          ],
+          [
+            86,
+            5
+          ],
+          [
+            92,
+            5.5
+          ],
+          [
+            96,
+            5.7
+          ],
+          [
+            99,
+            4.8
+          ],
+          [
+            101,
+            3
+          ],
+          [
+            103.65,
+            1.2
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "湾内発シャトル輸送の共通模式区間",
+        "route": "1",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。日本からの原油輸出、積荷、同一航路での往復実績、安全を示さない。",
+        "geometry_note": "公表された経由地を結ぶ模式航路。AIS航跡ではない。",
+        "category": "schematic_gulf_shipping",
+        "source": "https://energynow.com/2026/09/gulf-of-oman-ship-to-ship-oil-transfers-reach-limit-as-saudi-exports-surge/",
+        "accuracy": "複数の積出地・湾外STSを図上で集約。実際の同一航路・合流点・固定便を示さない。",
+        "layout_note": "始点をラス・タヌラ代表点に接続し、ダス島との記号表現を統一。港内航路や特定便を示さない。 海峡東岸の末端を南向きに接続し、東へ張り出して折り返す屈折を除去。",
+        "local_geometry_note": "湾内の陸地横断を修正。JMIC 011-26（2026-06-27）南側回廊を形状参考とし、ムサンダム西岸・北端・東岸沿いに模式化。北端から東岸は角を丸めるため海域内の代表点で補間し、公表座標の厳密な再現ではない。西岸の補助点は線幅の陸地接触を回避するための作図調整。現行の安全航路・個船の実航跡を示さない。",
+        "local_geometry_source": "https://www.ukmto.org/-/media/ukmto/products/jmic-advisory-note-01126-southern-route-widened.pdf",
+        "display_end_bearing": 180,
+        "previous_east_coast_display_points": [
+          [
+            56.359233,
+            26.404333
+          ],
+          [
+            56.4968,
+            26.41655
+          ],
+          [
+            56.540833,
+            26.403533
+          ],
+          [
+            56.5612,
+            26.3495
+          ],
+          [
+            56.55,
+            26.0
+          ],
+          [
+            56.6,
+            25.85
+          ]
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            50.163,
+            26.645
+          ],
+          [
+            50.4,
+            26.8
+          ],
+          [
+            51,
+            26.7
+          ],
+          [
+            52,
+            26.35
+          ],
+          [
+            53,
+            26.05
+          ],
+          [
+            54,
+            25.95
+          ],
+          [
+            54.55,
+            26.05
+          ],
+          [
+            55,
+            25.95
+          ],
+          [
+            55.65,
+            25.98
+          ],
+          [
+            56.0124,
+            26.0455
+          ],
+          [
+            56.15,
+            26.23
+          ],
+          [
+            56.2367,
+            26.3191
+          ],
+          [
+            56.359233,
+            26.404333
+          ],
+          [
+            56.47,
+            26.425
+          ],
+          [
+            56.56,
+            26.4
+          ],
+          [
+            56.62,
+            26.33
+          ],
+          [
+            56.64,
+            26.2
+          ],
+          [
+            56.63,
+            26.03
+          ],
+          [
+            56.6,
+            25.85
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ダス島（UAE）発シャトル輸送（模式）",
+        "route": "1",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。原油の逆向き輸送、個船の往復完了、往復で同じ航路を使うことを確認した表示ではない。",
+        "geometry_note": "公表された経由地を結ぶ模式航路。AIS航跡ではない。",
+        "category": "schematic_das_shuttle",
+        "reviewed_at": "2026-10-22",
+        "source": [
+          "https://ppa.adnoc.ae/en/ports/das-zirku-mubarraz/part-iii---7",
+          "https://www.argusmedia.com/de/about-argus/media-centre/press-releases/argus-gulf-of-oman-sts-abu-dhabi-crude-prices",
+          "https://www.bairdmaritime.com/shipping/tankers/adnoc-tests-buyer-appetite-again-with-ninth-spot-crude-tender-since-june"
+        ],
+        "accuracy": "ダス島の代表位置。Das原油の湾内積出・海峡外STSに基づく模式線。個別船の航跡、特定の港間固定便、日本向け貨物を示さない。",
+        "local_geometry_note": "ダス島発枝線を湾内の南寄りの共通線に接続。実航跡ではない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            52.88,
+            25.15
+          ],
+          [
+            53.05,
+            25.5
+          ],
+          [
+            53.35,
+            25.8
+          ],
+          [
+            54,
+            25.95
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "湾内とオマーン湾側の海上輸送接続",
+        "route": "1",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。原油の逆向き輸送、個船の往復完了、往復で同じ航路を使うことを確認した表示ではない。",
+        "geometry_note": "公表された経由地を結ぶ模式航路。AIS航跡ではない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            56.6,
+            25.85
+          ],
+          [
+            57.2,
+            25.3
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "湾内航路 ↔ フジャイラ沖の積替え接続（往復模式）",
+        "route": "1",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。日本からの原油輸出、積荷、同一航路での往復実績、安全を示さない。",
+        "geometry_note": "公表された経由地を結ぶ模式航路。AIS航跡ではない。",
+        "category": "schematic_sts_connection",
+        "source": "https://energynow.com/2026/09/gulf-of-oman-ship-to-ship-oil-transfers-reach-limit-as-saudi-exports-surge/",
+        "accuracy": "沖合積替えの代表位置。全便の寄港・積替え、特定のラス・タヌラ発シャトル便を示すものではない。",
+        "layout_note": "港の白点と沖合STSの輪を分離。紫線は輪で終端。海域内の模式経由点。 共通線と枝線の南向きの接線を揃え、分岐点の急折れを避ける。方位指定は表示上の曲線制御であり航行指示ではない。",
+        "display_start_bearing": 180
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            56.6,
+            25.85
+          ],
+          [
+            56.72,
+            25.62
+          ],
+          [
+            56.76,
+            25.46
+          ],
+          [
+            56.72,
+            25.34
+          ],
+          [
+            56.64,
+            25.22
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "湾内航路 ↔ ソハール沖の積替え接続（往復模式）",
+        "route": "1",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。日本からの原油輸出、積荷、同一航路での往復実績、安全を示さない。",
+        "geometry_note": "公表された経由地を結ぶ模式航路。AIS航跡ではない。",
+        "category": "schematic_sts_connection",
+        "source": "https://energynow.com/2026/09/gulf-of-oman-ship-to-ship-oil-transfers-reach-limit-as-saudi-exports-surge/",
+        "accuracy": "沖合積替えの代表位置。全便の寄港・積替え、特定のラス・タヌラ発シャトル便を示すものではない。",
+        "layout_note": "港の白点と沖合STSの輪を分離。紫線は輪で終端。海域内の模式経由点。 共通線と枝線の南向きの接線を揃え、分岐点の急折れを避ける。方位指定は表示上の曲線制御であり航行指示ではない。",
+        "display_start_bearing": 180
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            56.6,
+            25.85
+          ],
+          [
+            56.52,
+            25.6
+          ],
+          [
+            56.5,
+            25.1
+          ],
+          [
+            56.7,
+            24.8
+          ],
+          [
+            57.0,
+            24.51
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "フジャイラ発 ↔ ミナ・アル・ハファル沖STS（模式）",
+        "route": "1",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。原油の逆向き輸送、個船の往復完了、往復で同じ航路を使うことを確認した表示ではない。",
+        "geometry_note": "公表された経由地を結ぶ模式航路。AIS航跡ではない。",
+        "category": "schematic_fujairah_mina_sts",
+        "added_at": "2026-10-22",
+        "source": "ユーザー提供情報（2026-10-22）",
+        "evidence_status": "user_provided",
+        "accuracy": "フジャイラ発の船によるミナ・アル・ハファル沖STSという接続関係を模式化。始点はフジャイラ地域を示し、積載設備・油種・数量・個船・航跡を確定しない。ミナ沖STS位置は図示上の代表点。",
+        "layout_note": "港とSBMを分離できない縮尺のため、出発線をフジャイラ沖で小さく離して開始。既存金色SBMへの直接接続とせず、発地は文字で示す。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            56.43,
+            25.08
+          ],
+          [
+            56.48,
+            24.95
+          ],
+          [
+            56.67,
+            24.63
+          ],
+          [
+            56.88,
+            24.38
+          ],
+          [
+            57.3,
+            24.18
+          ],
+          [
+            57.8,
+            23.95
+          ],
+          [
+            58.35,
+            23.9
+          ],
+          [
+            58.8,
+            23.75
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ミナ・アル・ハファル沖の積載 ↔ 日本方面",
+        "route": "1",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。原油の逆向き輸送、個船の往復完了、往復で同じ航路を使うことを確認した表示ではない。",
+        "geometry_note": "公表された経由地を結ぶ模式航路。AIS航跡ではない。",
+        "source_notes": "docs/gulf-hormuz-oman.md",
+        "accuracy": "STS・SBMを区域として集約。個別荷役・貨物・運航の実績を示さない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            58.533333,
+            23.65
+          ],
+          [
+            59.2,
+            23.78
+          ],
+          [
+            59.65,
+            23.4
+          ],
+          [
+            61.5,
+            21
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ヤンブー ↔ バブ・エル・マンデブ ↔ 日本方面（航行制約）",
+        "route": "2",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。原油の逆向き輸送、個船の往復完了、往復で同じ航路を使うことを確認した表示ではない。",
+        "geometry_note": "公表された経由地を結ぶ模式航路。AIS航跡ではない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            38.2,
+            24.0
+          ],
+          [
+            37.7,
+            23.8
+          ],
+          [
+            38.4,
+            21.9
+          ],
+          [
+            39.8,
+            19.1
+          ],
+          [
+            41.15,
+            16.4
+          ],
+          [
+            42.7,
+            14.3
+          ],
+          [
+            43.4,
+            12.6
+          ],
+          [
+            45.5,
+            12
+          ],
+          [
+            50.4,
+            13.4
+          ],
+          [
+            54,
+            12.9
+          ],
+          [
+            61,
+            9
+          ],
+          [
+            68,
+            6
+          ],
+          [
+            78,
+            4.1
+          ],
+          [
+            86,
+            5
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "中東・喜望峰方面の日本向け共通区間",
+        "route": "common",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。原油の逆向き輸送、個船の往復完了、往復で同じ航路を使うことを確認した表示ではない。",
+        "geometry_note": "公表された経由地を結ぶ模式航路。AIS航跡ではない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            103.65,
+            1.2
+          ],
+          [
+            104.6,
+            1.1
+          ],
+          [
+            106,
+            2.5
+          ],
+          [
+            110,
+            8
+          ],
+          [
+            115,
+            15
+          ],
+          [
+            120,
+            20
+          ],
+          [
+            122,
+            21.4
+          ],
+          [
+            126,
+            26
+          ],
+          [
+            130,
+            29
+          ],
+          [
+            134,
+            31.3
+          ],
+          [
+            138.8,
+            34.1
+          ],
+          [
+            139.7,
+            35.1
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "米湾岸 ↔ パナマ運河 ↔ 太平洋 ↔ 日本（中型船による補完輸送・VLCC不可）",
+        "route": "5",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。原油の逆向き輸送、個船の往復完了、往復で同じ航路を使うことを確認した表示ではない。",
+        "geometry_note": "公表された経由地を結ぶ模式航路。AIS航跡ではない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -94.1,
+            28.5
+          ],
+          [
+            -91,
+            26
+          ],
+          [
+            -86,
+            23
+          ],
+          [
+            -85.5,
+            21.5
+          ],
+          [
+            -83.5,
+            18
+          ],
+          [
+            -80,
+            12
+          ],
+          [
+            -79.92,
+            9.36
+          ],
+          [
+            -79.7,
+            9.1
+          ],
+          [
+            -79.57,
+            8.95
+          ],
+          [
+            -80,
+            7
+          ],
+          [
+            -83,
+            6
+          ],
+          [
+            -92,
+            9
+          ],
+          [
+            -104,
+            14
+          ],
+          [
+            -117,
+            22
+          ],
+          [
+            -135,
+            30
+          ],
+          [
+            -156,
+            35
+          ],
+          [
+            -177,
+            36
+          ],
+          [
+            165,
+            35
+          ],
+          [
+            152,
+            34.5
+          ],
+          [
+            143,
+            34.5
+          ],
+          [
+            141,
+            34.3
+          ],
+          [
+            140,
+            34.6
+          ],
+          [
+            139.85,
+            34.85
+          ],
+          [
+            139.7,
+            35.1
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "カナダ西岸 ↔ 北太平洋 ↔ 日本",
+        "route": "6",
+        "direction": "bidirectional",
+        "display_note": "船の往復を模式化。原油の逆向き輸送、個船の往復完了、往復で同じ航路を使うことを確認した表示ではない。",
+        "geometry_note": "公表された経由地を結ぶ模式航路。AIS航跡ではない。"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -123.1,
+            49.3
+          ],
+          [
+            -123.45,
+            49.2
+          ],
+          [
+            -123.5,
+            48.7
+          ],
+          [
+            -123.3,
+            48.3
+          ],
+          [
+            -124.7,
+            48.3
+          ],
+          [
+            -126,
+            48
+          ],
+          [
+            -133,
+            46.5
+          ],
+          [
+            -147,
+            46
+          ],
+          [
+            -163,
+            45
+          ],
+          [
+            -179,
+            43
+          ],
+          [
+            166,
+            40
+          ],
+          [
+            153,
+            37
+          ],
+          [
+            144,
+            35.6
+          ],
+          [
+            141,
+            34.3
+          ],
+          [
+            140,
+            34.6
+          ],
+          [
+            139.85,
+            34.85
+          ],
+          [
+            139.7,
+            35.1
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "シディ・ケリル沖（原油SBM積載）",
+        "category": "loading_area",
+        "loading_method": "SBM",
+        "source": "https://www.sumed.org/?p=facilities",
+        "source_notes": "docs/route-additions-20261012.md",
+        "accuracy": "既存のターミナル代表点で区域を表示。個別ブイ座標や当日の稼働・個船の荷役実績を示さない。"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          29.7,
+          31.1
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "ミナ・アル・ハファル沖（STS／原油SBM）",
+        "category": "loading_area",
+        "source_notes": "docs/route-additions-20261012.md",
+        "accuracy": "区域代表点。個別ブイ・積替船の精密座標ではない。"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          58.533333,
+          23.65
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "マラッカ沖（リンギ等）：中東原油の日本向けSTS",
+        "category": "loading_area",
+        "loading_method": "STS",
+        "source": "https://www.spglobal.com/energy/en/news-research/latest-news/shipping/060926-japan-refiners-deploy-vlccs-for-ship-transfers-us-crude-amid-hormuz-disruptions",
+        "source_notes": "docs/route-additions-20261012.md",
+        "reported_on": "2026-06-09",
+        "accuracy": "リンギ付近の区域代表点。報道されたリンギ・タンジュンブルアス等の船間積替えを模式化。全貨物の必須経由地、10月時点の継続・輸送量、個船の作業位置を示さない。"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          101.95,
+          2.4
+        ]
+      }
+    }
+  ]
+}

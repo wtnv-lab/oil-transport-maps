@@ -83,8 +83,8 @@
         "status": "hypothetical",
         "callout": {
           "offset": [
-            -100,
-            35
+            -160,
+            220
           ],
           "width": 350,
           "title": "独自データの描画例",

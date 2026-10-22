@@ -104,6 +104,14 @@
     "user_update": {
       "size": 16,
       "weight": 400
+    },
+    "overview_route": {
+      "size": 28,
+      "weight": 500
+    },
+    "overview_condition": {
+      "size": 22,
+      "weight": 400
     }
   },
   "routes": {

@@ -8,14 +8,16 @@
 
 画像を見るだけなら、実行環境の準備は不要です。下の画像から高解像度PNGを開けます。**作図更新日と、情勢・費用の情報基準日は別です。**
 
-| 中東の原油輸送ルート · 第15版 | 日本向け原油輸送ルート · 第14版 |
+| 中東の原油輸送ルート · 第15版 | 日本向け原油輸送ルート · 第15版 |
 |---|---|
 | 作図更新：2026年10月12日 | 作図更新・湾岸局所追記：2026年10月22日 |
-| [![中東図](examples/2026-10-12-design-system/middle-east-pc1440.png?v=15-8f88aabec9e8)](examples/2026-10-12-design-system/middle-east.png?v=15-20b47336428a) | [![全球図](examples/2026-10-22-global/global-pc1440.png?v=14-d0bd8d4744c2)](examples/2026-10-22-global/global.png?v=14-f284cafedcf7) |
-| [PNG：3600 × 2608 px](examples/2026-10-12-design-system/middle-east.png?v=15-20b47336428a) · [SVG](examples/2026-10-12-design-system/middle-east.svg?v=15-1a635fe61fdb) | [PNG：4800 × 2676 px](examples/2026-10-22-global/global.png?v=14-f284cafedcf7) · [SVG](examples/2026-10-22-global/global.svg?v=14-27ee6551249b) |
-| [PC表示例：幅1440px](examples/2026-10-12-design-system/middle-east-pc1440.png?v=15-8f88aabec9e8) | [PC表示例：幅1440px](examples/2026-10-22-global/global-pc1440.png?v=14-d0bd8d4744c2) |
+| [![中東図](examples/2026-10-12-design-system/middle-east-pc1440.png?v=15-8f88aabec9e8)](examples/2026-10-12-design-system/middle-east.png?v=15-20b47336428a) | [![全球図](examples/2026-10-22-global-overview/global-pc1440.png?v=15-57e38c3477f4)](examples/2026-10-22-global-overview/global.png?v=15-54bf4f9718e0) |
+| [PNG：3600 × 2608 px](examples/2026-10-12-design-system/middle-east.png?v=15-20b47336428a) · [SVG](examples/2026-10-12-design-system/middle-east.svg?v=15-1a635fe61fdb) | [PNG：4800 × 2620 px](examples/2026-10-22-global-overview/global.png?v=15-54bf4f9718e0) · [SVG](examples/2026-10-22-global-overview/global.svg?v=15-1ea5a6d1b6f3) |
+| [PC表示例：幅1440px](examples/2026-10-12-design-system/middle-east-pc1440.png?v=15-8f88aabec9e8) | [PC表示例：幅1440px](examples/2026-10-22-global-overview/global-pc1440.png?v=15-57e38c3477f4) |
 
-全球図第14版は、6つの経路とマラッカ沖STSの説明を「方式・費用要因・リスク」に整理し、文字の階層・行間・直線の引出線を調整しています。ダス島発の枝線、ムサンダム沿岸の線形、フジャイラの原油SBM、フジャイラ発→ミナ沖STSの接続も反映しました。**情勢・費用の基準日は9月29日で、10月22日時点の全面的な再検証ではありません。** [局所追記と確認限界](docs/global-sources-and-costs.md)
+全球図第15版は、6つの主要経路と発着地を示す全体図です。費用・リスクの説明枠と細かな荷役注記を省き、経路名を線の近くに直接配置しています。パナマ経由の船型制約と、往復矢印・破線の意味は残しています。
+
+費用・リスクの詳細は[出典資料](docs/global-sources-and-costs.md)、湾岸の荷役・接続は[ホルムズ拡大図](docs/gulf-hormuz-oman.md)、説明枠付きの第14版は[保存版](examples/2026-10-22-global/)を参照できます。**情勢・費用の基準日は9月29日で、10月22日の湾岸局所追記と今回の表示整理は、全面的な情勢再検証ではありません。**
 
 中東図・全球図とも、国・大陸・海域名は縁なしの明朝体、主要港・パイプライン名は細い縁取りの角ゴシックで描き分けています。日付別の完成品は [`examples/`](examples/) に保存し、過去版も比較できるよう残しています。
 
@@ -211,7 +213,7 @@ maps:
     metadata: maps/global/metadata.json
     user_data: user-data/global.geojson
     gulf_routes_snapshot: maps/global/data/gulf-routes.geojson
-    published_example: examples/2026-10-22-global/
+    published_example: examples/2026-10-22-global-overview/
     sources: docs/global-sources-and-costs.md
     local_addition_sources: docs/gulf-hormuz-oman.md
   gulf-hormuz-oman:
@@ -243,7 +245,7 @@ outputs: ["{map_id}.png", "{map_id}.svg", "{map_id}.geojson", "{map_id}.qa.json"
 | 独自の港・航路・注記を追加、更新、削除 | `user-data/global.geojson` / `user-data/middle-east.geojson` |
 | 中東図の経路・地点・記載内容・ラベル位置 | [`maps/middle-east/build.py`](maps/middle-east/build.py) |
 | ホルムズ拡大図の座標・記載内容・配置 | [`maps/gulf-hormuz-oman/`](maps/gulf-hormuz-oman/) と[専用ガイド](docs/gulf-hormuz-oman.md) |
-| 全球図の経路・地点・記載内容・バルーン位置 | [`maps/global/build.py`](maps/global/build.py) |
+| 全球図の経路・主要地点・経路名の配置 | [`maps/global/build.py`](maps/global/build.py) |
 | 全球図に採用した湾岸線形・出典 | [`maps/global/data/gulf-routes.geojson`](maps/global/data/gulf-routes.geojson)（拡大図から採用した保存版。自動同期なし） |
 | 共通の書体・基本色・余白・縁取り・追加データの既定意匠 | [`design/foundations.json`](design/foundations.json) |
 | 図ごとの文字階層・地名別サイズ差・航路色・線・記号 | [`design/profiles/`](design/profiles/) 内の対象図のJSON |
