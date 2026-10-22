@@ -143,9 +143,9 @@ async function main() {
           element => !element.getAttribute('rx')
         ),
         // 全球図のクレジット確認用。中東図ではfalseでもエラーにしない。
-        researchCreditPresent: document.documentElement.textContent.includes(
-          '東京大学大学院 渡邉英徳研究室'
-        ),
+        researchCreditPresent: ['東京大学大学院 渡邉英徳研究室',
+          'Watanave Laboratory, The University of Tokyo'].some(credit =>
+            document.documentElement.textContent.includes(credit)),
       };
     });
 

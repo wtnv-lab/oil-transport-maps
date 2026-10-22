@@ -129,3 +129,16 @@ npm run refresh-basemap -- global
 `examples/2026-09-29/`は初期の完成品です。新しい日付の地図を確定するときは、日付別のフォルダーへ成果物を保存し、対応する変更と出典をローカルGitに記録すると追跡しやすくなります。`dist/`は再生成用の出力先として使用します。
 
 このリポジトリの作図処理は、Xへの投稿や外部サービスへの公開を行いません。公開用の画像を作ることと、外部に投稿することは別の操作です。
+
+## 英語版の更新
+
+```sh
+./build.sh all --lang en
+./build.sh gulf-hormuz-oman --lang en
+./build.sh all --lang en --data-dir examples/user-data-en --output-dir dist/en/tutorial
+python3 -m unittest discover -s tests -v
+```
+
+英語は`dist/en/`へ、日本語は`dist/`へ出力します。`--output-dir`指定時は言語フォルダーを自動付加しません。英語の表示内容と文字位置は`maps/<map-id>/locales/en.json`で編集し、地理座標と出典は元データを共有します。組込み文字の未翻訳、言語の伝播、元資料・経路の保持は`tests/test_map_language.py`で検査します。
+
+独自データの名前・注記・出典は自動翻訳しません。ステータス・追加データの日付表示だけを出力言語に揃えます。英語で共有する際は、実際に英語で用意した独自データを指定します。既定の空レイヤーでも、両言語を通常描画して文字・引出線・枠の配置を目視確認します。

@@ -227,8 +227,24 @@ def _line_samples(points):
     return result
 
 
-def _wrap_text(text, available, size):
+def _wrap_text(text, available, size, *, prefer_words=False):
     """CJK の字幅を概算して枠内で折り返す。実際の重なりは描画後の QA で確認。"""
+    if prefer_words and " " in text:
+        # Keep English words and ISO dates together; split only oversized tokens.
+        rows, row = [], ""
+        def advance(value):
+            return sum(size * (1 if unicodedata.east_asian_width(c) in "WF" else .58) for c in value)
+        for token in text.split():
+            candidate = (row + " " + token) if row else token
+            if advance(candidate) <= available:
+                row = candidate
+            else:
+                if row:
+                    rows.append(row)
+                pieces = _wrap_text(token, available, size)
+                rows.extend(pieces[:-1])
+                row = pieces[-1]
+        return rows + ([row] if row else [])
     lines, row, used = [], "", 0
     for char in text:
         advance = size * (1 if unicodedata.east_asian_width(char) in "WF" else .58)
@@ -240,13 +256,15 @@ def _wrap_text(text, available, size):
     return lines + ([row] if row else [])
 
 
-def render_layer(layer, project, width, height, wrap=False, *, top=0):
+def render_layer(layer, project, width, height, wrap=False, *, top=0, lang="ja"):
     """検証済みレイヤーを SVG 断片へ変換する。
 
     project([lon, lat]) は既存地図と同じピクセル座標を返す関数。
     height は下端の y 座標、top は上端。全球図では TOP + MH / TOP を渡す。
     ラベル位置は地点（航路の場合は可視部中央）からの差分で指定する。
     """
+    if lang not in ("ja", "en"):
+        raise ValueError(f"Unsupported language: {lang!r}")
     if not layer["features"]:
         return []  # 既定の空レイヤーでは既存 SVG を1バイトも変えない。
     # GeoJSONの明示値を優先し、省略された意匠だけを共通設定で補う。
@@ -316,7 +334,8 @@ def render_layer(layer, project, width, height, wrap=False, *, top=0):
             if not visible:
                 fail("geometry.coordinates", "経路全体が地図の描画範囲外です。対象地図と座標を確認してください")
             anchor = visible[len(visible) // 2]
-        status = STATUS_LABELS[props["status"]]
+        status = (STATUS_LABELS[props["status"]] if lang == "ja" else
+                  {"confirmed": "confirmed", "reported": "reported", "hypothetical": "hypothetical"}[props["status"]])
         if "label" in props or "callout" not in props:
             label = props.get("label", {})
             dx, dy = label.get("offset", (18, -18))
@@ -327,15 +346,18 @@ def render_layer(layer, project, width, height, wrap=False, *, top=0):
             if distance > 22:
                 start = tuple(anchor[k] + (end[k] - anchor[k]) * 9 / distance for k in (0, 1))
                 labels.extend(leader(start, end, "label-leader"))
-            labels.append(text(tx, ty, f'{props["name"]}［{status}］', size, anchor=align))
+            label_text = f'{props["name"]}［{status}］' if lang == "ja" else f'{props["name"]} [{status}]'
+            labels.append(text(tx, ty, label_text, size, anchor=align))
         if "callout" in props:
             callout = props["callout"]
             x, y = (anchor[k] + callout["offset"][k] for k in (0, 1))
             box_width = callout["width"]
             available = box_width - 2 * style["callout_padding"]
-            title_rows = _wrap_text(callout["title"], available, style["callout_title"])
-            status_rows = _wrap_text(f'追加データ・{status}・{props["observed_on"]}', available, style["callout_status"])
-            body_rows = [row for line in callout["lines"] for row in _wrap_text(line, available, style["callout_body"])]
+            title_rows = _wrap_text(callout["title"], available, style["callout_title"], prefer_words=lang == "en")
+            status_text = (f'追加データ・{status}・{props["observed_on"]}' if lang == "ja" else
+                           f'User data / {status} / {props["observed_on"]}')
+            status_rows = _wrap_text(status_text, available, style["callout_status"], prefer_words=lang == "en")
+            body_rows = [row for line in callout["lines"] for row in _wrap_text(line, available, style["callout_body"], prefer_words=lang == "en")]
             rows = ([(row, style["callout_title"], colors["primary"]) for row in title_rows]
                     + [(row, style["callout_status"], colors["muted"]) for row in status_rows]
                     + [(row, style["callout_body"], colors["secondary"]) for row in body_rows])

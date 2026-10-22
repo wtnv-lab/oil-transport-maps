@@ -1,0 +1,134 @@
+{
+  "translations": {
+    "中東の原油輸送ルート": "Middle East crude oil transport routes",
+    "公開資料による主要経路の整理 ｜ 当日の運航・稼働・輸送量を示す図ではありません": "Major routes from public sources | Schematic, not live operations or transport volumes",
+    "エジプト": "Egypt",
+    "サウジアラビア": "Saudi Arabia",
+    "イラク": "Iraq",
+    "イラン": "Iran",
+    "オマーン": "Oman",
+    "イエメン": "Yemen",
+    "スーダン": "Sudan",
+    "エリトリア": "Eritrea",
+    "ジブチ": "Djibouti",
+    "アラブ首長国連邦": "UAE",
+    "地中海": "Mediterranean Sea",
+    "紅海": "Red Sea",
+    "ペルシャ湾": "Persian Gulf",
+    "オマーン湾": "Gulf of Oman",
+    "アラビア海": "Arabian Sea",
+    "アデン湾": "Gulf of Aden",
+    "東西原油パイプライン": "East–West crude oil pipeline",
+    "9/28 輸出再開報道": "Exports reportedly resumed Sep 28",
+    "アブダビ原油パイプライン": "Abu Dhabi crude pipeline",
+    "SUMEDパイプライン": "SUMED pipeline",
+    "喜望峰経由 ↔ 日本方面": "Via Cape of Good Hope ↔ Japan",
+    "ミナ・アル・ハファル沖": "Off Mina Al Fahal",
+    "STS／原油SBM（模式）": "STS / crude SBM (schematic)",
+    "湾内 ↔ 湾外": "Gulf ↔ open sea",
+    "9月の通航回復／危険は継続": "Transit recovered in Sep / risks persist",
+    "日本方面と往復": "↔ Japan",
+    "ホルムズ海峡": "Strait of Hormuz",
+    "バブ・エル・マンデブ海峡": "Bab el-Mandeb",
+    "スエズ運河": "Suez Canal",
+    "シディ・ケリル": "Sidi Kerir",
+    "アイン・スフナ": "Ain Sokhna",
+    "ヤンブー": "Yanbu",
+    "ラス・タヌラ": "Ras Tanura",
+    "アブカイク": "Abqaiq",
+    "ハブシャン": "Habshan",
+    "フジャイラ": "Fujairah",
+    "ソハール": "Sohar",
+    "SBMで原油積載": "Crude loading via SBM",
+    "凡例": "Legend",
+    "原油パイプライン（概略・一部補間）": "Crude pipeline (approx.; gaps interpolated)",
+    "海上経路（船の往復・模式）": "Sea route (schematic vessel round trips)",
+    "南航に制約（サウジ関連船）": "Southbound restrictions (Saudi-linked ships)",
+    "湾内・湾外／紫点線は積替え接続": "Gulf route / purple dots: transfer connections",
+    "海上の双方向矢印は船の往復を模式化。積荷・同一航路での往復実績・安全を示さず、日本からの原油輸出を意味しません。": "Paired sea arrows denote schematic vessel round trips, not cargo flow, verified return voyages, safety, or crude exports from Japan.",
+    "赤破線は全船の完全封鎖を意味しません。湾内発はホルムズを通過。直航・湾外積替えがあり、起点・積替地点は代表位置です。": "Red dashes do not mean closure to all ships. Gulf cargo passes Hormuz; direct shipping and offshore transfers coexist. Points are representative.",
+    "STS＝船間積替え、SBM＝沖合ブイ経由の積載。パイプラインの矢印は送油方向です。既存の情勢注記は9/29基準です。": "STS = ship-to-ship transfer; SBM = single buoy mooring. Pipeline arrows show oil flow. Situation notes use the Sep 29 information baseline.",
+    "資料：OSM・GEM・SUMED・Reuters・GME・NGA・公開AISほか": "Sources: OSM, GEM, SUMED, Reuters, GME, NGA, public AIS and others"
+  },
+  "layout": {
+    "地中海": {
+      "size": 25,
+      "y": 29
+    },
+    "ペルシャ湾": {
+      "size": 23
+    },
+    "オマーン湾": {
+      "size": 22
+    },
+    "紅海": {
+      "size": 25
+    },
+    "アデン湾": {
+      "size": 22
+    },
+    "東西原油パイプライン": {
+      "size": 23
+    },
+    "9/28 輸出再開報道": {
+      "size": 16
+    },
+    "湾内 ↔ 湾外": {
+      "size": 23
+    },
+    "9月の通航回復／危険は継続": {
+      "size": 16
+    },
+    "日本方面と往復": {
+      "size": 23
+    },
+    "喜望峰経由 ↔ 日本方面": {
+      "size": 18
+    },
+    "STS／原油SBM（模式）": {
+      "size": 17
+    }
+  },
+  "typography": {
+    "country": {
+      "size": 29
+    },
+    "sea": {
+      "size": 27
+    },
+    "port": {
+      "size": 26
+    },
+    "secondary_port": {
+      "size": 24
+    },
+    "pipeline": {
+      "size": 23
+    },
+    "detail": {
+      "size": 17
+    },
+    "footnote": {
+      "size": 16
+    },
+    "legend": {
+      "size": 15
+    },
+    "source": {
+      "size": 12
+    },
+    "credit": {
+      "size": 14
+    }
+  },
+  "fonts": {
+    "sans": [
+      "Arial",
+      "sans-serif"
+    ],
+    "geographic": [
+      "Georgia",
+      "serif"
+    ]
+  }
+}

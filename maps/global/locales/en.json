@@ -1,0 +1,106 @@
+{
+  "translations": {
+    "日本向け原油輸送ルート": "Crude Oil Routes to Japan",
+    "主要航路と主なリスク・制約": "Main routes and key risks / constraints",
+    "アフリカ": "Africa",
+    "北アメリカ": "North America",
+    "南アメリカ": "South America",
+    "インド洋": "Indian Ocean",
+    "太平洋": "Pacific Ocean",
+    "大西洋": "Atlantic Ocean",
+    "日本": "Japan",
+    "米国メキシコ湾岸": "U.S. Gulf Coast",
+    "バンクーバー": "Vancouver",
+    "ヤンブー": "Yanbu",
+    "シディ・ケリル": "Sidi Kerir",
+    "フジャイラなど": "Fujairah area",
+    "パナマ運河": "Panama Canal",
+    "喜望峰周辺": "Cape of Good Hope",
+    "ホルムズ海峡": "Strait of Hormuz",
+    "マラッカ沖 STS": "Malacca offshore STS",
+    "地中海・喜望峰": "Mediterranean / Cape",
+    "送油設備への攻撃、接続の遅れ": "Oil facility attacks; connection delays",
+    "中東・インド洋": "Middle East / Indian Ocean",
+    "海峡・港湾への攻撃、積替え待ち": "Strait / port attacks; transfer delays",
+    "カナダ西岸・太平洋": "Canada West Coast / Pacific",
+    "積出港の喫水制限、油種の制約": "Port draft limits; crude grade limits",
+    "紅海南下（航行制約）": "Red Sea southbound (restricted)",
+    "フーシ派の攻撃・拿捕": "Houthi attacks and seizures",
+    "米湾岸・パナマ": "U.S. Gulf / Panama",
+    "予約待ち・水位による通航制限": "Booking delays; water-level limits",
+    "中型船／VLCC不可": "Mid-size tankers / no VLCC passage",
+    "米湾岸・喜望峰": "U.S. Gulf / Cape",
+    "荒天・船腹不足による遅れ": "Rough seas; vessel shortages",
+    "航路は模式線。矢印は船の往復で、原油の流向・個船の実績・安全を示さない。赤破線は一部船舶の航行制約。白線は共通区間。": "Schematic routes. Arrows: vessel round trips, not crude flow, verified voyages or safe passage. Red dashes: restrictions on some vessels. White: shared routes.",
+    "資料：Reuters・S&P Global・GME・NGA・公開AIS・パナマ運河庁ほか": "Sources: Reuters, S&P Global, GME, NGA, public AIS, Panama Canal Authority and others",
+    "作図：東京大学大学院 渡邉英徳研究室": "Map: Watanave Laboratory, The University of Tokyo"
+  },
+  "layout": {
+    "喜望峰周辺": {
+      "y": 910,
+      "size": 22
+    },
+    "南アメリカ": {
+      "x": 2260,
+      "size": 30
+    },
+    "ホルムズ海峡": {
+      "y": 565,
+      "size": 22
+    },
+    "大西洋": {
+      "x": 125,
+      "size": 30
+    }
+  },
+  "typography": {
+    "title": {
+      "size": 46
+    },
+    "subtitle": {
+      "size": 24
+    },
+    "date": {
+      "size": 22
+    },
+    "header_note": {
+      "size": 21
+    },
+    "port": {
+      "size": 28
+    },
+    "passage": {
+      "size": 22
+    },
+    "callout_title": {
+      "size": 26
+    },
+    "callout_body": {
+      "size": 23
+    },
+    "overview_condition": {
+      "size": 21
+    },
+    "footer_note": {
+      "size": 19
+    },
+    "credit": {
+      "size": 18
+    },
+    "attribution": {
+      "size": 17
+    }
+  },
+  "fonts": {
+    "sans": [
+      "Arial",
+      "Helvetica",
+      "sans-serif"
+    ],
+    "geographic": [
+      "Georgia",
+      "Times New Roman",
+      "serif"
+    ]
+  }
+}

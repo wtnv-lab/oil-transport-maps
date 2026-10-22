@@ -18,13 +18,18 @@ D = Path(__file__).resolve().parent
 ROOT = D.parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from design_system import load_design, svg_css
+from map_language import MapLanguage
 
 
-DS = load_design("middle-east")
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument("--output-dir", type=Path, default=ROOT / "dist")
+parser.add_argument("--output-dir", type=Path)
+parser.add_argument("--lang", choices=("ja", "en"), default="ja",
+                    help="Output language (default: ja)")
 args = parser.parse_args()
-OUT = args.output_dir.resolve()
+L10N = MapLanguage("gulf-hormuz-oman", args.lang)
+LANG_ATTRIBUTE = ' lang="en"' if args.lang == "en" else ""
+DS = L10N.design(load_design("middle-east"))
+OUT = (args.output_dir or ROOT / "dist" / ("en" if args.lang == "en" else "")).resolve()
 OUT.mkdir(parents=True, exist_ok=True)
 if OUT == D or OUT == D / "data":
     parser.error("出力先を入力フォルダーと別にしてください。")
@@ -57,8 +62,9 @@ def xy(p):
 
 def text(x, y, value, role="label", color=None, anchor="start", css=""):
     spec = T[role]
+    value, x, y, size, anchor = L10N.text(value, x, y, spec["size"], anchor)
     a(
-        f'<text x="{x:.2f}" y="{y:.2f}" font-size="{spec["size"]}" '
+        f'<text x="{x:.2f}" y="{y:.2f}" font-size="{size}" '
         f'font-weight="{spec["weight"]}" fill="{color or C["primary"]}" '
         f'text-anchor="{anchor}" class="{css}">{escape(value)}</text>'
     )
@@ -151,12 +157,14 @@ def leader(p, q, color=None, marker_gap=None):
 
 def point(p, label, at, role="port", anchor="start", kind="port", sub=None):
     x, y = xy(p)
-    tx, ty = at
+    # Resolve the translated label before placing its leader, so both share the
+    # same anchor and baseline when an English layout override is provided.
+    _, tx, ty, label_size, anchor = L10N.text(label, *at, T[role]["size"], anchor)
     leader(
         (x, y),
         (
             tx - SP["label_gap"] if anchor == "start" else tx + SP["label_gap"],
-            ty - T[role]["size"] * SP["label_center_factor"],
+            ty - label_size * SP["label_center_factor"],
         ),
     )
     if kind == "plant":
@@ -193,13 +201,15 @@ def point(p, label, at, role="port", anchor="start", kind="port", sub=None):
 
 a(
     f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{TOP+H+BOT}" '
-    f'viewBox="0 0 {W} {TOP+H+BOT}" role="img" aria-labelledby="title desc">'
+    f'viewBox="0 0 {W} {TOP+H+BOT}"{LANG_ATTRIBUTE} role="img" aria-labelledby="title desc">'
 )
 a(
-    f'<title id="title">{escape(META["title"])}</title><desc id="desc">'
-    'ホルムズ海峡を経由する海路とアブダビ原油パイプライン、'
-    'フジャイラ・ソハール・ミナ・アル・ハファル沖の積出区域。'
-    '航路は模式表現で当日の通航や施設稼働を示さない。</desc>'
+    f'<title id="title">{escape(L10N.tr(META["title"]))}</title><desc id="desc">'
+    + escape(L10N.tr(
+        "ホルムズ海峡を経由する海路とアブダビ原油パイプライン、"
+        "フジャイラ・ソハール・ミナ・アル・ハファル沖の積出区域。"
+        "航路は模式表現で当日の通航や施設稼働を示さない。"
+    )) + "</desc>"
 )
 a(
     f'<defs><style>{svg_css(DS)}</style><clipPath id="mapclip">'
@@ -210,10 +220,11 @@ text(48, 40, META["title"], "title")
 text(48, 69, META["subtitle"], "footnote", C["subtitle"])
 text(
     W - 48, 40,
-    META["as_of"].replace("-", ".")
-    + " 基準 ／ "
-    + META["route_additions_as_of"][5:].replace("-", ".")
-    + " 航路追記",
+    (META["as_of"].replace("-", ".") + " baseline / "
+     + META["route_additions_as_of"][5:].replace("-", ".") + " routes added")
+    if args.lang == "en" else
+    (META["as_of"].replace("-", ".") + " 基準 ／ "
+     + META["route_additions_as_of"][5:].replace("-", ".") + " 航路追記"),
     "footnote", C["date"], "end",
 )
 text(W - 48, 69, META["status_label"], "status", C["date"], "end")
@@ -348,7 +359,7 @@ STEM.with_suffix(".design.json").write_text(json.dumps(DS, ensure_ascii=False, i
 print(STEM.with_suffix(".svg"))
 STEM.with_suffix(".geojson").write_text(
     json.dumps(
-        {"type": "FeatureCollection", "metadata": META, "features": features},
+        {"type": "FeatureCollection", "language": args.lang, "metadata": META, "features": features},
         ensure_ascii=False, indent=2,
     )
     + "\n"

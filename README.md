@@ -1,5 +1,7 @@
 # 原油輸送ルート地図
 
+**日本語** · [English](README.en.md)
+
 中東の地域図、日本向け原油輸送の全球図、ホルムズ海峡周辺の拡大図を作成するスクリプト・地理データ・出典資料です。公開資料とAIS由来の情報を参照した**模式航路**を、OpenStreetMap系のダーク背景に重ねます。完成画像を閲覧するほか、手元で再生成し、航路や注記を編集できます。
 
 作図：**東京大学大学院 渡邉英徳研究室**。コードの作成・修正にはCodexを使用しています。
@@ -36,6 +38,17 @@
 ```
 
 `dist/gulf-hormuz-oman.*` とPC用画像を生成します。`all` は従来の中東図・全球図の2図です。拡大図は `user-data` レイヤーに未対応で、内蔵のGeoJSONを編集します。**フジャイラ発→ミナ沖STSは提供情報に基づく模式表示で、公開一次資料による独立確認は未了**です。10月22日の部分追加・作図調整を、全面的な情勢更新とは扱いません。
+
+## 英語版
+
+[英語版README](README.en.md)から、全球図・中東図・ホルムズ拡大図の英語版PNG・SVGを閲覧できます。英訳と英語用レイアウトは `maps/<地図ID>/locales/en.json`、共通処理は `scripts/map_language.py` に保存しています。
+
+```sh
+./build.sh all --lang en                  # 英語の中東図・全球図
+./build.sh gulf-hormuz-oman --lang en     # 英語のホルムズ拡大図
+```
+
+既定の出力先は `dist/en/`、日本語は従来どおり `dist/` です。`--output-dir` を指定すると、そのフォルダーへ直接出力します。独自データの本文は自動翻訳せず、利用者の記載を維持します。英語の追加例は `examples/user-data-en/` にあります。英訳・作図調整を、情勢の再検証や基準日の更新として扱いません。
 
 ## 情報の基準日と読み方
 
@@ -182,6 +195,9 @@ GeoJSONも模式的な代表座標です。描画確認用JSONは文字の重な
 ```yaml
 project: oil-transport-maps
 language: ja
+supported_languages: [ja, en]
+english_readme: README.en.md
+english_catalogs: maps/{map_id}/locales/en.json
 repository: https://github.com/wtnv-lab/oil-transport-maps
 license: CC-BY-4.0
 license_file: LICENSE

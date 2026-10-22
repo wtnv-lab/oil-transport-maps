@@ -23,25 +23,28 @@ D = Path(__file__).resolve().parent
 sys.path.insert(0, str(D.parents[1] / "scripts"))
 from user_layers import load_layer, render_layer
 from design_system import load_design, svg_css
-
-# 共通の色・書体と、地域図の縮尺に合わせた寸法を分離する。
-DS = load_design("middle-east")
-COLORS, LINES, SYMBOLS = DS["colors"], DS["lines"], DS["symbols"]
-SPACING = DS["spacing"]
+from map_language import MapLanguage
 
 parser = argparse.ArgumentParser(
     description="Generate the map SVG and representative route geometry"
 )
-parser.add_argument("--output-dir", type=Path, default=D.parents[1] / "dist")
+parser.add_argument("--output-dir", type=Path, help="Output directory (default: dist for ja, dist/en for en)")
 parser.add_argument("--data-file", type=Path, default=D.parents[1] / "user-data/middle-east.geojson")
+parser.add_argument("--lang", choices=("ja", "en"), default="ja", help="Output language (default: ja)")
 args = parser.parse_args()
+# 言語ごとに文字列・文字サイズ・配置を分け、地理座標と出典は共通に保つ。
+L10N = MapLanguage("middle-east", args.lang)
+LANG_ATTRIBUTE = ' lang="en"' if args.lang == "en" else ""
+DS = L10N.design(load_design("middle-east"))
+COLORS, LINES, SYMBOLS = DS["colors"], DS["lines"], DS["symbols"]
+SPACING = DS["spacing"]
 if not args.data_file.is_file():
     parser.error(f"独自データがありません: {args.data_file}")
 try:
     USER_LAYER = load_layer(args.data_file, "middle-east")
 except (ValueError, OSError) as error:
     parser.error(str(error))
-OUT = args.output_dir.resolve()
+OUT = (args.output_dir or D.parents[1] / "dist" / ("en" if args.lang == "en" else "")).resolve()
 if (OUT / "middle-east.geojson").resolve() == args.data_file.resolve():
     parser.error("入力GeoJSONと出力先を別の場所にしてください。")
 OUT.mkdir(parents=True, exist_ok=True)
@@ -107,6 +110,7 @@ def txt(
     extra="",
     css="",
 ):
+    t, x, y, size, anchor = L10N.text(t, x, y, size, anchor)
     classes = " ".join(name for name in ("halo" if halo else "", css) if name)
     add(
         f'<text x="{x}" y="{y}" font-size="{size}" font-weight="{weight}" '
@@ -204,6 +208,8 @@ def point(p, label, lx, ly, sub=None, kind="port", anchor="start", *, leader_end
     font = TYPE[role or kind]
     weight = WEIGHT[role or kind]
     color = COLORS["facility"] if kind == "plant" else COLORS["strong"]
+    # 英語の長さで配置を変えた場合も、引出線は同じ文字端へ接続する。
+    _, lx, ly, font, anchor = L10N.text(label, lx, ly, font, anchor)
     # 地名を施設の右に置くなら start、左なら end にそろえる。
     # 行の反対側へ線を回さず、近い文字端から10px外側・文字高さの中央へ。
     destx = lx - SPACING["label_gap"] if anchor == "start" else lx + SPACING["label_gap"]
@@ -244,24 +250,27 @@ def chokepoint(p, label, dx, dy):
         f'<circle cx="{x}" cy="{y}" r="{SYMBOLS["passage_radius"]}" stroke="{C}" '
         f'stroke-width="{SYMBOLS["passage_width"]}" fill="none" opacity="{SYMBOLS["passage_opacity"]}"/>'
     )
-    direction = -1 if dx < 0 else 1
+    label_x, label_y = x + dx, y + dy
+    anchor = "end" if dx < 0 else "start"
+    _, label_x, label_y, font, anchor = L10N.text(label, label_x, label_y, TYPE["chokepoint"], anchor)
+    direction = -1 if anchor == "end" else 1
     # 引き出し線は文字の手前で止め、字形と重ならない間隔を取る。
     label_leader(
         [
             (x + direction * SPACING["passage_leader_start"], y - SPACING["passage_leader_start"]),
-            (x + dx - direction * SPACING["passage_leader_gap"],
-             y + dy - TYPE["chokepoint"] * SPACING["label_center_factor"]),
+            (label_x - direction * SPACING["passage_leader_gap"],
+             label_y - font * SPACING["label_center_factor"]),
         ],
         C,
     )
     txt(
-        x + dx,
-        y + dy,
+        label_x,
+        label_y,
         label,
-        TYPE["chokepoint"],
+        font,
         C,
         weight=WEIGHT["chokepoint"],
-        anchor="end" if dx < 0 else "start",
+        anchor=anchor,
         css="passage-label",
     )
 
@@ -278,16 +287,21 @@ add(
     '<svg xmlns="http://www.w3.org/2000/svg" '
     'xmlns:xlink="http://www.w3.org/1999/xlink" '
     f'width="{W}" height="{H + TOP + BOT}" '
-    f'viewBox="0 0 {W} {H + TOP + BOT}" role="img" aria-labelledby="title desc">'
+    f'viewBox="0 0 {W} {H + TOP + BOT}"{LANG_ATTRIBUTE} role="img" aria-labelledby="title desc">'
 )
-add(
-    '<title id="title">中東の原油輸送ルート</title><desc id="desc">'
-    '公開資料による原油輸送経路の概念図。ヤンブー南航はサウジ関連船への航行制約を示す赤破線で、全船の完全封鎖ではない。'
-    '湾内発はホルムズを通過し、直航と湾外積替えの両方がある。'
-    'シディ・ケリルでは陸上タンクから沖合のSBMを経て原油を積載する。'
-    '海路・積替地点は模式的な代表位置で、当日の稼働・輸送量・個別貨物の日本向け実績を示さない。'
-    '双方向矢印は船の往復を模式化し、日本からの原油輸出や同一航路の往復実績を意味しない。LNGなどは対象外。</desc>'
+description = (
+    "Schematic crude oil transport routes compiled from public sources. The dashed southbound route from Yanbu indicates restrictions affecting Saudi-linked ships, not a complete closure. "
+    "Gulf-origin cargo passes through Hormuz; direct shipping and offshore transfers coexist. Sidi Kerir loads crude from onshore tanks via offshore SBMs. "
+    "Routes and transfer points are representative, not live vessel tracks, operating status, volumes, or verified Japan-bound cargoes. "
+    "Paired arrows denote schematic vessel round trips, not crude exports from Japan or verified return voyages. LNG is outside the scope."
+    if args.lang == "en" else
+    "公開資料による原油輸送経路の概念図。ヤンブー南航はサウジ関連船への航行制約を示す赤破線で、全船の完全封鎖ではない。"
+    "湾内発はホルムズを通過し、直航と湾外積替えの両方がある。"
+    "シディ・ケリルでは陸上タンクから沖合のSBMを経て原油を積載する。"
+    "海路・積替地点は模式的な代表位置で、当日の稼働・輸送量・個別貨物の日本向け実績を示さない。"
+    "双方向矢印は船の往復を模式化し、日本からの原油輸出や同一航路の往復実績を意味しない。LNGなどは対象外。"
 )
+add(f'<title id="title">{html.escape(L10N.tr(META["title"]))}</title><desc id="desc">{html.escape(description)}</desc>')
 add(
     f'<defs><style>{svg_css(DS)}</style>'
     '<clipPath id="mapclip"><rect width="1800" height="1080"/></clipPath></defs>'
@@ -306,7 +320,8 @@ txt(
 txt(
     W - SPACING["frame_inset"],
     42,
-    f"{AS_OF:%Y.%m.%d} 基準 ／ {ADDED:%m.%d} 航路追記",
+    (f"Information: {AS_OF:%Y-%m-%d} / Routes added: {ADDED:%m-%d}" if args.lang == "en"
+     else f"{AS_OF:%Y.%m.%d} 基準 ／ {ADDED:%m.%d} 航路追記"),
     TYPE["status"],
     COLORS["date"],
     WEIGHT["status"],
@@ -824,7 +839,7 @@ add(f'<path d="M 1739 59 L 1731 89 L 1739 83 L 1747 89 Z" fill="{COLORS["north"]
 txt(1739, 45, "N", TYPE["north"], COLORS["north"], WEIGHT["north"], "middle", False)
 if USER_LAYER["features"]:
     try:
-        svg.extend(render_layer(USER_LAYER, xy, W, H))
+        svg.extend(render_layer(USER_LAYER, xy, W, H, lang=args.lang))
     except ValueError as error:
         parser.error(f"{args.data_file}: {error}")
 add("</g>")
@@ -883,7 +898,9 @@ txt(
 if USER_LAYER["features"]:
     txt(
         SPACING["frame_inset"], H + TOP + BOT - 12,
-        f"利用者データ更新：{USER_LAYER['updated_at']} ｜ 追加{len(USER_LAYER['features'])}件（元図の情報基準日は上記）",
+        (f"User data: {USER_LAYER['updated_at']} / {len(USER_LAYER['features'])} added features; original information date shown above"
+         if args.lang == "en" else
+         f"利用者データ更新：{USER_LAYER['updated_at']} ｜ 追加{len(USER_LAYER['features'])}件（元図の情報基準日は上記）"),
         TYPE["user_data"], COLORS["user_data"], WEIGHT["user_data"], halo=False,
     )
 add("</svg>")
@@ -894,6 +911,7 @@ add("</svg>")
     json.dumps(
         {
             "type": "FeatureCollection",
+            "language": args.lang,
             "as_of": META["as_of"],
             "revalidated_at": META.get("revalidated_at"),
             "route_additions_as_of": META.get("route_additions_as_of"),

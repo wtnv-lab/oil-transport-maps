@@ -150,3 +150,9 @@ design/foundations.jsonと対象図のdesign/profiles/*.jsonを確認し、
 ## ホルムズ拡大図の下部注記
 
 `maps/gulf-hormuz-oman/`は中東図のプロファイルを共用します。拡大図専用の`compact_footnote`は15px・400、`compact_footer_line_height`は22px、`compact_footer_height`は80pxです。凡例枠・積載方式の模式図は置かず、注記は2行の言い切り表現とします。既存2図の`footnote`設定は変更しません。
+
+## 英語の文字と配置
+
+英語版は各図の`locales/en.json`に保存した英訳と表示用の差分を使います。`fonts`は書体、`typography`は文字役割ごとのサイズ、`layout`は表示文字列ごとの位置・サイズ・揃えを上書きします。共通の色・線・記号、地理座標は保持します。位置を変えた地名では、引出線終点も同じ値へ揃えます。
+
+日本語の既定意匠は`design/`の設定をそのまま使います。英語はArial系の角ゴシックとGeorgia系の地理ラベルで階層を表し、バルーン・注記の文字幅を描画後に確認します。英語サンプルの利用者注記は単語・日付を保って折り返します。

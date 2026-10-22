@@ -28,13 +28,19 @@ D = Path(__file__).resolve().parent
 sys.path.insert(0, str(D.parents[1] / 'scripts'))
 from user_layers import load_layer, render_layer
 from design_system import load_design, svg_css
+from map_language import MapLanguage, LANGUAGES
 
 parser = argparse.ArgumentParser(
     description="Generate the map SVG and representative route geometry"
 )
-parser.add_argument("--output-dir", type=Path, default=D.parents[1] / "dist")
+parser.add_argument("--output-dir", type=Path)
+parser.add_argument("--lang", choices=LANGUAGES, default="ja")
 parser.add_argument("--data-file", type=Path, default=D.parents[1] / "user-data/global.geojson")
 args = parser.parse_args()
+L10N = MapLanguage("global", args.lang)
+LANG_ATTRIBUTE = ' lang="en"' if args.lang == "en" else ""
+if args.output_dir is None:
+    args.output_dir = D.parents[1] / "dist" / ("en" if args.lang == "en" else "")
 if not args.data_file.is_file():
     parser.error(f"独自データがありません: {args.data_file}")
 try:
@@ -52,18 +58,25 @@ ADDED = datetime.date.fromisoformat(META["route_additions_as_of"])
 LOCAL_ADDED = datetime.date.fromisoformat(META["local_revision_as_of"])
 LAYOUT_UPDATED = datetime.date.fromisoformat(META["layout_updated_at"])
 # 基準日・一部追記・作図更新を混同せず、保存済みメタデータから表示する。
-DATE_LABEL = f"{AS_OF:%Y.%m.%d} 基準 ／ {ADDED:%m.%d} 航路追記"
+DATE_LABEL = (f"{AS_OF:%Y.%m.%d} 基準 ／ {ADDED:%m.%d} 航路追記" if args.lang == "ja"
+              else f"Baseline {AS_OF:%Y.%m.%d} / routes added {ADDED:%m.%d}")
 UPDATE_LABEL = (
     f"{LOCAL_ADDED:%m.%d} 湾岸追記・作図更新"
     if LOCAL_ADDED == LAYOUT_UPDATED
     else f"{LOCAL_ADDED:%m.%d} 湾岸追記 ／ {LAYOUT_UPDATED:%m.%d} 作図更新"
 )
+if args.lang == "en":
+    UPDATE_LABEL = (
+        f"{LOCAL_ADDED:%m.%d} Gulf additions / layout update"
+        if LOCAL_ADDED == LAYOUT_UPDATED
+        else f"Gulf additions {LOCAL_ADDED:%m.%d} / layout {LAYOUT_UPDATED:%m.%d}"
+    )
 
 # 幅、地図本体の高さ、上部余白、図全体の高さ（いずれも SVG のピクセル単位）。
 W, MH, TOP, H = 2400, 1120, 112, 1310
 # 色・字級・線・記号は両図で共有する基盤と、この図の表示プロファイルから取得。
 # 地理座標や配置座標はこのスクリプト、見た目の規則は design/ に分ける。
-DS = load_design('global')
+DS = L10N.design(load_design('global'))
 TYPE = {role: (style['size'], style['weight']) for role, style in DS['typography'].items()}
 COL = DS['routes']
 C = DS['colors']
@@ -111,6 +124,7 @@ def text(
     """文字列をエスケープして追加する。y は文字のベースライン位置。"""
     if role:
         size, weight = TYPE[role]
+    s, x, y, size, anchor = L10N.text(s, x, y, size, anchor)
     classes = ' '.join(name for name in ('halo' if halo else '', css) if name)
     add(
         f'<text x="{x:.2f}" y="{y:.2f}" font-size="{size}" '
@@ -294,6 +308,7 @@ def dot(
     x, y = xy(p)
     if label and at:
         tx, ty = at
+        label, tx, ty, font, anchor = L10N.text(label, tx, ty, font, anchor)
         gap = SPACE['label_gap']
         end = (tx - gap if anchor == 'start' else tx + gap, ty - font * SPACE['label_baseline_factor'])
         distance = math.dist((x, y), end)
@@ -353,7 +368,7 @@ def risk_bubble(x, y, width, title, key, risk, tail, condition=None):
 add(
     f'<svg xmlns="http://www.w3.org/2000/svg" '
     f'xmlns:xlink="http://www.w3.org/1999/xlink" width="{W}" height="{H}" '
-    f'viewBox="0 0 {W} {H}">'
+    f'viewBox="0 0 {W} {H}"{LANG_ATTRIBUTE}>'
 )
 add(
     '<defs><style>' + svg_css(DS)
@@ -713,7 +728,7 @@ risk_bubble(64, 1085, 540, '米湾岸・喜望峰', '4',
 
 if USER_LAYER['features']:
     try:
-        svg.extend(render_layer(USER_LAYER, xy, W, TOP + MH, wrap=True, top=TOP))
+        svg.extend(render_layer(USER_LAYER, xy, W, TOP + MH, wrap=True, top=TOP, lang=args.lang))
     except ValueError as error:
         parser.error(f"{args.data_file}: {error}")
 add('</g>')
@@ -731,12 +746,14 @@ text(W-SPACE['frame_inset'],1293,'作図：'+META['credit'],
     color=C['secondary'],anchor='end',halo=False,role='credit')
 if USER_LAYER['features']:
     text(SPACE['frame_inset'],H-12,
-         f"利用者データ更新：{USER_LAYER['updated_at']} ｜ 追加{len(USER_LAYER['features'])}件",
+         (f"利用者データ更新：{USER_LAYER['updated_at']} ｜ 追加{len(USER_LAYER['features'])}件" if args.lang == "ja"
+          else f"User data updated: {USER_LAYER['updated_at']} / {len(USER_LAYER['features'])} features"),
          color=C['secondary'],halo=False,role='user_update')
 add('</svg>')
 (OUT/'global.svg').write_text('\n'.join(svg))
 (OUT/'global.geojson').write_text(json.dumps({
     'type':'FeatureCollection',
+    'language':args.lang,
     'as_of':META['as_of'],
     'revalidated_at':META.get('revalidated_at'),
     'route_additions_as_of':META.get('route_additions_as_of'),

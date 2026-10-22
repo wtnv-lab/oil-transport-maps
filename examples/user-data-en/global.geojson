@@ -1,0 +1,98 @@
+{
+  "type": "FeatureCollection",
+  "map": "global",
+  "updated_at": "2026-10-22",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "example-port",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45,
+          25
+        ]
+      },
+      "properties": {
+        "name": "Example location",
+        "kind": "port",
+        "source": "Schematic demonstration, not a real route. Replace with sourced observations.",
+        "observed_on": "2026-10-12",
+        "status": "hypothetical",
+        "label": {
+          "offset": [
+            22,
+            -15
+          ],
+          "font_size": 20
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "example-route",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -48,
+            19
+          ],
+          [
+            -42,
+            14
+          ],
+          [
+            -37,
+            9
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Example route",
+        "kind": "route",
+        "source": "Schematic demonstration, not a real route. Replace with sourced observations.",
+        "observed_on": "2026-10-12",
+        "status": "hypothetical",
+        "color": "#e6dcae",
+        "line_style": "dotted",
+        "label": {
+          "offset": [
+            22,
+            5
+          ],
+          "font_size": 18
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "example-note",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          174,
+          10
+        ]
+      },
+      "properties": {
+        "name": "Rendering example",
+        "kind": "note",
+        "source": "Schematic demonstration, not a real route. Replace with sourced observations.",
+        "observed_on": "2026-10-12",
+        "status": "hypothetical",
+        "callout": {
+          "offset": [
+            -500,
+            220
+          ],
+          "width": 350,
+          "title": "Custom data example",
+          "lines": [
+            "Not a real port or route."
+          ]
+        }
+      }
+    }
+  ]
+}

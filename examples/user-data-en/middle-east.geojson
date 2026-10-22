@@ -1,0 +1,100 @@
+{
+  "type": "FeatureCollection",
+  "map": "middle-east",
+  "updated_at": "2026-10-12",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "example-port",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          61,
+          16
+        ]
+      },
+      "properties": {
+        "name": "Example location",
+        "kind": "port",
+        "source": "Schematic demonstration, not a real route. Replace with sourced observations.",
+        "observed_on": "2026-10-12",
+        "status": "hypothetical",
+        "label": {
+          "offset": [
+            -30,
+            0
+          ],
+          "anchor": "end",
+          "font_size": 20
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "example-route",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            60.5,
+            15.8
+          ],
+          [
+            61,
+            14.6
+          ],
+          [
+            62,
+            13.8
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Example route",
+        "kind": "route",
+        "source": "Schematic demonstration, not a real route. Replace with sourced observations.",
+        "observed_on": "2026-10-12",
+        "status": "hypothetical",
+        "color": "#e6dcae",
+        "line_style": "dotted",
+        "label": {
+          "offset": [
+            -25,
+            -20
+          ],
+          "anchor": "end",
+          "font_size": 18
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "example-note",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          48,
+          20.5
+        ]
+      },
+      "properties": {
+        "name": "Rendering example",
+        "kind": "note",
+        "source": "Schematic demonstration, not a real route. Replace with sourced observations.",
+        "observed_on": "2026-10-12",
+        "status": "hypothetical",
+        "callout": {
+          "offset": [
+            -62,
+            10
+          ],
+          "width": 360,
+          "title": "Custom data example",
+          "lines": [
+            "Not a real port or route."
+          ]
+        }
+      }
+    }
+  ]
+}

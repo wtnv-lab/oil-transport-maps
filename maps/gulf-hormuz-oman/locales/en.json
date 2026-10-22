@@ -1,0 +1,87 @@
+{
+  "translations": {
+    "ペルシャ湾・ホルムズ海峡の原油輸送": "Crude Oil Transport: Persian Gulf & Strait of Hormuz",
+    "湾内の海上輸送とオマーン湾側の積出港  |  公開資料・提供情報による主要経路の整理": "Gulf shipping and Gulf of Oman loading ports | Public sources and supplied observations",
+    "10.22 フジャイラ発STS輸送を追記": "Oct 22: Fujairah–Mina STS link added",
+    "作図：東京大学大学院 渡邉英徳研究室": "Map: Watanave Laboratory, The University of Tokyo",
+    "ホルムズ海峡を経由する海路とアブダビ原油パイプライン、フジャイラ・ソハール・ミナ・アル・ハファル沖の積出区域。航路は模式表現で当日の通航や施設稼働を示さない。": "Shipping through the Strait of Hormuz, the Abu Dhabi Crude Oil Pipeline, and loading areas at Fujairah, Sohar and off Mina al Fahal. Schematic routes do not show live vessel traffic or facility operations.",
+    "イラン": "Iran",
+    "サウジアラビア": "Saudi Arabia",
+    "アラブ首長国連邦": "United Arab Emirates",
+    "オマーン": "Oman",
+    "ペルシャ湾": "Persian Gulf",
+    "オマーン湾": "Gulf of Oman",
+    "ラス・タヌラ": "Ras Tanura",
+    "ダス島（UAE）": "Das Island (UAE)",
+    "ハブシャン": "Habshan",
+    "フジャイラ": "Fujairah",
+    "UAE／原油SBM": "UAE / crude oil SBM",
+    "ソハール": "Sohar",
+    "ミナ・アル・ハファル沖": "Off Mina al Fahal",
+    "原油SBM": "Crude oil SBM",
+    "ホルムズ海峡": "Strait of Hormuz",
+    "アブダビ原油パイプライン": "Abu Dhabi Crude Oil Pipeline",
+    "シャトル輸送": "Shuttle shipping",
+    "フジャイラ発": "From Fujairah",
+    "ミナ沖でSTS": "STS off Mina al Fahal",
+    "日本方面と往復": "To / from Japan",
+    "海路は船の往復の模式線。原油の双方向輸送・個船の実績は示さない。緑矢印は送油方向。": "Sea arrows show schematic vessel round trips, not two-way crude flows or individual voyages. Green arrows show pipeline flow.",
+    "輪は荷役の代表位置、交差は接続を示さない。STS＝船間積替え、SBM＝沖合ブイ積載。当日の通航・安全・稼働・輸送量は示さない。": "Rings mark representative handling sites; crossings do not imply connections. STS = ship-to-ship transfer; SBM = offshore buoy loading. Routes do not show live traffic, safety, operations or volumes."
+  },
+  "layout": {
+    "ペルシャ湾・ホルムズ海峡の原油輸送": {
+      "size": 31
+    },
+    "湾内の海上輸送とオマーン湾側の積出港  |  公開資料・提供情報による主要経路の整理": {
+      "size": 16
+    },
+    "アラブ首長国連邦": {
+      "size": 26
+    },
+    "オマーン湾": {
+      "size": 24
+    },
+    "ダス島（UAE）": {
+      "size": 25
+    },
+    "ミナ・アル・ハファル沖": {
+      "size": 25
+    },
+    "日本方面と往復": {
+      "size": 23
+    },
+    "フジャイラ発": {
+      "x": 1260
+    },
+    "ミナ沖でSTS": {
+      "x": 1260
+    }
+  },
+  "typography": {
+    "footnote": {
+      "size": 16
+    },
+    "status": {
+      "size": 16
+    },
+    "compact_footnote": {
+      "size": 13
+    },
+    "credit": {
+      "size": 13
+    },
+    "pipeline": {
+      "size": 24
+    }
+  },
+  "fonts": {
+    "sans": [
+      "Arial",
+      "sans-serif"
+    ],
+    "geographic": [
+      "Georgia",
+      "serif"
+    ]
+  }
+}

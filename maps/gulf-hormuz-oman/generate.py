@@ -13,11 +13,13 @@ ROOT = HERE.parents[1]
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output-dir', type=Path, default=ROOT / 'dist')
+    parser.add_argument('--output-dir', type=Path)
+    parser.add_argument('--lang', choices=('ja', 'en'), default='ja',
+                        help='Output language (default: ja)')
     parser.add_argument('--svg-only', action='store_true',
                         help='PythonによるSVG・GeoJSON生成のみ。矢印配置・PNG・検査は省略')
     args = parser.parse_args()
-    output = args.output_dir.resolve()
+    output = (args.output_dir or ROOT / 'dist' / ('en' if args.lang == 'en' else '')).resolve()
     node = os.environ.get('NODE', 'node')
     if not args.svg_only:
         if not shutil.which(node):
@@ -25,7 +27,7 @@ def main():
         if not (ROOT / 'node_modules/playwright/package.json').exists():
             parser.error('リポジトリのルートで npm ci を実行してください。')
     subprocess.run([sys.executable, str(HERE / 'build.py'),
-                    '--output-dir', str(output)], check=True)
+                    '--output-dir', str(output), '--lang', args.lang], check=True)
     if not args.svg_only:
         stem = str(output / 'gulf-hormuz-oman')
         for script in ('render.cjs', 'check-water.cjs'):

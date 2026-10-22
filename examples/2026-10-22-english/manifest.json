@@ -1,0 +1,79 @@
+{
+  "language": "en",
+  "translated_at": "2026-10-22",
+  "scope": "Translation and layout only; not a new operational assessment. Original provenance is preserved.",
+  "maps": {
+    "global": {
+      "source_metadata": {
+        "as_of": "2026-09-29",
+        "title": "日本向け原油輸送ルート",
+        "credit": "東京大学大学院 渡邉英徳研究室",
+        "revision": 16,
+        "route_additions_as_of": "2026-10-12",
+        "revalidated_at": "2026-09-29T09:55:19+09:00",
+        "layout_updated_at": "2026-10-22",
+        "revision_scope": "簡略図の6経路に、経路名と1行の主要リスクを示す説明枠を追加。費用と細かな荷役注記は省略。地理座標・情勢基準日は変更していない。",
+        "local_revision_as_of": "2026-10-22"
+      },
+      "png_size": [
+        4800,
+        2620
+      ]
+    },
+    "middle-east": {
+      "source_metadata": {
+        "as_of": "2026-09-29",
+        "title": "中東の原油輸送ルート",
+        "revision": 15,
+        "route_additions_as_of": "2026-10-12",
+        "revalidated_at": "2026-09-29T09:48:00+09:00"
+      },
+      "png_size": [
+        3600,
+        2608
+      ]
+    },
+    "gulf-hormuz-oman": {
+      "source_metadata": {
+        "as_of": "2026-09-29",
+        "title": "ペルシャ湾・ホルムズ海峡の原油輸送",
+        "revision": 1,
+        "route_additions_as_of": "2026-10-12",
+        "revalidated_at": "2026-09-29T09:48:00+09:00",
+        "zoom_revision_as_of": "2026-10-22",
+        "zoom_revision_scope": "ダス島発シャトル、フジャイラSBM、提供情報によるミナ沖STS接続を局所追加。ムサンダム沿岸の曲線・コンパクト表示を調整。凡例を削除し注記を15px・2行へ簡略化。全面的な情勢再検証ではない。",
+        "layout_revision": "compact_no_legend",
+        "subtitle": "湾内の海上輸送とオマーン湾側の積出港  |  公開資料・提供情報による主要経路の整理",
+        "status_label": "10.22 フジャイラ発STS輸送を追記",
+        "credit": "作図：東京大学大学院 渡邉英徳研究室",
+        "notes": [
+          "海路は船の往復の模式線。原油の双方向輸送・個船の実績は示さない。緑矢印は送油方向。",
+          "輪は荷役の代表位置、交差は接続を示さない。STS＝船間積替え、SBM＝沖合ブイ積載。当日の通航・安全・稼働・輸送量は示さない。"
+        ]
+      },
+      "png_size": [
+        3600,
+        1948
+      ]
+    }
+  },
+  "files": {
+    "global.png": "2678e1462989311319fd727435558e742e0586583f08c10a78a3e2df25122be9",
+    "global.svg": "9b0087626b3b54abe751f5a7500bd26ae60032e952880a39b0e843a48acbb88c",
+    "global.geojson": "c09c4c1e28632f723ec1e7e3d9b7799923fdffd87c92c81b570dbaceec7baebb",
+    "global.qa.json": "58e7f440a923fcfe6c1c8f7922d4dc89ade37f6245151fcca24efd13e6902d40",
+    "global-pc1440.png": "adc6a451d6c022986349006f06e264aaa6e394ee6a165911586f19e20ed2347c",
+    "middle-east.png": "749943feb373e2a62846560ccfed99d0bc03b5328ba3b08082840fdaf9d57413",
+    "middle-east.svg": "2cd3c45a0a24a3489de8a038b9854bd44f5379753c983d6ed9be9607b3637c33",
+    "middle-east.geojson": "2ca651e2edc41d1c19923cb54808447adb5233351f8a02941bdf757eeb05e9fa",
+    "middle-east.qa.json": "ca1ab950cc9a1069dd11340bc2502676ac3b746db17f2eea877736f1fac8a882",
+    "middle-east-pc1440.png": "c9bc46d94c2ac222d78d81dcf42d71e95675af6802e8bac026acdd09fafa0a5a",
+    "gulf-hormuz-oman.png": "0bd5da2c94b7916664a7c186a3b478d8b3746a5064303d01dc5fbf73cf61e4f5",
+    "gulf-hormuz-oman.svg": "400f195cd146ac8c626b518b3fc71726f179685ae1e0e74fc29596755eef9b8f",
+    "gulf-hormuz-oman.geojson": "2b093ae4a535179f3b64e0ba7a1c3759cfa81a427a22fb9466bad66257a5c3f8",
+    "gulf-hormuz-oman.qa.json": "18bf9a065be4166d46eeafecf38efeb4c26b9ade6daa1b55abde8ad6cd125e5d",
+    "gulf-hormuz-oman-pc1440.png": "88bede6d5c4b6f8fe3caf1ca29b89c78d8cf049ee11cfbaa31682388f4ebaa14",
+    "gulf-hormuz-oman.design.json": "48d6910f78df2a68260cbe38d72dab262b58bb892e660470a8e33c75cdf7c3d7",
+    "gulf-hormuz-oman.water-qa.json": "2ae1071fe327e3c25bcccf5df67cbc0c753940a0286824e1ba159eb507a19f88"
+  }
+}
