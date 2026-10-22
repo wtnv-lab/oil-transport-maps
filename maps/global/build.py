@@ -320,6 +320,34 @@ def dot(
         )
 
 
+def risk_bubble(x, y, width, title, key, risk, tail, condition=None):
+    """経路名と1行のリスクを示し、対象線へ直線で結ぶ。"""
+    style = DS['callout']
+    height = style['base_height'] + (style['line_height'] if condition else 0)
+    start, target = tail
+    # 引出線が航路から浮かないよう、描画後の曲線の標本点へ合わせる。
+    endpoint = min(route_samples[key], key=lambda point: math.dist(point, target))
+    add(
+        f'<path class="callout-leader" d="{path([start, endpoint])}" '
+        f'fill="none" stroke="{C["muted"]}" stroke-width="{style["leader_width"]}" '
+        f'opacity="{style["leader_opacity"]}"/>'
+    )
+    add(f'<g class="callout" data-key="{key}">')
+    add(
+        f'<rect class="callout-box" x="{x}" y="{y}" width="{width}" height="{height}" '
+        f'fill="{C["panel"]}" fill-opacity="{style["fill_opacity"]}" '
+        f'stroke="{C["panel_border"]}" stroke-opacity="{style["border_opacity"]}" '
+        f'stroke-width="{style["border_width"]}"/>'
+    )
+    left = x + style['padding_x']
+    text(left, y + style['title_y'], title, color=COL[key], halo=False, role='callout_title')
+    text(left, y + style['body_y'], risk, color=C['secondary'], halo=False, role='callout_body')
+    if condition:
+        text(left, y + style['body_y'] + style['line_height'], condition,
+             color=C['muted'], halo=False, role='overview_condition')
+    add('</g>')
+
+
 # --- SVG の枠・見出し・背景画像 ----------------------------------------------
 
 add(
@@ -335,7 +363,7 @@ add(
 )
 add(f'<rect width="{W}" height="{H}" fill="{C["frame"]}"/>')
 text(SPACE['frame_inset'],53,META['title'],halo=False,role='title')
-text(SPACE['frame_inset'],92,'主要航路と発着地',color=C['secondary'],halo=False,role='subtitle')
+text(SPACE['frame_inset'],92,'主要航路と主なリスク・制約',color=C['secondary'],halo=False,role='subtitle')
 text(W-SPACE['frame_inset'],53,DATE_LABEL,color=C['secondary'],anchor='end',halo=False,role='date')
 text(W-SPACE['frame_inset'],92,UPDATE_LABEL,color=C['muted'],anchor='end',halo=False,role='header_note')
 
@@ -666,20 +694,22 @@ features.append({
     'geometry': {'type': 'Point', 'coordinates': [101.95, 2.4]},
 })
 
-# --- 経路名だけを線の近くへ配置 ---------------------------------------------
-# 細かな費用・リスク・荷役方式は出典資料と拡大図に分担する。
-# 船型を誤解しやすいパナマ経由だけ、最小限の条件を添える。
-for x, y, label, key, anchor in [
-    (840, 714, '中東・インド洋', '1', 'start'),
-    (540, 800, '紅海南下（航行制約）', '2', 'start'),
-    (300, 850, '地中海・喜望峰', '3', 'start'),
-    (64, 1120, '米湾岸・喜望峰', '4', 'start'),
-    (1770, 650, '米湾岸・パナマ', '5', 'middle'),
-    (1720, 408, 'カナダ西岸・太平洋', '6', 'middle'),
-]:
-    text(x, y, label, color=COL[key], anchor=anchor, role='overview_route')
-text(1770, 684, '中型船／VLCC不可', color=COL['5'], anchor='middle',
-     halo=False, role='overview_condition')
+# --- 主要リスクを1行ずつ示す説明枠 -----------------------------------------
+# 費用・荷役の詳細は戻さず、経路名とリスクだけをまとめる。
+# パナマだけ船型条件を添え、VLCCが通航できるという誤読を防ぐ。
+risk_bubble(64, 200, 500, '地中海・喜望峰', '3',
+            '送油設備への攻撃、接続の遅れ', [(544, 306), xy(sidi)])
+risk_bubble(650, 200, 540, '中東・インド洋', '1',
+            '海峡・港湾への攻撃、積替え待ち', [(710, 306), xy([57.2, 25.3])])
+risk_bubble(1480, 200, 540, 'カナダ西岸・太平洋', '6',
+            '積出港の喫水制限、油種の制約', [(1800, 306), xy([-137, 46.35])])
+risk_bubble(790, 385, 450, '紅海南下（航行制約）', '2',
+            'フーシ派の攻撃・拿捕', [(790, 491), xy([39.8, 19.1])])
+risk_bubble(1770, 835, 565, '米湾岸・パナマ', '5',
+            '予約待ち・水位による通航制限', [(1770, 835), xy([-103, 13.6])],
+            condition='中型船／VLCC不可')
+risk_bubble(64, 1085, 540, '米湾岸・喜望峰', '4',
+            '荒天・船腹不足による遅れ', [(230, 1085), xy([-22, -29])])
 
 if USER_LAYER['features']:
     try:
